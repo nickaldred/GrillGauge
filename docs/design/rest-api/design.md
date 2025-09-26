@@ -12,7 +12,7 @@ Stores reading in DB
 {
     "apiKey": 123456
     "probes": [
-        {"probe": 1, "currentTemp": 20.00},
+        {"probeId": 1, "currentTemp": 20.00},
         {"probe": 2, "currentTemp": 50.00},
         {"probe": 3, "currentTemp": 23.00},
         {"probe": 4, "currentTemp": 50.00},
