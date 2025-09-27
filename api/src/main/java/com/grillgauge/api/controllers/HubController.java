@@ -2,28 +2,30 @@ package com.grillgauge.api.controllers;
 
 import org.springframework.web.bind.annotation.RestController;
 
-import com.grillgauge.api.domain.models.HubCurrentState;
-import com.grillgauge.api.domain.models.HubKey;
 import com.grillgauge.api.domain.models.HubReading;
+import com.grillgauge.api.services.HubService;
 
 import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseStatus;
 
 @RestController()
 @RequestMapping("/api/v1/hub")
 public class HubController {
 
+    private final HubService hubService;
+
+    public HubController(final HubService hubService) {
+        this.hubService = hubService;
+    }
+
     @PostMapping()
     @ResponseStatus(HttpStatus.CREATED) // 201
     public HubReading storeReading(@RequestBody HubReading reading) {
-
-        return new HubReading();
+        return hubService.saveHubReading(reading);
     }
 
     @GetMapping()
