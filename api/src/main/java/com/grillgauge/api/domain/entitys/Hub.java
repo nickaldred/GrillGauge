@@ -1,0 +1,41 @@
+package com.grillgauge.api.domain.entitys;
+
+import java.time.Instant;
+
+import org.springframework.lang.NonNull;
+import org.springframework.lang.Nullable;
+
+import jakarta.persistence.Entity;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
+import jakarta.persistence.Id;
+import lombok.AllArgsConstructor;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
+
+@Getter
+@Setter
+@AllArgsConstructor
+@NoArgsConstructor
+@Entity
+public class Hub {
+
+    @Id
+    @GeneratedValue(strategy = GenerationType.AUTO)
+    private Long id;
+    @NonNull
+    private Long userId;
+    @NonNull
+    private String apiKey;
+    @Nullable
+    private String name;
+
+    private Instant createdAt = Instant.now();
+
+    public Hub(final Long userId, final String apiKey, final String name) {
+        this.userId = userId;
+        this.apiKey = apiKey;
+        this.name = name;
+    }
+}
