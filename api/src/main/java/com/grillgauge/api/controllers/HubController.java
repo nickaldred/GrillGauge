@@ -22,10 +22,12 @@ public class HubController {
     @PostMapping()
     @ResponseStatus(HttpStatus.CREATED) // 201
     public HubReading storeReading(@RequestBody HubReading reading) {
+
         return new HubReading();
     }
 
     @GetMapping()
+    @ResponseStatus(HttpStatus.ACCEPTED) // 200
     public String getCurrentState() {
         return new String();
     }

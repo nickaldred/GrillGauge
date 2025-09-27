@@ -8,5 +8,5 @@ import lombok.Setter;
 @Getter
 @Setter
 public class HubReading {
-    private List<Probe> probes;
+    private List<ProbeReading> probes;
 }

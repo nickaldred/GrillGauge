@@ -10,14 +10,6 @@ email (unique, optional if needed for login)
 
 password_hash (if needed)
 
-## 2. user_details (1:1 with users)
-
-user_id (PK, FK → users.id)
-
-first_name
-
-last_name
-
 ## 3. hubs (1:N from users → hubs)
 
 id (PK)
