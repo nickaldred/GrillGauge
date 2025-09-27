@@ -1,16 +1,22 @@
 package com.grillgauge.api.domain.entitys;
 
-import org.springframework.data.annotation.Id;
 import org.springframework.lang.NonNull;
 import org.springframework.lang.Nullable;
 
+import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
+import jakarta.persistence.Id;
+import lombok.AllArgsConstructor;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 @Getter
 @Setter
+@AllArgsConstructor
+@NoArgsConstructor
+@Entity
 public class Hub {
 
     @NonNull
