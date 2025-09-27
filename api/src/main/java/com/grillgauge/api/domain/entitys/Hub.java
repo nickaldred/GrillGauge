@@ -19,7 +19,6 @@ import lombok.Setter;
 @Entity
 public class Hub {
 
-    @NonNull
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
     private Long id;
@@ -29,4 +28,10 @@ public class Hub {
     private String apiKey;
     @Nullable
     private String name;
+
+    public Hub(final Long userId, final String apiKey, final String name) {
+        this.userId = userId;
+        this.apiKey = apiKey;
+        this.name = name;
+    }
 }

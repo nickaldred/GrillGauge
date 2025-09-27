@@ -2,6 +2,7 @@ package com.grillgauge.api.controllers;
 
 import org.springframework.web.bind.annotation.RestController;
 
+import com.grillgauge.api.domain.models.HubCurrentState;
 import com.grillgauge.api.domain.models.HubReading;
 import com.grillgauge.api.services.HubService;
 
@@ -10,6 +11,7 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.ResponseStatus;
 
 @RestController()
@@ -28,10 +30,9 @@ public class HubController {
         return hubService.saveHubReading(reading);
     }
 
-    @GetMapping()
-    @ResponseStatus(HttpStatus.ACCEPTED) // 200
-    public String getCurrentState() {
-        return new String();
+    @GetMapping("/{hubId}") // 200
+    public HubCurrentState getCurrentState(@PathVariable Long hubId) {
+        return hubService.getHubCurrentState(hubId);
     }
 
 }
