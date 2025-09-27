@@ -1,5 +1,7 @@
 package com.grillgauge.api.domain.entitys;
 
+import java.time.Instant;
+
 import org.springframework.lang.NonNull;
 import org.springframework.lang.Nullable;
 
@@ -28,6 +30,8 @@ public class Hub {
     private String apiKey;
     @Nullable
     private String name;
+
+    private Instant createdAt = Instant.now();
 
     public Hub(final Long userId, final String apiKey, final String name) {
         this.userId = userId;
