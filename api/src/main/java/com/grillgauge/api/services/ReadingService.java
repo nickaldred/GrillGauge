@@ -1,6 +1,6 @@
 package com.grillgauge.api.services;
 
-import java.time.LocalDateTime;
+import java.time.Instant;
 import java.util.Optional;
 
 import org.springframework.stereotype.Service;
@@ -22,7 +22,7 @@ public class ReadingService {
     }
 
     public Reading saveCurrentReading(final Long probeId, final float currentTemp) {
-        Reading reading = new Reading(probeId, LocalDateTime.now(), currentTemp);
+        Reading reading = new Reading(probeId, Instant.now(), currentTemp);
         readingRepository.save(reading);
         return reading;
     }

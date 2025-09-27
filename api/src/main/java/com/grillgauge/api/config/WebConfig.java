@@ -1,4 +1,4 @@
-package com.grillgauge.api.configuration;
+package com.grillgauge.api.config;
 
 import org.springframework.context.annotation.Configuration;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;

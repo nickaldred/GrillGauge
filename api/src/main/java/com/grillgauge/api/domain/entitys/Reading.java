@@ -1,6 +1,6 @@
 package com.grillgauge.api.domain.entitys;
 
-import java.time.LocalDateTime;
+import java.time.Instant;
 
 import org.springframework.lang.NonNull;
 
@@ -25,11 +25,11 @@ public class Reading {
     @NonNull
     private Long probeId;
     @NonNull
-    private LocalDateTime timeStamp;
+    private Instant timeStamp;
     @NonNull
     private Float currentTemp;
 
-    public Reading(final Long probeId, final LocalDateTime timeStamp, final Float currentTemp) {
+    public Reading(final Long probeId, final Instant timeStamp, final Float currentTemp) {
         this.probeId = probeId;
         this.timeStamp = timeStamp;
         this.currentTemp = currentTemp;

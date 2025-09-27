@@ -1,6 +1,5 @@
 package com.grillgauge.api.controllers;
 
-import java.util.Comparator;
 import java.util.List;
 
 import org.junit.jupiter.api.Test;
@@ -12,15 +11,18 @@ import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.grillgauge.api.domain.entitys.ApiKey;
 import com.grillgauge.api.domain.entitys.Hub;
 import com.grillgauge.api.domain.entitys.Probe;
 import com.grillgauge.api.domain.entitys.Reading;
 import com.grillgauge.api.domain.models.HubCurrentState;
 import com.grillgauge.api.domain.models.HubReading;
 import com.grillgauge.api.domain.models.ProbeReading;
+import com.grillgauge.api.domain.repositorys.ApiKeyRepository;
 import com.grillgauge.api.domain.repositorys.HubRepository;
 import com.grillgauge.api.domain.repositorys.ProbeRepository;
 import com.grillgauge.api.domain.repositorys.ReadingRepository;
+import com.grillgauge.api.utils.ApiKeyGenerator;
 
 import jakarta.transaction.Transactional;
 
@@ -48,22 +50,44 @@ class HubControllerIntTest {
     private HubRepository hubRepository;
 
     @Autowired
+    private ApiKeyRepository apiKeyRepository;
+
+    @Autowired
+    private ApiKeyGenerator apiKeyGenerator;
+
+    @Autowired
     private ObjectMapper objectMapper;
+
+    private String generateAndStoreApiKey(final Long hubId) {
+        // Generate API key for this hub
+        String randomKey = apiKeyGenerator.generateRandomKey();
+        String fullApiKey = apiKeyGenerator.buildFullApiKey(randomKey, hubId);
+        String hashedKey = apiKeyGenerator.hashKey(randomKey, hubId);
+
+        ApiKey apiKey = new ApiKey(hashedKey, hubId, "apiKey1");
+        apiKeyRepository.save(apiKey);
+        return fullApiKey;
+    }
 
     @Test
     void testStoreReadingSuccessful() throws Exception {
         // Given
+        Hub hub = new Hub((long) 1234, "apikey1", "Smoke Gauge");
+        hub = hubRepository.save(hub);
         ProbeReading probeReading1 = new ProbeReading(1, (float) 120.23);
         ProbeReading probeReading2 = new ProbeReading(2, (float) 180.23);
         List<ProbeReading> probeReadings = List.of(probeReading1, probeReading2);
         HubReading hubReading = new HubReading((long) 1234, probeReadings);
-        Probe probe1 = new Probe(1, (long) 1234, (float) 200, "probe 1");
-        Probe probe2 = new Probe(2, (long) 1234, (float) 160, "probe 2");
+        Probe probe1 = new Probe(1, hub.getId(), (float) 200, "probe 1");
+        Probe probe2 = new Probe(2, hub.getId(), (float) 160, "probe 2");
         probeRepository.save(probe1);
         probeRepository.save(probe2);
 
+        String fullApiKey = generateAndStoreApiKey((long) hub.getId());
+
         // When
         mockMvc.perform(post("/api/v1/hub")
+                .header("X-API-KEY", fullApiKey)
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(objectMapper.writeValueAsString(hubReading)))
                 .andExpect(status().isCreated());
@@ -83,10 +107,15 @@ class HubControllerIntTest {
         ProbeReading probeReading1 = new ProbeReading(1, (float) 120.23);
         List<ProbeReading> probeReadings = List.of(probeReading1);
         HubReading hubReading = new HubReading((long) 1234, probeReadings);
+        Hub hub = new Hub((long) 1234, "apikey1", "Smoke Gauge");
+        hub = hubRepository.save(hub);
+
+        String fullApiKey = generateAndStoreApiKey((long) hub.getId());
 
         // When and Then
         mockMvc.perform(post("/api/v1/hub")
                 .contentType(MediaType.APPLICATION_JSON)
+                .header("X-API-KEY", fullApiKey)
                 .content(objectMapper.writeValueAsString(hubReading)))
                 .andExpect(status().isNotFound());
     }
@@ -99,11 +128,14 @@ class HubControllerIntTest {
         Probe probe1 = new Probe(1, hub.getId(), (float) 200, "probe 1");
         Probe probe2 = new Probe(2, hub.getId(), (float) 160, "probe 2");
         List<Probe> probes = List.of(probe1, probe2);
-        probe1 = probeRepository.save(probe1);
-        probe2 = probeRepository.save(probe2);
+        probeRepository.save(probe1);
+        probeRepository.save(probe2);
+
+        String fullApiKey = generateAndStoreApiKey(hub.getId());
 
         // When
-        MvcResult result = mockMvc.perform(get("/api/v1/hub/%d".formatted(hub.getId())))
+        MvcResult result = mockMvc.perform(get("/api/v1/hub")
+                .header("X-API-KEY", fullApiKey))
                 .andExpect(status().isOk()).andReturn();
 
         // Then
@@ -118,8 +150,12 @@ class HubControllerIntTest {
 
     @Test
     void testgetHubCurrentStateUnsuccessfulNoHub() throws Exception {
+        // Given
+        String fullApiKey = generateAndStoreApiKey((long) 2);
+
         // When
-        mockMvc.perform(get("/api/v1/hub/%d".formatted((long) 1234)))
+        mockMvc.perform(get("/api/v1/hub/%d".formatted((long) 1234))
+                .header("X-API-KEY", fullApiKey))
                 .andExpect(status().isNotFound());
     }
 
@@ -129,8 +165,11 @@ class HubControllerIntTest {
         Hub hub = new Hub((long) 1234, "apikey1", "Smoke Gauge");
         hub = hubRepository.save(hub);
 
+        String fullApiKey = generateAndStoreApiKey((long) 2);
+
         // When
-        mockMvc.perform(get("/api/v1/hub/%d".formatted(hub.getId())))
+        mockMvc.perform(get("/api/v1/hub/%d".formatted(hub.getId()))
+                .header("X-API-KEY", fullApiKey))
                 .andExpect(status().isNotFound());
     }
 }
