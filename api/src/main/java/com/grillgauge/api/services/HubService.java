@@ -36,9 +36,9 @@ public class HubService {
         return hub.get();
     }
 
-    public HubReading saveHubReading(final HubReading hubReading) {
+    public HubReading saveHubReading(final HubReading hubReading, final Long hubId) {
         for (ProbeReading probeReading : hubReading.getProbeReadings()) {
-            probeService.saveProbeReading(probeReading, hubReading.getId());
+            probeService.saveProbeReading(probeReading, hubId);
         }
         return hubReading;
     }
