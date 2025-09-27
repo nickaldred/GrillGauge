@@ -4,6 +4,7 @@ import java.util.List;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.server.ResponseStatusException;
 
 import com.grillgauge.api.domain.entitys.Probe;
@@ -52,6 +53,7 @@ public class ProbeService {
      * @throws ResponseStatusException with status 404 if the probe with the given
      *                                 local ID and hubId is not found
      */
+    @Transactional
     public Reading saveProbeReading(final ProbeReading probeReading, final Long hubId) {
         List<Probe> probes = getProbes(hubId);
         Probe probe = probes.stream()

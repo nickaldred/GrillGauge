@@ -4,6 +4,7 @@ import java.time.Instant;
 import java.util.Optional;
 
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import com.grillgauge.api.domain.entitys.Reading;
 import com.grillgauge.api.domain.repositorys.ReadingRepository;
@@ -37,6 +38,7 @@ public class ReadingService {
      * @param currentTemp the current temperature to save
      * @return the saved Reading entity
      */
+    @Transactional
     public Reading saveCurrentReading(final Long probeId, final float currentTemp) {
         Reading reading = new Reading(probeId, Instant.now(), currentTemp);
         readingRepository.save(reading);
