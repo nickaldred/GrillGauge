@@ -11,6 +11,9 @@ import com.grillgauge.api.domain.entitys.Reading;
 import com.grillgauge.api.domain.models.ProbeReading;
 import com.grillgauge.api.domain.repositorys.ProbeRepository;
 
+/**
+ * Service class for managing probes and their readings.
+ */
 @Service
 public class ProbeService {
     private ReadingService readingService;
@@ -21,6 +24,14 @@ public class ProbeService {
         this.readingService = readingService;
     }
 
+    /**
+     * Get all probes for the given hubId.
+     * 
+     * @param hubId hubId to get probes for
+     * @return List of Probe entities
+     * @throws ResponseStatusException with status 404 if no probes are found for
+     *                                 the given hubId
+     */
     public List<Probe> getProbes(final Long hubId) {
         List<Probe> probes = probeRepository.findByHubId(hubId);
         if (probes.isEmpty()) {
@@ -31,6 +42,16 @@ public class ProbeService {
         return probes;
     }
 
+    /**
+     * Save a probe reading for the given hubId.
+     * 
+     * @param probeReading the ProbeReading containing the local probe ID and
+     *                     current temperature
+     * @param hubId        the hubId to which the probe belongs
+     * @return the saved Reading entity
+     * @throws ResponseStatusException with status 404 if the probe with the given
+     *                                 local ID and hubId is not found
+     */
     public Reading saveProbeReading(final ProbeReading probeReading, final Long hubId) {
         List<Probe> probes = getProbes(hubId);
         Probe probe = probes.stream()

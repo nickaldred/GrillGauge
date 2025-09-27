@@ -17,6 +17,13 @@ import java.time.Instant;
 import java.util.List;
 import java.util.Optional;
 
+/**
+ * Filter that checks for a valid API key in the X-API-KEY header for requests
+ * to /api/v1/hub/** endpoints.
+ * If a valid API key is found, the hubId is extracted and set as a request
+ * attribute.
+ * The filter also updates the lastUsedAt timestamp of the API key.
+ */
 @Component
 public class ApiKeyAuthFilter extends OncePerRequestFilter {
 
