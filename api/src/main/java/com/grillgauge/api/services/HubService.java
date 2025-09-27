@@ -5,6 +5,7 @@ import java.util.Optional;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.server.ResponseStatusException;
 
 import com.grillgauge.api.domain.entitys.Hub;
@@ -54,6 +55,7 @@ public class HubService {
      * @param hubId      the hubId to which the hub belongs
      * @return the saved HubReading entity
      */
+    @Transactional
     public HubReading saveHubReading(final HubReading hubReading, final Long hubId) {
         for (ProbeReading probeReading : hubReading.getProbeReadings()) {
             probeService.saveProbeReading(probeReading, hubId);
