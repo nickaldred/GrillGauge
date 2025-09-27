@@ -10,5 +10,5 @@ import lombok.Setter;
 public class HubCurrentState {
     private String apiKey;
     private String hubName;
-    private List<Probe> probes;
+    private List<ProbeReading> probes;
 }
