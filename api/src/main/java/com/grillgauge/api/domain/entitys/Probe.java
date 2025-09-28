@@ -3,10 +3,14 @@ package com.grillgauge.api.domain.entitys;
 import org.springframework.lang.NonNull;
 import org.springframework.lang.Nullable;
 
+import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
+import jakarta.persistence.FetchType;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.ManyToOne;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
@@ -20,26 +24,36 @@ public class Probe {
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
     private Long id;
-    @NonNull
+
+    @Column(name = "local_id", nullable = false)
     private Integer localId;
-    @NonNull
-    private Long hubId;
-    @Nullable
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "hub_id", nullable = false)
+    private Hub hub;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "user_id", nullable = false)
+    private User owner;
+
+    @Column(nullable = true)
     private Float targetTemp;
-    @Nullable
+
+    @Column(nullable = true)
     private String name;
 
-    public Probe(Integer localId, Long hubId) {
-        this(localId, hubId, null, null);
+    public Probe(Integer localId, Hub hub, User owner) {
+        this(localId, hub, owner, null, null);
     }
 
-    public Probe(Integer localId, Long hubId, Float targetTemp) {
-        this(localId, hubId, targetTemp, null);
+    public Probe(Integer localId, Hub hub, User owner, Float targetTemp) {
+        this(localId, hub, owner, targetTemp, null);
     }
 
-    public Probe(Integer localId, Long hubId, Float targetTemp, String name) {
+    public Probe(Integer localId, Hub hub, User owner, Float targetTemp, String name) {
         this.localId = localId;
-        this.hubId = hubId;
+        this.hub = hub;
+        this.owner = owner;
         this.targetTemp = targetTemp;
         this.name = name;
     }

@@ -8,6 +8,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.server.ResponseStatusException;
 
+import com.grillgauge.api.domain.entitys.Probe;
 import com.grillgauge.api.domain.entitys.Reading;
 import com.grillgauge.api.domain.repositorys.ReadingRepository;
 
@@ -36,13 +37,13 @@ public class ReadingService {
     /**
      * Save the current reading for the given probeId with the current timestamp.
      * 
-     * @param probeId     probeId to save the reading for
+     * @param probe       the probe to save the reading for
      * @param currentTemp the current temperature to save
      * @return the saved Reading entity
      */
     @Transactional
-    public Reading saveCurrentReading(final Long probeId, final float currentTemp) {
-        Reading reading = new Reading(probeId, Instant.now(), currentTemp);
+    public Reading saveCurrentReading(final Probe probe, final float currentTemp) {
+        Reading reading = new Reading(probe, currentTemp);
         readingRepository.save(reading);
         return reading;
     }

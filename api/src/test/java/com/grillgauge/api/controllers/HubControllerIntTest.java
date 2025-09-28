@@ -91,8 +91,8 @@ class HubControllerIntTest {
         final ProbeReading probeReading2 = new ProbeReading(2, (float) 180.23);
         final List<ProbeReading> probeReadings = List.of(probeReading1, probeReading2);
         final HubReading hubReading = new HubReading((long) 1234, probeReadings);
-        final Probe probe1 = new Probe(1, hub.getId(), (float) 200, "probe 1");
-        final Probe probe2 = new Probe(2, hub.getId(), (float) 160, "probe 2");
+        final Probe probe1 = new Probe(1, hub, testUser, (float) 200, "probe 1");
+        final Probe probe2 = new Probe(2, hub, testUser, (float) 160, "probe 2");
         probeRepository.save(probe1);
         probeRepository.save(probe2);
 
@@ -151,8 +151,8 @@ class HubControllerIntTest {
         // Given
         Hub hub = new Hub(testUser, "apikey1", "Smoke Gauge");
         hubRepository.save(hub);
-        Probe probe1 = new Probe(1, hub.getId(), (float) 200, "probe 1");
-        Probe probe2 = new Probe(2, hub.getId(), (float) 160, "probe 2");
+        Probe probe1 = new Probe(1, hub, testUser, (float) 200, "probe 1");
+        Probe probe2 = new Probe(2, hub, testUser, (float) 160, "probe 2");
         List<Probe> probes = List.of(probe1, probe2);
         probeRepository.save(probe1);
         probeRepository.save(probe2);
