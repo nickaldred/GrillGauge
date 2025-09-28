@@ -74,4 +74,14 @@ public class HubService {
         List<Probe> probes = probeService.getProbes(hubId);
         return new HubCurrentState(hubId, hub.getName(), probes);
     }
+
+    /**
+     * Store a new hub.
+     * 
+     * @param hub the Hub entity to store
+     * @return the stored Hub entity
+     */
+    public void deleteHub(final Long hubId) {
+        hubRepository.deleteById(hubId);
+    }
 }
