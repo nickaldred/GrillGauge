@@ -2,6 +2,7 @@ package com.grillgauge.api.controllers;
 
 import java.util.List;
 
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
@@ -15,6 +16,7 @@ import com.grillgauge.api.domain.entitys.ApiKey;
 import com.grillgauge.api.domain.entitys.Hub;
 import com.grillgauge.api.domain.entitys.Probe;
 import com.grillgauge.api.domain.entitys.Reading;
+import com.grillgauge.api.domain.entitys.User;
 import com.grillgauge.api.domain.models.HubCurrentState;
 import com.grillgauge.api.domain.models.HubReading;
 import com.grillgauge.api.domain.models.ProbeReading;
@@ -22,6 +24,7 @@ import com.grillgauge.api.domain.repositorys.ApiKeyRepository;
 import com.grillgauge.api.domain.repositorys.HubRepository;
 import com.grillgauge.api.domain.repositorys.ProbeRepository;
 import com.grillgauge.api.domain.repositorys.ReadingRepository;
+import com.grillgauge.api.domain.repositorys.UserRepository;
 import com.grillgauge.api.utils.ApiKeyGenerator;
 
 import jakarta.transaction.Transactional;
@@ -56,7 +59,12 @@ class HubControllerIntTest {
     private ApiKeyGenerator apiKeyGenerator;
 
     @Autowired
+    private UserRepository userRepository;
+
+    @Autowired
     private ObjectMapper objectMapper;
+
+    private User testUser;
 
     private String generateAndStoreApiKey(final Long hubId) {
         String randomKey = apiKeyGenerator.generateRandomKey();
@@ -68,10 +76,16 @@ class HubControllerIntTest {
         return fullApiKey;
     }
 
+    @BeforeEach
+    void setUp() {
+        testUser = new User("nick@hotmail.co.uk", "nick", "aldred", "1234");
+        userRepository.save(testUser);
+    }
+
     @Test
     void testStoreReadingSuccessful() throws Exception {
         // Given
-        final Hub hub = new Hub((long) 1234, "apikey1", "Smoke Gauge");
+        final Hub hub = new Hub(testUser, "apikey1", "Smoke Gauge");
         hubRepository.save(hub);
         final ProbeReading probeReading1 = new ProbeReading(1, (float) 120.23);
         final ProbeReading probeReading2 = new ProbeReading(2, (float) 180.23);
@@ -106,7 +120,7 @@ class HubControllerIntTest {
         final ProbeReading probeReading1 = new ProbeReading(1, (float) 120.23);
         final List<ProbeReading> probeReadings = List.of(probeReading1);
         final HubReading hubReading = new HubReading((long) 1234, probeReadings);
-        final Hub hub = new Hub((long) 1234, "apikey1", "Smoke Gauge");
+        final Hub hub = new Hub(testUser, "apikey1", "Smoke Gauge");
         hubRepository.save(hub);
 
         final String fullApiKey = generateAndStoreApiKey((long) hub.getId());
@@ -135,7 +149,7 @@ class HubControllerIntTest {
     @Test
     void testgetHubCurrentStateSuccessful() throws Exception {
         // Given
-        Hub hub = new Hub((long) 1234, "apikey1", "Smoke Gauge");
+        Hub hub = new Hub(testUser, "apikey1", "Smoke Gauge");
         hubRepository.save(hub);
         Probe probe1 = new Probe(1, hub.getId(), (float) 200, "probe 1");
         Probe probe2 = new Probe(2, hub.getId(), (float) 160, "probe 2");
@@ -174,7 +188,7 @@ class HubControllerIntTest {
     @Test
     void testgetHubCurrentStateUnsuccessfulNoProbes() throws Exception {
         // Given
-        Hub hub = new Hub((long) 1234, "apikey1", "Smoke Gauge");
+        Hub hub = new Hub(testUser, "apikey1", "Smoke Gauge");
         hub = hubRepository.save(hub);
 
         String fullApiKey = generateAndStoreApiKey((long) 2);
@@ -188,7 +202,7 @@ class HubControllerIntTest {
     @Test
     void testgetHubCurrentStateUnauthorised() throws Exception {
         // Given
-        Hub hub = new Hub((long) 1234, "apikey1", "Smoke Gauge");
+        Hub hub = new Hub(testUser, "apikey1", "Smoke Gauge");
         hub = hubRepository.save(hub);
 
         // When
