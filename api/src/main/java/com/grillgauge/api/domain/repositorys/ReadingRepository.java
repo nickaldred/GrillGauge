@@ -13,4 +13,6 @@ public interface ReadingRepository extends JpaRepository<Reading, Long> {
     List<Reading> findByProbeId(Long probeId);
 
     Optional<Reading> findTopByProbeIdOrderByTimeStampDesc(Long probeId);
+
+    Long deleteAllByProbeId(Long probeId);
 }
