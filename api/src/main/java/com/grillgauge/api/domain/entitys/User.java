@@ -1,7 +1,6 @@
 package com.grillgauge.api.domain.entitys;
 
-import org.springframework.lang.NonNull;
-
+import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
@@ -24,16 +23,16 @@ public class User {
     @Id
     private Long id;
 
-    @NonNull
+    @Column(nullable = false)
     private String email;
 
-    @NonNull
+    @Column(nullable = false)
     private String firstName;
 
-    @NonNull
+    @Column(nullable = false)
     private String lastName;
 
-    @NonNull
+    @Column(nullable = false)
     private String passwordHash;
 
     public User(final String email, final String firstName, final String lastName, final String passwordHash) {

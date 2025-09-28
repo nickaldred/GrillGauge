@@ -23,7 +23,7 @@ import com.grillgauge.api.domain.repositorys.UserRepository;
 @SpringBootTest
 @AutoConfigureMockMvc
 @Transactional
-public class UserControllerIntTest {
+class UserControllerIntTest {
 
     @Autowired
     private MockMvc mockMvc;

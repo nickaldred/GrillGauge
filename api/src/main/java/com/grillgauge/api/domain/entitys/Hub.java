@@ -2,9 +2,6 @@ package com.grillgauge.api.domain.entitys;
 
 import java.time.Instant;
 
-import org.springframework.lang.NonNull;
-import org.springframework.lang.Nullable;
-
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.FetchType;
@@ -28,13 +25,17 @@ public class Hub {
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
     private Long id;
+
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "user_id", nullable = false)
     private User owner;
-    @Column(name = "api_key", nullable = false)
+
+    @Column(nullable = false)
     private String apiKey;
-    @Column(name = "name", nullable = true)
+
+    @Column(nullable = true)
     private String name;
+
     private Instant createdAt = Instant.now();
 
     public Hub(final User owner, final String apiKey, final String name) {
