@@ -62,7 +62,7 @@ public class ProbeService {
                 .orElseThrow(() -> new ResponseStatusException(
                         HttpStatus.NOT_FOUND,
                         "Probe with ID: %s and HubId: %s not found".formatted(probeReading.getId(), hubId)));
-        return readingService.saveCurrentReading(probe.getId(), probeReading.getCurrentTemp());
+        return readingService.saveCurrentReading(probe, probeReading.getCurrentTemp());
     }
 
     /**
