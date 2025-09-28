@@ -5,10 +5,14 @@ import java.time.Instant;
 import org.springframework.lang.NonNull;
 import org.springframework.lang.Nullable;
 
+import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
+import jakarta.persistence.FetchType;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.ManyToOne;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -24,17 +28,17 @@ public class Hub {
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
     private Long id;
-    @NonNull
-    private Long userId;
-    @NonNull
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "user_id", nullable = false)
+    private User owner;
+    @Column(name = "api_key", nullable = false)
     private String apiKey;
-    @Nullable
+    @Column(name = "name", nullable = true)
     private String name;
-
     private Instant createdAt = Instant.now();
 
-    public Hub(final Long userId, final String apiKey, final String name) {
-        this.userId = userId;
+    public Hub(final User owner, final String apiKey, final String name) {
+        this.owner = owner;
         this.apiKey = apiKey;
         this.name = name;
     }
