@@ -7,8 +7,12 @@ import org.springframework.stereotype.Repository;
 
 import com.grillgauge.api.domain.entitys.Probe;
 
+import jakarta.persistence.Id;
+
 @Repository
 public interface ProbeRepository extends JpaRepository<Probe, Long> {
 
     List<Probe> findByHubId(Long hubId);
+
+    int deleteAllByHubId(Long hubId);
 }

@@ -3,8 +3,10 @@ package com.grillgauge.api.services;
 import java.time.Instant;
 import java.util.Optional;
 
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.server.ResponseStatusException;
 
 import com.grillgauge.api.domain.entitys.Reading;
 import com.grillgauge.api.domain.repositorys.ReadingRepository;
@@ -43,5 +45,24 @@ public class ReadingService {
         Reading reading = new Reading(probeId, Instant.now(), currentTemp);
         readingRepository.save(reading);
         return reading;
+    }
+
+    /**
+     * Delete all readings for the given probeId.
+     * 
+     * @param probeId probeId to delete readings for
+     * @return the number of deleted readings
+     * @throws ResponseStatusException with status 404 if no readings are found for
+     *                                 the given probeId
+     */
+    @Transactional
+    public Long deleteAllReadings(final Long probeId) {
+        Long deletedReadings = readingRepository.deleteAllByProbeId(probeId);
+        if (deletedReadings == 0) {
+            throw new ResponseStatusException(
+                    HttpStatus.NOT_FOUND,
+                    "No readings found for probe ID: %s".formatted(probeId));
+        }
+        return deletedReadings;
     }
 }
