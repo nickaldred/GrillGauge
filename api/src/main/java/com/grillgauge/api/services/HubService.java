@@ -1,6 +1,5 @@
 package com.grillgauge.api.services;
 
-import java.util.List;
 import java.util.Optional;
 
 import org.springframework.http.HttpStatus;
@@ -8,10 +7,6 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
 
 import com.grillgauge.api.domain.entitys.Hub;
-import com.grillgauge.api.domain.entitys.Probe;
-import com.grillgauge.api.domain.models.HubCurrentState;
-import com.grillgauge.api.domain.models.HubReading;
-import com.grillgauge.api.domain.models.ProbeReading;
 import com.grillgauge.api.domain.repositorys.HubRepository;
 
 /**
@@ -20,13 +15,10 @@ import com.grillgauge.api.domain.repositorys.HubRepository;
 @Service
 public class HubService {
 
-    private final ProbeService probeService;
     private HubRepository hubRepository;
 
-    public HubService(final HubRepository hubRepository, final ProbeService probeService) {
+    public HubService(final HubRepository hubRepository) {
         this.hubRepository = hubRepository;
-        this.probeService = probeService;
-
     }
 
     /**
@@ -48,28 +40,22 @@ public class HubService {
     }
 
     /**
-     * Save the hub reading for the given hubId.
+     * Store a new hub.
      * 
-     * @param hubReading the HubReading containing the probe readings
-     * @param hubId      the hubId to which the hub belongs
-     * @return the saved HubReading entity
+     * @param hub the Hub entity to store
+     * @return the stored Hub entity
      */
-    public HubReading saveHubReading(final HubReading hubReading, final Long hubId) {
-        for (ProbeReading probeReading : hubReading.getProbeReadings()) {
-            probeService.saveProbeReading(probeReading, hubId);
-        }
-        return hubReading;
+    public Hub storeHub(final Hub hub) {
+        return hubRepository.save(hub);
     }
 
     /**
-     * Get the current state of the hub for the given hubId, including its probes.
+     * Store a new hub.
      * 
-     * @param hubId hubId to get the current state for
-     * @return HubCurrentState containing the hubId, hub name, and list of probes
+     * @param hub the Hub entity to store
+     * @return the stored Hub entity
      */
-    public HubCurrentState getHubCurrentState(final Long hubId) {
-        Hub hub = getHub(hubId);
-        List<Probe> probes = probeService.getProbes(hubId);
-        return new HubCurrentState(hubId, hub.getName(), probes);
+    public void deleteHub(final Long hubId) {
+        hubRepository.deleteById(hubId);
     }
 }
