@@ -17,7 +17,7 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.ResponseStatus;
 
 /**
- * Controller for managing hub-related operations.
+ * Controller for managing communication with the external hubs.
  * 
  * Provides endpoints for storing readings and retrieving the current state of a
  * hub, identified by an API key provided in the request.
@@ -26,7 +26,7 @@ import org.springframework.web.bind.annotation.ResponseStatus;
 @RequestMapping("/api/v1/externalHub")
 public class ExternalHubController {
 
-    private final ExternalHubService externalHubService;
+    private ExternalHubService externalHubService;
 
     public ExternalHubController(final ExternalHubService externalHubService) {
         this.externalHubService = externalHubService;
