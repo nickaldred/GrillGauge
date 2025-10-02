@@ -1,8 +1,5 @@
 package com.grillgauge.api.domain.entitys;
 
-import org.springframework.lang.NonNull;
-import org.springframework.lang.Nullable;
-
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.FetchType;

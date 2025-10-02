@@ -42,7 +42,7 @@ public class ApiKeyAuthFilter extends OncePerRequestFilter {
             throws ServletException, IOException {
 
         String path = request.getRequestURI();
-        if (!path.startsWith("/api/v1/hub")) {
+        if (!path.startsWith("/api/v1/externalHub")) {
             filterChain.doFilter(request, response);
             return;
         }

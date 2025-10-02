@@ -5,7 +5,7 @@ import org.springframework.web.server.ResponseStatusException;
 
 import com.grillgauge.api.domain.models.HubCurrentState;
 import com.grillgauge.api.domain.models.HubReading;
-import com.grillgauge.api.services.HubService;
+import com.grillgauge.api.services.ExternalHubService;
 
 import jakarta.servlet.http.HttpServletRequest;
 
@@ -23,13 +23,13 @@ import org.springframework.web.bind.annotation.ResponseStatus;
  * hub, identified by an API key provided in the request.
  */
 @RestController()
-@RequestMapping("/api/v1/hub")
-public class HubController {
+@RequestMapping("/api/v1/externalHub")
+public class ExternalHubController {
 
-    private final HubService hubService;
+    private final ExternalHubService externalHubService;
 
-    public HubController(final HubService hubService) {
-        this.hubService = hubService;
+    public ExternalHubController(final ExternalHubService externalHubService) {
+        this.externalHubService = externalHubService;
     }
 
     /**
@@ -61,7 +61,7 @@ public class HubController {
     @ResponseStatus(HttpStatus.CREATED) // 201
     public HubReading storeReading(@RequestBody HubReading reading, HttpServletRequest request) {
         final Long hubId = getHubId(request);
-        return hubService.saveHubReading(reading, hubId);
+        return externalHubService.saveHubReading(reading, hubId);
     }
 
     /**
@@ -73,7 +73,7 @@ public class HubController {
     @GetMapping()
     public HubCurrentState getCurrentState(HttpServletRequest request) {
         final Long hubId = getHubId(request);
-        return hubService.getHubCurrentState(hubId);
+        return externalHubService.getHubCurrentState(hubId);
     }
 
 }

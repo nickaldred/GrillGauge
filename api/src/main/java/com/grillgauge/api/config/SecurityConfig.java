@@ -25,7 +25,7 @@ public class SecurityConfig {
         http
                 .csrf(csrf -> csrf.disable()) // disable CSRF for APIs
                 .authorizeHttpRequests(auth -> auth
-                        .requestMatchers("/api/v1/hub/**").authenticated()
+                        .requestMatchers("/api/v1/externalHub/**").authenticated()
                         .anyRequest().permitAll())
                 .addFilterBefore(apiKeyAuthFilter, UsernamePasswordAuthenticationFilter.class);
         return http.build();

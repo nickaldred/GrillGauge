@@ -38,7 +38,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 @SpringBootTest
 @AutoConfigureMockMvc
 @Transactional
-class HubControllerIntTest {
+class ExternalHubControllerIntTest {
 
     @Autowired
     private MockMvc mockMvc;
@@ -99,7 +99,7 @@ class HubControllerIntTest {
         final String fullApiKey = generateAndStoreApiKey((long) hub.getId());
 
         // When
-        mockMvc.perform(post("/api/v1/hub")
+        mockMvc.perform(post("/api/v1/externalHub")
                 .header("X-API-KEY", fullApiKey)
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(objectMapper.writeValueAsString(hubReading)))
@@ -126,7 +126,7 @@ class HubControllerIntTest {
         final String fullApiKey = generateAndStoreApiKey((long) hub.getId());
 
         // When and Then
-        mockMvc.perform(post("/api/v1/hub")
+        mockMvc.perform(post("/api/v1/externalHub")
                 .contentType(MediaType.APPLICATION_JSON)
                 .header("X-API-KEY", fullApiKey)
                 .content(objectMapper.writeValueAsString(hubReading)))
@@ -140,7 +140,7 @@ class HubControllerIntTest {
         final HubReading hubReading = new HubReading((long) 1234, probeReadings);
 
         // When and Then
-        mockMvc.perform(post("/api/v1/hub")
+        mockMvc.perform(post("/api/v1/externalHub")
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(objectMapper.writeValueAsString(hubReading)))
                 .andExpect(status().isUnauthorized());
@@ -160,7 +160,7 @@ class HubControllerIntTest {
         String fullApiKey = generateAndStoreApiKey(hub.getId());
 
         // When
-        MvcResult result = mockMvc.perform(get("/api/v1/hub")
+        MvcResult result = mockMvc.perform(get("/api/v1/externalHub")
                 .header("X-API-KEY", fullApiKey))
                 .andExpect(status().isOk()).andReturn();
 
@@ -180,7 +180,7 @@ class HubControllerIntTest {
         String fullApiKey = generateAndStoreApiKey((long) 2);
 
         // When
-        mockMvc.perform(get("/api/v1/hub/%d".formatted((long) 1234))
+        mockMvc.perform(get("/api/v1/externalHub/%d".formatted((long) 1234))
                 .header("X-API-KEY", fullApiKey))
                 .andExpect(status().isNotFound());
     }
@@ -194,7 +194,7 @@ class HubControllerIntTest {
         String fullApiKey = generateAndStoreApiKey((long) 2);
 
         // When
-        mockMvc.perform(get("/api/v1/hub/%d".formatted(hub.getId()))
+        mockMvc.perform(get("/api/v1/externalHub/%d".formatted(hub.getId()))
                 .header("X-API-KEY", fullApiKey))
                 .andExpect(status().isNotFound());
     }
@@ -206,7 +206,7 @@ class HubControllerIntTest {
         hub = hubRepository.save(hub);
 
         // When
-        mockMvc.perform(get("/api/v1/hub/%d".formatted(hub.getId())))
+        mockMvc.perform(get("/api/v1/externalHub/%d".formatted(hub.getId())))
                 .andExpect(status().isUnauthorized());
     }
 }

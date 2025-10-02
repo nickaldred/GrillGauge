@@ -2,8 +2,6 @@ package com.grillgauge.api.domain.entitys;
 
 import java.time.Instant;
 
-import org.springframework.lang.NonNull;
-
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.FetchType;
