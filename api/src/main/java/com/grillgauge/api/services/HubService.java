@@ -45,6 +45,16 @@ public class HubService {
      * @param hub the Hub entity to store
      * @return the stored Hub entity
      */
+    public Hub storeHub(final Hub hub) {
+        return hubRepository.save(hub);
+    }
+
+    /**
+     * Store a new hub.
+     * 
+     * @param hub the Hub entity to store
+     * @return the stored Hub entity
+     */
     public void deleteHub(final Long hubId) {
         hubRepository.deleteById(hubId);
     }
