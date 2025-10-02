@@ -11,4 +11,6 @@ import com.grillgauge.api.domain.entitys.Probe;
 public interface ProbeRepository extends JpaRepository<Probe, Long> {
 
     List<Probe> findByHubId(Long hubId);
+
+    int deleteAllByHubId(Long hubId);
 }
