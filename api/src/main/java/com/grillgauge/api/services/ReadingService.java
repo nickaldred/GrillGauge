@@ -1,5 +1,7 @@
 package com.grillgauge.api.services;
 
+import java.time.Instant;
+import java.util.List;
 import java.util.Optional;
 
 import org.springframework.http.HttpStatus;
@@ -64,5 +66,28 @@ public class ReadingService {
                     "No readings found for probe ID: %s".formatted(probeId));
         }
         return deletedReadings;
+    }
+
+    /**
+     * Get all readings for the given probe between the specified start and end
+     * timestamps.
+     * 
+     * @param probe the probe to get readings for
+     * @param start the start timestamp in ISO 8601 format
+     * @param end   the end timestamp in ISO 8601 format
+     * @return list of Reading entities between the specified timestamps
+     * @throws ResponseStatusException with status 400 if the date format is invalid
+     */
+    public List<Reading> getReadingsForProbeBetween(Long probeId, String start, String end) {
+        try {
+            return readingRepository.findByProbe_IdAndTimeStampBetweenOrderByTimeStampAsc(
+                    probeId,
+                    Instant.parse(start),
+                    Instant.parse(end));
+        } catch (Exception e) {
+            throw new ResponseStatusException(
+                    HttpStatus.BAD_REQUEST,
+                    "Invalid date format. Please use ISO 8601 format (e.g., 2023-10-01T12:00:00Z).");
+        }
     }
 }
