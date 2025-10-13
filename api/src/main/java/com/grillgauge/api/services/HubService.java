@@ -1,5 +1,6 @@
 package com.grillgauge.api.services;
 
+import java.util.List;
 import java.util.Optional;
 
 import org.springframework.http.HttpStatus;
@@ -60,5 +61,15 @@ public class HubService {
     @Transactional
     public void deleteHub(final Long hubId) {
         hubRepository.deleteById(hubId);
+    }
+
+    /**
+     * Get all hubs for the given userId.
+     * 
+     * @param userId userId to get the hubs for
+     * @return List of Hub entities
+     */
+    public List<Hub> getHubsByUserId(final Long userId) {
+        return hubRepository.findByOwnerId(userId);
     }
 }

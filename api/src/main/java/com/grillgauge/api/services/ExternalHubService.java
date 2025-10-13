@@ -50,7 +50,7 @@ public class ExternalHubService {
      */
     public HubCurrentState getHubCurrentState(final Long hubId) {
         Hub hub = hubService.getHub(hubId);
-        List<Probe> probes = probeService.getProbes(hubId);
+        List<Probe> probes = probeService.getProbesByHubId(hubId);
         return new HubCurrentState(hubId, hub.getName(), probes);
     }
 }
