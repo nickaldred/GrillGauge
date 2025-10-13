@@ -1,6 +1,7 @@
 package com.grillgauge.api.services;
 
 import java.util.List;
+import java.util.Optional;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
@@ -33,7 +34,7 @@ public class ProbeService {
      * @throws ResponseStatusException with status 404 if no probes are found for
      *                                 the given hubId
      */
-    public List<Probe> getProbes(final Long hubId) {
+    public List<Probe> getProbesByHubId(final Long hubId) {
         List<Probe> probes = probeRepository.findByHubId(hubId);
         if (probes.isEmpty()) {
             throw new ResponseStatusException(
@@ -55,7 +56,7 @@ public class ProbeService {
      */
     @Transactional
     public Reading saveProbeReading(final ProbeReading probeReading, final Long hubId) {
-        List<Probe> probes = getProbes(hubId);
+        List<Probe> probes = getProbesByHubId(hubId);
         Probe probe = probes.stream()
                 .filter(x -> x.getLocalId().equals(probeReading.getId()))
                 .findFirst()
@@ -101,5 +102,15 @@ public class ProbeService {
                     "No probe found for probe ID: %s".formatted(probeId));
         }
         return deletedProbe;
+    }
+
+    public float getCurrentTemperature(final Long probeId) {
+        Optional<Reading> reading = readingService.getLatestReading(probeId);
+        if (reading.isEmpty()) {
+            throw new ResponseStatusException(
+                    HttpStatus.NOT_FOUND,
+                    "No readings found for probe ID: %s".formatted(probeId));
+        }
+        return reading.get().getCurrentTemp();
     }
 }

@@ -64,8 +64,10 @@ public class DataLoader implements CommandLineRunner {
         Probe testProbe5 = new Probe(2, testHub2, testUser2, (float) 170.00, "probe5");
         Probe testProbe6 = new Probe(1, testHub3, testUser3, (float) 190.00, "probe6");
         Probe testProbe7 = new Probe(1, testHub4, testUser4, (float) 210.00, "probe7");
+        Probe testProbe8 = new Probe(1, testHub5, testUser1, (float) 220.00, "probe8");
         probeRepository
-                .saveAll(List.of(testProbe1, testProbe2, testProbe3, testProbe4, testProbe5, testProbe6, testProbe7));
+                .saveAll(List.of(testProbe1, testProbe2, testProbe3, testProbe4, testProbe5, testProbe6, testProbe7,
+                        testProbe8));
 
         Reading testReading1 = new Reading(testProbe1, (float) 135, Instant.now().minusSeconds(300));
         Reading testReading2 = new Reading(testProbe1, (float) 145, Instant.now().minusSeconds(200));
@@ -79,8 +81,14 @@ public class DataLoader implements CommandLineRunner {
         Reading testReading10 = new Reading(testProbe3, (float) 130, Instant.now().minusSeconds(200));
         Reading testReading11 = new Reading(testProbe3, (float) 135, Instant.now().minusSeconds(100));
         Reading testReading12 = new Reading(testProbe3, (float) 145, Instant.now());
+        Reading testReading13 = new Reading(testProbe8, (float) 125, Instant.now().minusSeconds(300));
+        Reading testReading14 = new Reading(testProbe8, (float) 135, Instant.now().minusSeconds(200));
+        Reading testReading15 = new Reading(testProbe8, (float) 140, Instant.now().minusSeconds(200));
+        Reading testReading16 = new Reading(testProbe8, (float) 145, Instant.now());
+
         readingRepository.saveAll(List.of(testReading1, testReading2, testReading3, testReading4, testReading5,
-                testReading6, testReading7, testReading8, testReading9, testReading10, testReading11, testReading12));
+                testReading6, testReading7, testReading8, testReading9, testReading10, testReading11, testReading12,
+                testReading13, testReading14, testReading15, testReading16));
     }
 
 }
