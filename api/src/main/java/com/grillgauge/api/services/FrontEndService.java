@@ -68,7 +68,8 @@ public class FrontEndService {
                             })
                             .toList();
 
-                    return new DashboardHub(hub.getId(), hub.getName(), probes);
+                    final boolean connected = probes.stream().anyMatch(p -> p.getConnected());
+                    return new DashboardHub(hub.getId(), hub.getName(), probes, connected);
                 })
                 .toList();
         return new Dashboard(userId, dashboardHubs);

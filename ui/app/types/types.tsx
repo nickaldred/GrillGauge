@@ -24,4 +24,5 @@ export interface DashboardHub {
   id: number;
   name: string;
   probes: Probe[];
+  connected: boolean;
 }
