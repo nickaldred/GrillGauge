@@ -1,9 +1,10 @@
 export type Probe = {
   id: number;
-  name: string;
-  currentTemp: number;
+  localId: number;
   targetTemp: number;
-  color: string;
+  currentTemp: number;
+  name: string;
+  colour: string;
   connected: boolean;
 };
 export type Hub = {
@@ -25,3 +26,14 @@ export type User = {
   lastName: string;
   email: string;
 };
+
+export interface Dashboard {
+  userId: number;
+  hubs: DashboardHub[];
+}
+
+export interface DashboardHub {
+  id: number;
+  name: string;
+  probes: Probe[];
+}

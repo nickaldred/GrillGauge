@@ -98,7 +98,7 @@ export function ProbeCard({
       <div
         className="p-5 flex justify-between items-center"
         style={{
-          borderTop: `4px solid ${probe.color}`,
+          borderTop: `4px solid ${probe.colour}`,
         }}
       >
         <div className="flex items-center">
@@ -195,7 +195,7 @@ export function ProbeCard({
             className="h-3 rounded-full transition-all duration-500"
             style={{
               width: `${progress}%`,
-              backgroundColor: probe.color,
+              backgroundColor: probe.colour,
             }}
           ></div>
         </div>
