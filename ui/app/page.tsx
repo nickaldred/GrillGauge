@@ -29,13 +29,21 @@ export default function Home() {
   }
 
   useEffect(() => {
-    getData("http://localhost:8080/api/v1/ui/dashboard?userId=1")
-      .then((data) => {
-        setDashboard(data);
-      })
-      .catch((error) => {
-        console.error("Error fetching user:", error);
-      });
+    const fetchData = () => {
+      getData("http://localhost:8080/api/v1/ui/dashboard?userId=1")
+        .then((data) => {
+          setDashboard(data);
+        })
+        .catch((error) => {
+          console.error("Error fetching user:", error);
+        });
+    };
+
+    fetchData();
+
+    const intervalId = setInterval(fetchData, 30000);
+
+    return () => clearInterval(intervalId);
   }, []);
 
   const handleUpdateTargetTemp = async (probeId: number, temp: number) => {};
