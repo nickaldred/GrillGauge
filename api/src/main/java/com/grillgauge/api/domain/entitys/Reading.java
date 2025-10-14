@@ -38,4 +38,10 @@ public class Reading {
         this.probe = probe;
         this.currentTemp = currentTemp;
     }
+
+    public Reading(final Probe probe, final Float currentTemp, final Instant timeStamp) {
+        this.probe = probe;
+        this.currentTemp = currentTemp;
+        this.timeStamp = timeStamp;
+    }
 }
