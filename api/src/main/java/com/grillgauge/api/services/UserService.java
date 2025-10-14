@@ -53,4 +53,22 @@ public class UserService {
         return user;
     }
 
+    /**
+     * Get the user with the given email.
+     * 
+     * @param email the email of the user to retrieve
+     * @return the User entity with the given email
+     * @throws ResponseStatusException with status 404 if no user is found for the
+     *                                 given email
+     */
+    @Transactional(readOnly = true)
+    public User getUserByEmail(final String email) {
+        Optional<User> user = userRepository.findByEmail(email);
+        if (user.isEmpty()) {
+            throw new ResponseStatusException(
+                    HttpStatus.NOT_FOUND,
+                    "No user found with for email: %s".formatted(email));
+        }
+        return user.get();
+    }
 }
