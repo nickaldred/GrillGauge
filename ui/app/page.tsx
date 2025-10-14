@@ -59,11 +59,22 @@ export default function Home() {
       <Header />
       <div className="space-y-8">
         {dashboard.hubs.map((hub) => (
-          <div key={hub.id}>
-            {/* Hub name */}
-            <h2 className="text-2xl font-semibold mb-4 text-gray-800">
-              {hub.name}
-            </h2>
+          <div key={hub.id} className="mb-10">
+            <div className="flex items-center mb-4">
+              {/* Hub name */}
+              <h2 className="text-2xl font-bold mb-4 text-gray-800">
+                {hub.name}
+              </h2>
+              <span
+                className={`ml-3 px-3 py-1 text-sm rounded-full ${
+                  hub.connected
+                    ? "bg-green-100 text-green-800"
+                    : "bg-gray-100 text-gray-800"
+                }`}
+              >
+                {hub.connected ? "Connected" : "Disconnected"}
+              </span>
+            </div>
 
             {/* Probe cards in a 2-per-row layout */}
             <div className="flex flex-wrap -mx-2">

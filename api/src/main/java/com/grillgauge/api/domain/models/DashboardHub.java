@@ -16,4 +16,5 @@ public class DashboardHub {
     private Long id;
     private String name;
     private List<DashboardProbe> probes;
+    private boolean connected;
 }
