@@ -104,13 +104,18 @@ public class ProbeService {
         return deletedProbe;
     }
 
-    public float getCurrentTemperature(final Long probeId) {
+    public Float getCurrentTemperature(final Long probeId) {
         Optional<Reading> reading = readingService.getLatestReading(probeId);
         if (reading.isEmpty()) {
             throw new ResponseStatusException(
                     HttpStatus.NOT_FOUND,
                     "No readings found for probe ID: %s".formatted(probeId));
         }
-        return reading.get().getCurrentTemp();
+
+        Float currentTemp = reading.get().getCurrentTemp();
+        if (reading.get().getTimeStamp().isBefore(java.time.Instant.now().minusSeconds(300))) {
+            currentTemp = null;
+        }
+        return currentTemp;
     }
 }

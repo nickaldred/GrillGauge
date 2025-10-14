@@ -3,19 +3,14 @@
 import { useEffect, useState } from "react";
 import { Header } from "./components/header";
 import { ProbeCard } from "./components/probeCard";
-import { Probe } from "./types/types";
+import { Dashboard, Probe } from "./types/types";
 
 export default function Home() {
   const [user, setUser] = useState(null);
-
-  const testProbe = {
-    id: 1,
-    name: "Probe 1",
-    currentTemp: 55,
-    targetTemp: 165,
-    color: "red",
-    connected: true,
-  };
+  // const [probes, setProbes] = useState<Probe[]>([]);
+  // const [hubs, setHubs] = useState<string[]>([]);
+  // const [probes, setProbes] = useState<Probe[]>([]);
+  const [dashboard, setDashboard] = useState<Dashboard | null>(null);
 
   async function getData(url: string) {
     const response = await fetch(url, {
@@ -34,9 +29,9 @@ export default function Home() {
   }
 
   useEffect(() => {
-    getData("http://localhost:8080/api/v1/user?email=swathi@gmail.com")
+    getData("http://localhost:8080/api/v1/ui/dashboard?userId=1")
       .then((data) => {
-        setUser(data);
+        setDashboard(data);
       })
       .catch((error) => {
         console.error("Error fetching user:", error);
@@ -47,18 +42,38 @@ export default function Home() {
   const handleUpdateName = async (probeId: number, name: string) => {};
   const onClick = async () => {};
 
+  if (!dashboard) {
+    return <p>Loading dashboard...</p>;
+  }
+
   return (
     <main className="p-6">
       <Header />
-      <ProbeCard
-        probe={testProbe}
-        hubName="hub1"
-        onUpdateTargetTemp={handleUpdateTargetTemp}
-        onUpdateName={handleUpdateName}
-        onClick={onClick}
-      />
-      <p>Welcome to the Meat Thermometer Dashboard!</p>
-      <p>User is: {user ? JSON.stringify(user) : "Loading user..."}</p>
+      <div className="space-y-8">
+        {dashboard.hubs.map((hub) => (
+          <div key={hub.id}>
+            {/* Hub name */}
+            <h2 className="text-2xl font-semibold mb-4 text-gray-800">
+              {hub.name}
+            </h2>
+
+            {/* Probe cards in a 2-per-row layout */}
+            <div className="flex flex-wrap -mx-2">
+              {hub.probes.map((probe) => (
+                <div key={probe.id} className="w-full sm:w-1/2 px-2 mb-4">
+                  <ProbeCard
+                    probe={probe}
+                    hubName={hub.name}
+                    onUpdateTargetTemp={handleUpdateTargetTemp}
+                    onUpdateName={handleUpdateName}
+                    onClick={onClick}
+                  />
+                </div>
+              ))}
+            </div>
+          </div>
+        ))}
+      </div>
     </main>
   );
 }

@@ -16,4 +16,6 @@ public class DashboardProbe {
     private Float targetTemp;
     private Float currentTemp;
     private String name;
+    private String colour;
+    private Boolean connected;
 }
