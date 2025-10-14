@@ -2,6 +2,8 @@ package com.grillgauge.api.services;
 
 import java.util.List;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
 import com.grillgauge.api.domain.entitys.Hub;
@@ -11,6 +13,8 @@ import com.grillgauge.api.domain.models.DashboardProbe;
 
 @Service
 public class FrontEndService {
+
+    private static final Logger LOG = LoggerFactory.getLogger(FrontEndService.class);
 
     private HubService hubService;
     private UserService userService;
@@ -49,7 +53,7 @@ public class FrontEndService {
     }
 
     public Dashboard getDashboard(final long userId) {
-
+        LOG.info("Generating dashboard for user ID: {}", userId);
         List<Hub> hubs = hubService.getHubsByUserId(userId);
 
         List<DashboardHub> dashboardHubs = hubs.stream()
@@ -72,7 +76,8 @@ public class FrontEndService {
                     return new DashboardHub(hub.getId(), hub.getName(), probes, connected);
                 })
                 .toList();
+
+        LOG.info("Dashboard for user ID: {} has {} hubs", userId, dashboardHubs.size());
         return new Dashboard(userId, dashboardHubs);
     }
-
 }
