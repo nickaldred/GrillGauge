@@ -32,13 +32,9 @@ public class User {
     @Column(nullable = false)
     private String lastName;
 
-    @Column(nullable = false)
-    private String passwordHash;
-
-    public User(final String email, final String firstName, final String lastName, final String passwordHash) {
+    public User(final String email, final String firstName, final String lastName) {
         this.email = email;
         this.firstName = firstName;
         this.lastName = lastName;
-        this.passwordHash = passwordHash;
     }
 }
