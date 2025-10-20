@@ -18,7 +18,7 @@ export function ProbeCard({
   onUpdateTargetTemp,
   onUpdateName,
   onClick,
-}: ProbeProps) {
+}: Readonly<ProbeProps>) {
   const [isEditingName, setIsEditingName] = useState(false);
   const [tempName, setTempName] = useState(probe.name);
   const [isEditingTarget, setIsEditingTarget] = useState(false);
