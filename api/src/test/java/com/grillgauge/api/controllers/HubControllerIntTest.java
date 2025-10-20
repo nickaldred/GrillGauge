@@ -43,7 +43,7 @@ class HubControllerIntTest {
 
     @BeforeEach
     void setUp() {
-        testUser = new User("nick@hotmail.co.uk", "Nick", "Bloggs", "1234");
+        testUser = new User("nick@hotmail.co.uk", "Nick", "Bloggs");
         testUser = userRepository.save(testUser);
         Hub hub = new Hub(testUser, "apiKey", "Test Hub");
         testHub = hubRepository.save(hub);
