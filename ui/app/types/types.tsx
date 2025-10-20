@@ -15,7 +15,7 @@ export type User = {
   email: string;
 };
 
-export interface Dashboard {
+export interface DashboardType {
   userId: number;
   hubs: DashboardHub[];
 }
