@@ -78,7 +78,7 @@ class ExternalHubControllerIntTest {
 
     @BeforeEach
     void setUp() {
-        testUser = new User("nick@hotmail.co.uk", "nick", "aldred", "1234");
+        testUser = new User("nick@hotmail.co.uk", "nick", "aldred");
         userRepository.save(testUser);
     }
 

@@ -35,7 +35,7 @@ class UserControllerIntTest {
     @Test
     void storeUserSuccessful() throws Exception {
         // Given
-        User user = new User("nick@hotmail.co.uk", "Nick", "Bloggs", "1234");
+        User user = new User("nick@hotmail.co.uk", "Nick", "Bloggs");
 
         // When
         mockMvc.perform(post("/api/v1/user")
@@ -50,7 +50,6 @@ class UserControllerIntTest {
         assertEquals(user.getEmail(), savedUser.getEmail());
         assertEquals(user.getFirstName(), savedUser.getFirstName());
         assertEquals(user.getLastName(), savedUser.getLastName());
-        assertEquals(user.getPasswordHash(), savedUser.getPasswordHash());
     }
 
 }

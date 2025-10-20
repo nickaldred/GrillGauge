@@ -43,10 +43,10 @@ public class DataLoader implements CommandLineRunner {
     }
 
     private void dataLoader() {
-        User testUser1 = new User("nick@hotmail.co.uk", "nick", "aldred", "hash1");
-        User testUser2 = new User("joe@hotmail.co.uk", "joe", "bloggs", "hash2");
-        User testUser3 = new User("swathi@gmail.com", "swathi", "guptha", "hash3");
-        User testUser4 = new User("tom@askjeeves.com", "tom", "jones", "hash4");
+        User testUser1 = new User("nick@hotmail.co.uk", "nick", "aldred");
+        User testUser2 = new User("joe@hotmail.co.uk", "joe", "bloggs");
+        User testUser3 = new User("swathi@gmail.com", "swathi", "guptha");
+        User testUser4 = new User("tom@askjeeves.com", "tom", "jones");
         userRepository.saveAll(List.of(testUser1, testUser2, testUser3, testUser4));
 
         Hub testHub1 = new Hub(testUser1, "123abc", "hub1");
