@@ -23,6 +23,7 @@ export function ProbeCard({
   const [tempName, setTempName] = useState(probe.name);
   const [isEditingTarget, setIsEditingTarget] = useState(false);
   const [tempTarget, setTempTarget] = useState(probe.targetTemp);
+  const [showGraph, setShowGraph] = useState(false);
 
   const progress = probe.connected
     ? Math.max(Math.round((probe.currentTemp / probe.targetTemp) * 100), 0)

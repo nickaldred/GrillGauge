@@ -8,24 +8,24 @@ const handleUpdateTargetTemp = async (probeId: number, temp: number) => {};
 const handleUpdateName = async (probeId: number, name: string) => {};
 const onClick = async () => {};
 
+async function getData(url: string) {
+  const response = await fetch(url, {
+    method: "GET",
+    headers: {
+      "Content-Type": "application/json",
+    },
+  });
+
+  if (!response.ok) {
+    throw new Error("Failed to fetch data");
+  }
+
+  const data = await response.json();
+  return data;
+}
+
 export function DashboardComponent() {
   const [dashboard, setDashboard] = useState<DashboardType | null>(null);
-
-  async function getData(url: string) {
-    const response = await fetch(url, {
-      method: "GET",
-      headers: {
-        "Content-Type": "application/json",
-      },
-    });
-
-    if (!response.ok) {
-      throw new Error("Failed to fetch data");
-    }
-
-    const data = await response.json();
-    return data;
-  }
 
   useEffect(() => {
     const fetchData = () => {
