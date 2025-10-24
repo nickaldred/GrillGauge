@@ -1,8 +1,12 @@
 package com.grillgauge.api.services;
 
+import java.sql.Timestamp;
+import java.time.Instant;
 import java.util.List;
 import java.util.Optional;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -18,6 +22,9 @@ import com.grillgauge.api.domain.repositorys.ProbeRepository;
  */
 @Service
 public class ProbeService {
+
+    private static final Logger LOG = LoggerFactory.getLogger(ProbeService.class);
+
     private ReadingService readingService;
     private ProbeRepository probeRepository;
 
@@ -105,6 +112,7 @@ public class ProbeService {
     }
 
     public Float getCurrentTemperature(final Long probeId) {
+        LOG.info("Getting current temp for probeID: {}", probeId);
         Optional<Reading> reading = readingService.getLatestReading(probeId);
         if (reading.isEmpty()) {
             throw new ResponseStatusException(
@@ -113,8 +121,13 @@ public class ProbeService {
         }
 
         Float currentTemp = reading.get().getCurrentTemp();
-        if (reading.get().getTimeStamp().isBefore(java.time.Instant.now().minusSeconds(300))) {
+        Instant readingTime = reading.get().getTimeStamp();
+        if (readingTime.isBefore(java.time.Instant.now().minusSeconds(300))) {
             currentTemp = null;
+            LOG.warn("No current temp available for for probeID: {}, last reading was at: {}", probeId,
+                    Timestamp.from(readingTime));
+        } else {
+            LOG.info("Successfully got current temp for probeID: {}, temp is: {}", probeId, currentTemp);
         }
         return currentTemp;
     }

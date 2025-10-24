@@ -2,11 +2,12 @@
 
 import { useEffect, useState } from "react";
 import { ProbeCard } from "../../components/probeCard";
-import { DashboardType } from "../../types/types";
+import { DashboardType, Probe } from "../../types/types";
+import Modal from "./modal";
+import ProbeChart from "./probeChart";
 
 const handleUpdateTargetTemp = async (probeId: number, temp: number) => {};
 const handleUpdateName = async (probeId: number, name: string) => {};
-const onClick = async () => {};
 
 async function getData(url: string) {
   const response = await fetch(url, {
@@ -26,6 +27,8 @@ async function getData(url: string) {
 
 export function DashboardComponent() {
   const [dashboard, setDashboard] = useState<DashboardType | null>(null);
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [selectedProbe, setSelectedProbe] = useState<Probe | null>(null);
 
   useEffect(() => {
     const fetchData = () => {
@@ -37,17 +40,22 @@ export function DashboardComponent() {
           console.error("Error fetching user:", error);
         });
     };
-
     fetchData();
-
     const intervalId = setInterval(fetchData, 30000);
-
     return () => clearInterval(intervalId);
   }, []);
 
-  if (!dashboard) {
-    return <p>Loading dashboard...</p>;
-  }
+  const openProbeModal = (probe: Probe) => {
+    setSelectedProbe(probe);
+    setIsModalOpen(true);
+  };
+
+  const closeModal = () => {
+    setIsModalOpen(false);
+    setSelectedProbe(null);
+  };
+
+  if (!dashboard) return <p>Loading dashboard...</p>;
 
   return (
     <main className="p-6">
@@ -79,7 +87,7 @@ export function DashboardComponent() {
                     hubName={hub.name}
                     onUpdateTargetTemp={handleUpdateTargetTemp}
                     onUpdateName={handleUpdateName}
-                    onClick={onClick}
+                    onClick={openProbeModal}
                   />
                 </div>
               ))}
@@ -87,6 +95,38 @@ export function DashboardComponent() {
           </div>
         ))}
       </div>
+
+      {/* Modal — shows when a probe has been selected */}
+      <Modal open={isModalOpen} onClose={closeModal}>
+        <div className="p-6">
+          <div className="flex justify-between items-start">
+            <h3 className="text-xl font-semibold">
+              {selectedProbe ? selectedProbe.name : "Probe"}
+            </h3>
+            <button
+              onClick={closeModal}
+              className="ext-gray-500 hover:text-gray-700"
+            >
+              Close
+            </button>
+          </div>
+
+          {selectedProbe ? (
+            <div>
+              <p className="text-sm text-gray-600 mb-4">
+                Probe ID: {selectedProbe.id} | Current Temp:{" "}
+                {selectedProbe.currentTemp}°F
+              </p>
+
+              <div className="border rounded-lg p-4">
+                <ProbeChart probeId={selectedProbe.id} />
+              </div>
+            </div>
+          ) : (
+            <p>Loading probe...</p>
+          )}
+        </div>
+      </Modal>
     </main>
   );
 }
