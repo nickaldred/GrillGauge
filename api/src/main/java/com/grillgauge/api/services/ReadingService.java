@@ -1,9 +1,13 @@
 package com.grillgauge.api.services;
 
+import java.sql.Timestamp;
 import java.time.Instant;
 import java.util.List;
 import java.util.Optional;
+import java.util.function.Predicate;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -18,6 +22,8 @@ import com.grillgauge.api.domain.repositorys.ReadingRepository;
  */
 @Service
 public class ReadingService {
+
+    private static final Logger LOG = LoggerFactory.getLogger(ReadingService.class);
 
     private ReadingRepository readingRepository;
 
@@ -79,6 +85,7 @@ public class ReadingService {
      * @throws ResponseStatusException with status 400 if the date format is invalid
      */
     public List<Reading> getReadingsForProbeBetween(Long probeId, String start, String end) {
+        LOG.info("Getting readings for probeID: {}, between: {} - {}", probeId, start, end);
         try {
             return readingRepository.findByProbe_IdAndTimeStampBetweenOrderByTimeStampAsc(
                     probeId,

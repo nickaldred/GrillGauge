@@ -1,15 +1,14 @@
 package com.grillgauge.api.controllers;
 
+import java.time.Instant;
 import java.util.List;
 
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.grillgauge.api.domain.entitys.Probe;
-import com.grillgauge.api.domain.entitys.Reading;
 import com.grillgauge.api.services.ReadingService;
 
-import org.springframework.data.repository.query.Param;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 
@@ -23,9 +22,15 @@ public class ProbeController {
         this.readingService = readingService;
     }
 
+    public record ReadingDTO(Instant timestamp, double temperature) {
+    }
+
     @GetMapping("/{probeId}/readings/between")
-    public List<Reading> getReadingsForProbeBetween(@PathVariable Long probeId, @Param("start") String start,
-            @Param("end") String end) {
-        return readingService.getReadingsForProbeBetween(probeId, start, end);
+    public List<ReadingDTO> getReadingsForProbeBetween(@PathVariable Long probeId, @RequestParam("start") String start,
+            @RequestParam("end") String end) {
+        return readingService.getReadingsForProbeBetween(probeId, start, end)
+                .stream()
+                .map(r -> new ReadingDTO(r.getTimeStamp(), r.getCurrentTemp()))
+                .toList();
     }
 }

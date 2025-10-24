@@ -9,7 +9,7 @@ interface ProbeProps {
   readonly hubName: string;
   onUpdateTargetTemp: (probeId: number, temp: number) => void;
   onUpdateName: (probeId: number, name: string) => void;
-  onClick?: () => void;
+  onClick?: (probe: Probe) => void;
 }
 
 export function ProbeCard({
@@ -23,7 +23,6 @@ export function ProbeCard({
   const [tempName, setTempName] = useState(probe.name);
   const [isEditingTarget, setIsEditingTarget] = useState(false);
   const [tempTarget, setTempTarget] = useState(probe.targetTemp);
-  const [showGraph, setShowGraph] = useState(false);
 
   const progress = probe.connected
     ? Math.max(Math.round((probe.currentTemp / probe.targetTemp) * 100), 0)
@@ -84,7 +83,7 @@ export function ProbeCard({
     ) {
       return;
     }
-    onClick && onClick();
+    onClick && onClick(probe);
   };
 
   return (
