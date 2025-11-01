@@ -46,14 +46,17 @@ export default function ProbeChart({ probeId }: ProbeChartProps) {
     const endISO = end.toISOString();
 
     setLoading(true);
+    const probeIdsParam = [probeId].join(",");
     fetch(
-      `http://localhost:8080/api/v1/probe/${probeId}/readings/between?start=${startISO}&end=${endISO}`
+      `http://localhost:8080/api/v1/probe/readings/between?probeIds=${probeIdsParam}&start=${startISO}&end=${endISO}`
     )
       .then((res) => {
         if (!res.ok) throw new Error("Failed to fetch readings");
         return res.json();
       })
-      .then((data) => setReadings(data))
+      .then((data: Record<number, Reading[]>) => {
+        setReadings(data[probeId] || []);
+      })
       .catch((err) => console.error(err))
       .finally(() => setLoading(false));
   }, [probeId, timeframe]);
