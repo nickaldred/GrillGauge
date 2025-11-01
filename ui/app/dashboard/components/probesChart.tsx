@@ -16,6 +16,7 @@ import {
   Color,
 } from "chart.js";
 import "chartjs-adapter-date-fns";
+import { DashboardHub } from "@/app/types/types";
 
 ChartJS.register(
   LineElement,
@@ -33,13 +34,20 @@ interface Reading {
 }
 
 interface ProbesChartProps {
-  probeIds: number[];
+  hubs: DashboardHub;
 }
 
-export default function ProbesChart({ probeIds }: ProbesChartProps) {
+export default function ProbesChart({ hubs }: ProbesChartProps) {
   const [readings, setReadings] = useState<Map<String, Reading[]>>(new Map());
   const [timeframe, setTimeframe] = useState<number>(60); // minutes, default = 1 hour
   const [loading, setLoading] = useState(false);
+
+  const probeIds = hubs.probes.map((probe) => probe.id);
+
+  const probeIdToNameMap: Record<number, string> = {};
+  hubs.probes.forEach((probe) => {
+    probeIdToNameMap[probe.id] = probe.name;
+  });
 
   useEffect(() => {
     const end = new Date();
@@ -49,9 +57,9 @@ export default function ProbesChart({ probeIds }: ProbesChartProps) {
 
     setLoading(true);
     fetch(
-      `http://localhost:8080/api/v1/probe/${probeIds.join(
+      `http://localhost:8080/api/v1/probe/readings/between?probeIds=${probeIds.join(
         ","
-      )}/readings/between?start=${startISO}&end=${endISO}`
+      )}&start=${startISO}&end=${endISO}`
     )
       .then((res) => {
         if (!res.ok) throw new Error("Failed to fetch readings");
@@ -60,7 +68,7 @@ export default function ProbesChart({ probeIds }: ProbesChartProps) {
       .then((data) => setReadings(data))
       .catch((err) => console.error(err))
       .finally(() => setLoading(false));
-  }, [probeIds, timeframe]);
+  }, [probeIds.keys, timeframe]);
 
   let chartDataSets: ChartDataset<"line">[] = [];
 
@@ -74,7 +82,7 @@ export default function ProbesChart({ probeIds }: ProbesChartProps) {
   let dataCount = 0;
   readings.forEach((probeReadings, probeId) => {
     chartDataSets.push({
-      label: probeId + " - Temperature (°F)",
+      label: probeIdToNameMap[Number(probeId)] + " - Temperature (°F)",
       data: probeReadings.map((r) => r.temperature),
       fill: false,
       borderColor: chartDataSetColours[dataCount],
