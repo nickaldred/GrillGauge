@@ -33,19 +33,19 @@ interface Reading {
   temperature: number;
 }
 
-interface ProbesChartProps {
-  hubs: DashboardHub;
+interface HubChartProps {
+  hub: DashboardHub;
 }
 
-export default function ProbesChart({ hubs }: ProbesChartProps) {
-  const [readings, setReadings] = useState<Map<String, Reading[]>>(new Map());
+export default function HubChart({ hub }: HubChartProps) {
+  const [readings, setReadings] = useState<Record<string, Reading[]>>({});
   const [timeframe, setTimeframe] = useState<number>(60); // minutes, default = 1 hour
   const [loading, setLoading] = useState(false);
 
-  const probeIds = hubs.probes.map((probe) => probe.id);
+  const probeIds = hub.probes.map((probe) => probe.id);
 
   const probeIdToNameMap: Record<number, string> = {};
-  hubs.probes.forEach((probe) => {
+  hub.probes.forEach((probe) => {
     probeIdToNameMap[probe.id] = probe.name;
   });
 
@@ -65,10 +65,10 @@ export default function ProbesChart({ hubs }: ProbesChartProps) {
         if (!res.ok) throw new Error("Failed to fetch readings");
         return res.json();
       })
-      .then((data) => setReadings(data))
+      .then((data: Record<string, Reading[]>) => setReadings(data || {}))
       .catch((err) => console.error(err))
       .finally(() => setLoading(false));
-  }, [probeIds.keys, timeframe]);
+  }, [probeIds.join(","), timeframe]);
 
   let chartDataSets: ChartDataset<"line">[] = [];
 
@@ -80,7 +80,7 @@ export default function ProbesChart({ hubs }: ProbesChartProps) {
   ];
 
   let dataCount = 0;
-  readings.forEach((probeReadings, probeId) => {
+  for (const [probeId, probeReadings] of Object.entries(readings)) {
     chartDataSets.push({
       label: probeIdToNameMap[Number(probeId)] + " - Temperature (°F)",
       data: probeReadings.map((r) => r.temperature),
@@ -91,15 +91,29 @@ export default function ProbesChart({ hubs }: ProbesChartProps) {
       pointRadius: 0,
     });
     dataCount += 1;
-  });
+  }
+
+  // build sorted, unique labels (Date objects) from all readings' timestamps
+  const allTimestamps = Object.values(readings)
+    .flat()
+    .map((r) => new Date(r.timestamp).getTime());
+  const uniqueSortedTimestamps = Array.from(new Set(allTimestamps)).sort(
+    (a, b) => a - b
+  );
+  const labels = uniqueSortedTimestamps.map((ts) => new Date(ts));
 
   const chartData: ChartData<"line"> = {
-    labels: Array.from(new Set(Array.from(readings.values()).flat())),
+    labels,
     datasets: chartDataSets,
   };
 
   const end = new Date();
   const start = new Date(end.getTime() - timeframe * 60 * 1000);
+
+  // choose a sensible time unit for the X axis
+  let timeUnit: "minute" | "hour" | "day" = "day";
+  if (timeframe <= 60) timeUnit = "minute";
+  else if (timeframe <= 720) timeUnit = "hour";
 
   const options: ChartOptions<"line"> = {
     responsive: true,
@@ -107,7 +121,7 @@ export default function ProbesChart({ hubs }: ProbesChartProps) {
       x: {
         type: "time",
         time: {
-          unit: timeframe <= 60 ? "minute" : timeframe <= 720 ? "hour" : "day",
+          unit: timeUnit,
         },
         min: start.getTime(),
         max: end.getTime(),
@@ -133,7 +147,7 @@ export default function ProbesChart({ hubs }: ProbesChartProps) {
   };
 
   const handleSliderChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const linearValue = parseInt(e.target.value);
+    const linearValue = Number.parseInt(e.target.value, 10);
     const newTimeframe = sliderToTimeframe(linearValue);
     setTimeframe(newTimeframe);
   };
@@ -158,13 +172,15 @@ export default function ProbesChart({ hubs }: ProbesChartProps) {
         />
       </div>
 
-      {loading ? (
-        <p className="text-center text-gray-500">Loading data...</p>
-      ) : Array.from(readings.values()).every((arr) => arr.length === 0) ? (
-        <p className="text-center text-gray-400">No readings available.</p>
-      ) : (
-        <Line data={chartData} options={options} />
-      )}
+      {(() => {
+        if (loading)
+          return <p className="text-center text-gray-500">Loading data...</p>;
+        if (Object.values(readings).every((arr) => arr.length === 0))
+          return (
+            <p className="text-center text-gray-400">No readings available.</p>
+          );
+        return <Line data={chartData} options={options} />;
+      })()}
     </div>
   );
 }
