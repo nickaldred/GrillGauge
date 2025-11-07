@@ -1,1 +1,47 @@
 @import "tailwindcss";
+
+:root {
+	--theme-bg: #0b0b0c;
+	--theme-fg: #f7f7f8;
+	--theme-accent: #ff8a00;
+	--theme-muted: rgba(255,255,255,0.75);
+	--theme-cta: linear-gradient(180deg,#ff8a00,#ff5a00);
+	--theme-cta-fg: #0b0b0c;
+	--theme-cta-border: rgba(255,255,255,0.06);
+
+	--theme-toggle-bg: rgba(255,255,255,0.06);
+	--theme-toggle-fg: #fff;
+	--theme-toggle-ring: rgba(255,255,255,0.04);
+}
+
+html[data-theme="light"] {
+	--theme-bg: #f8fafc;
+	--theme-fg: #07132a;
+	--theme-accent: #d35400;
+	--theme-muted: rgba(10,20,30,0.7);
+	--theme-cta: linear-gradient(180deg,#ffb371,#ff7a1f);
+	--theme-cta-fg: #07132a;
+	--theme-cta-border: rgba(7,19,42,0.08);
+
+	--theme-toggle-bg: rgba(7,19,42,0.06);
+	--theme-toggle-fg: #07132a;
+	--theme-toggle-ring: rgba(7,19,42,0.06);
+}
+
+/* Helper utility classes used by the hero */
+.bg-theme-bg { background: linear-gradient(180deg, var(--theme-bg), color-mix(in srgb, var(--theme-bg) 80%, black 20%)); }
+.text-theme-fg { color: var(--theme-fg); }
+.text-theme-muted { color: var(--theme-muted); }
+.bg-theme-cta { background: var(--theme-cta); }
+.text-theme-cta-fg { color: var(--theme-cta-fg); }
+.border-theme-cta-border { border-color: var(--theme-cta-border); }
+
+.primary { display: inline-flex; align-items:center; gap:8px; font-weight:700; }
+.secondary { display: inline-flex; align-items:center; gap:8px; font-weight:600; }
+
+.bg-theme-toggle-bg { background: var(--theme-toggle-bg); }
+.text-theme-toggle-fg { color: var(--theme-toggle-fg); }
+.ring-theme-toggle-ring { box-shadow: 0 1px 0 0 var(--theme-toggle-ring); }
+
+/* Small nicety to smooth theme transitions */
+* { transition: background-color 220ms ease, color 220ms ease, border-color 220ms ease; }
