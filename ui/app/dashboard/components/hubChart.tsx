@@ -12,8 +12,11 @@ import {
   Legend,
   ChartOptions,
   ChartData,
+  ChartDataset,
+  Color,
 } from "chart.js";
 import "chartjs-adapter-date-fns";
+import { DashboardHub } from "@/app/types/types";
 
 ChartJS.register(
   LineElement,
@@ -30,14 +33,21 @@ interface Reading {
   temperature: number;
 }
 
-interface ProbeChartProps {
-  probeId: number;
+interface HubChartProps {
+  hub: DashboardHub;
 }
 
-export default function ProbeChart({ probeId }: ProbeChartProps) {
-  const [readings, setReadings] = useState<Reading[]>([]);
+export default function HubChart({ hub }: HubChartProps) {
+  const [readings, setReadings] = useState<Record<string, Reading[]>>({});
   const [timeframe, setTimeframe] = useState<number>(60); // minutes, default = 1 hour
   const [loading, setLoading] = useState(false);
+
+  const probeIds = hub.probes.map((probe) => probe.id);
+
+  const probeIdToNameMap: Record<number, string> = {};
+  hub.probes.forEach((probe) => {
+    probeIdToNameMap[probe.id] = probe.name;
+  });
 
   useEffect(() => {
     const end = new Date();
@@ -46,38 +56,64 @@ export default function ProbeChart({ probeId }: ProbeChartProps) {
     const endISO = end.toISOString();
 
     setLoading(true);
-    const probeIdsParam = [probeId].join(",");
     fetch(
-      `http://localhost:8080/api/v1/probe/readings/between?probeIds=${probeIdsParam}&start=${startISO}&end=${endISO}`
+      `http://localhost:8080/api/v1/probe/readings/between?probeIds=${probeIds.join(
+        ","
+      )}&start=${startISO}&end=${endISO}`
     )
       .then((res) => {
         if (!res.ok) throw new Error("Failed to fetch readings");
         return res.json();
       })
-      .then((data: Record<number, Reading[]>) => {
-        setReadings(data[probeId] || []);
-      })
+      .then((data: Record<string, Reading[]>) => setReadings(data || {}))
       .catch((err) => console.error(err))
       .finally(() => setLoading(false));
-  }, [probeId, timeframe]);
+  }, [probeIds.join(","), timeframe]);
 
-  const data: ChartData<"line"> = {
-    labels: readings.map((r) => new Date(r.timestamp)),
-    datasets: [
-      {
-        label: "Temperature (°F)",
-        data: readings.map((r) => r.temperature),
-        fill: false,
-        borderColor: "#3b82f6",
-        backgroundColor: "#3b82f6",
-        tension: 0.3,
-        pointRadius: 0,
-      },
-    ],
+  let chartDataSets: ChartDataset<"line">[] = [];
+
+  let chartDataSetColours: Array<Color> = [
+    "#3b82f6",
+    "#f0f63bff",
+    "#f6b23bff",
+    "#fd0404ff",
+  ];
+
+  let dataCount = 0;
+  for (const [probeId, probeReadings] of Object.entries(readings)) {
+    chartDataSets.push({
+      label: probeIdToNameMap[Number(probeId)] + " - Temperature (°F)",
+      data: probeReadings.map((r) => r.temperature),
+      fill: false,
+      borderColor: chartDataSetColours[dataCount],
+      backgroundColor: chartDataSetColours[dataCount],
+      tension: 0.3,
+      pointRadius: 0,
+    });
+    dataCount += 1;
+  }
+
+  // build sorted, unique labels (Date objects) from all readings' timestamps
+  const allTimestamps = Object.values(readings)
+    .flat()
+    .map((r) => new Date(r.timestamp).getTime());
+  const uniqueSortedTimestamps = Array.from(new Set(allTimestamps)).sort(
+    (a, b) => a - b
+  );
+  const labels = uniqueSortedTimestamps.map((ts) => new Date(ts));
+
+  const chartData: ChartData<"line"> = {
+    labels,
+    datasets: chartDataSets,
   };
 
   const end = new Date();
   const start = new Date(end.getTime() - timeframe * 60 * 1000);
+
+  // choose a sensible time unit for the X axis
+  let timeUnit: "minute" | "hour" | "day" = "day";
+  if (timeframe <= 60) timeUnit = "minute";
+  else if (timeframe <= 720) timeUnit = "hour";
 
   const options: ChartOptions<"line"> = {
     responsive: true,
@@ -85,7 +121,7 @@ export default function ProbeChart({ probeId }: ProbeChartProps) {
       x: {
         type: "time",
         time: {
-          unit: timeframe <= 60 ? "minute" : timeframe <= 720 ? "hour" : "day",
+          unit: timeUnit,
         },
         min: start.getTime(),
         max: end.getTime(),
@@ -111,7 +147,7 @@ export default function ProbeChart({ probeId }: ProbeChartProps) {
   };
 
   const handleSliderChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const linearValue = parseInt(e.target.value);
+    const linearValue = Number.parseInt(e.target.value, 10);
     const newTimeframe = sliderToTimeframe(linearValue);
     setTimeframe(newTimeframe);
   };
@@ -136,13 +172,15 @@ export default function ProbeChart({ probeId }: ProbeChartProps) {
         />
       </div>
 
-      {loading ? (
-        <p className="text-center text-gray-500">Loading data...</p>
-      ) : readings.length === 0 ? (
-        <p className="text-center text-gray-400">No readings available.</p>
-      ) : (
-        <Line data={data} options={options} />
-      )}
+      {(() => {
+        if (loading)
+          return <p className="text-center text-gray-500">Loading data...</p>;
+        if (Object.values(readings).every((arr) => arr.length === 0))
+          return (
+            <p className="text-center text-gray-400">No readings available.</p>
+          );
+        return <Line data={chartData} options={options} />;
+      })()}
     </div>
   );
 }

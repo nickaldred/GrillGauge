@@ -2,9 +2,10 @@
 
 import { useEffect, useState } from "react";
 import { ProbeCard } from "../../components/probeCard";
-import { DashboardType, Probe } from "../../types/types";
+import { DashboardHub, DashboardType, Probe } from "../../types/types";
 import Modal from "./modal";
 import ProbeChart from "./probeChart";
+import HubChart from "./hubChart";
 
 const handleUpdateTargetTemp = async (probeId: number, temp: number) => {};
 const handleUpdateName = async (probeId: number, name: string) => {};
@@ -27,8 +28,10 @@ async function getData(url: string) {
 
 export function DashboardComponent() {
   const [dashboard, setDashboard] = useState<DashboardType | null>(null);
-  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [isProbeModalOpen, setIsProbeModalOpen] = useState(false);
+  const [isHubModalOpen, setIsHubModalOpen] = useState(false);
   const [selectedProbe, setSelectedProbe] = useState<Probe | null>(null);
+  const [selectedHub, setSelectedHub] = useState<DashboardHub | null>(null);
 
   useEffect(() => {
     const fetchData = () => {
@@ -47,12 +50,22 @@ export function DashboardComponent() {
 
   const openProbeModal = (probe: Probe) => {
     setSelectedProbe(probe);
-    setIsModalOpen(true);
+    setIsProbeModalOpen(true);
   };
 
-  const closeModal = () => {
-    setIsModalOpen(false);
+  const closeProbeModal = () => {
+    setIsProbeModalOpen(false);
     setSelectedProbe(null);
+  };
+
+  const openHubModal = (hub: DashboardHub) => {
+    setSelectedHub(hub);
+    setIsHubModalOpen(true);
+  };
+
+  const closeHubModal = () => {
+    setIsHubModalOpen(false);
+    setSelectedHub(null);
   };
 
   if (!dashboard) return <p>Loading dashboard...</p>;
@@ -63,9 +76,18 @@ export function DashboardComponent() {
         {dashboard.hubs.map((hub) => (
           <div key={hub.id} className="mb-10">
             <div className="flex items-center mb-4">
-              {/* Hub name */}
-              <h2 className="text-2xl font-bold mb-4 text-gray-800">
-                {hub.name}
+              {/* Hub name (clickable to open hub modal) */}
+              <h2 className="mb-4">
+                <button
+                  type="button"
+                  onClick={() => openHubModal(hub)}
+                  onKeyDown={(e) => {
+                    if (e.key === "Enter" || e.key === " ") openHubModal(hub);
+                  }}
+                  className="text-2xl font-bold text-gray-800 cursor-pointer"
+                >
+                  {hub.name}
+                </button>
               </h2>
               <span
                 className={`ml-3 px-3 py-1 text-sm rounded-full ${
@@ -96,15 +118,15 @@ export function DashboardComponent() {
         ))}
       </div>
 
-      {/* Modal — shows when a probe has been selected */}
-      <Modal open={isModalOpen} onClose={closeModal}>
+      {/* Probe Modal — shows when a probe has been selected */}
+      <Modal open={isProbeModalOpen} onClose={closeProbeModal}>
         <div className="p-6">
           <div className="flex justify-between items-start">
             <h3 className="text-xl font-semibold">
               {selectedProbe ? selectedProbe.name : "Probe"}
             </h3>
             <button
-              onClick={closeModal}
+              onClick={closeProbeModal}
               className="ext-gray-500 hover:text-gray-700"
             >
               Close
@@ -124,6 +146,44 @@ export function DashboardComponent() {
             </div>
           ) : (
             <p>Loading probe...</p>
+          )}
+        </div>
+      </Modal>
+
+      {/* Hub Modal — shows when a hub has been selected */}
+      <Modal open={isHubModalOpen} onClose={closeHubModal}>
+        <div className="p-6">
+          <div className="flex justify-between items-start">
+            <h3 className="text-xl font-semibold">
+              {selectedHub ? selectedHub.name : "Hub"}
+            </h3>
+            <button
+              onClick={closeHubModal}
+              className="ext-gray-500 hover:text-gray-700"
+            >
+              Close
+            </button>
+          </div>
+
+          {selectedHub ? (
+            <div>
+              <div className="text-sm text-gray-600 mb-4">
+                <p className="font-medium mb-2">Probes temperatures:</p>
+                <ul className="list-disc list-inside">
+                  {selectedHub.probes.map((p) => (
+                    <li key={p.id}>
+                      {p.name ? `${p.name} ` : ""}(ID: {p.id}): {p.currentTemp}
+                      °F
+                    </li>
+                  ))}
+                </ul>
+              </div>
+              <div className="border rounded-lg p-4">
+                <HubChart hub={selectedHub} />
+              </div>
+            </div>
+          ) : (
+            <p>Loading hub...</p>
           )}
         </div>
       </Modal>
