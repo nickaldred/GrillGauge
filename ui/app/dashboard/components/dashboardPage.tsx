@@ -6,7 +6,8 @@ import { DashboardHub, DashboardType, Probe } from "../../types/types";
 import Modal from "./modal";
 import ProbeChart from "./probeChart";
 import HubChart from "./hubChart";
-import GoogleSignInButton from "@/app/components/googleSignInButton";
+import { useSession } from "next-auth/react";
+import { useRouter } from "next/navigation";
 
 const handleUpdateTargetTemp = async (probeId: number, temp: number) => {};
 const handleUpdateName = async (probeId: number, name: string) => {};
@@ -28,6 +29,8 @@ async function getData(url: string) {
 }
 
 export function DashboardPage() {
+  const { status } = useSession();
+  const router = useRouter();
   const [dashboard, setDashboard] = useState<DashboardType | null>(null);
   const [isProbeModalOpen, setIsProbeModalOpen] = useState(false);
   const [isHubModalOpen, setIsHubModalOpen] = useState(false);
@@ -188,8 +191,6 @@ export function DashboardPage() {
           )}
         </div>
       </Modal>
-
-      <GoogleSignInButton />
     </main>
   );
 }
