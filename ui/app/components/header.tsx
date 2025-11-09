@@ -3,7 +3,7 @@ import React from "react";
 import { useRouter, usePathname } from "next/navigation";
 import { FlameIcon } from "lucide-react";
 import { useTheme } from "../providers/ThemeProvider";
-import GoogleSignInButton from "./googleSignInButton";
+import GoogleSignInButton from "./googleSignIn";
 
 // Shared site header (derived from LandingPage nav). This component is a
 // client component so it can manage theme toggling and client navigation.
@@ -11,10 +11,12 @@ export function Header() {
   const router = useRouter();
   const pathname = usePathname();
   const { theme, toggle } = useTheme();
+  const isDarkMode = theme === "dark";
 
   // Keep landing page as-is (it renders its own nav). When this header is
   // rendered on the root path we'll return null to avoid duplicate navs.
   if (pathname === "/") return null;
+  if (pathname === "/login") return null;
 
   return (
     <header
@@ -79,12 +81,12 @@ export function Header() {
                 </svg>
               )}
             </button>
-            <button
-              onClick={() => router.push("/login")}
-              className="px-4 py-2 rounded-lg font-medium bg-gradient-to-r from-orange-500 to-red-600 text-white"
-            >
-              Sign In
-            </button>
+            <div
+              className={`border-l ${
+                isDarkMode ? "border-gray-700" : "border-gray-300"
+              } h-8 mx-2`}
+            ></div>
+            <GoogleSignInButton />
           </div>
         </div>
       </div>
