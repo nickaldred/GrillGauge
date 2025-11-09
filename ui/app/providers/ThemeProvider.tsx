@@ -1,5 +1,13 @@
 "use client";
-import React, { createContext, useContext, useEffect, useState, ReactNode, useMemo } from "react";
+import React, {
+  createContext,
+  useContext,
+  useEffect,
+  useState,
+  ReactNode,
+  useMemo,
+} from "react";
+import { SessionProvider } from "next-auth/react";
 
 type Theme = "light" | "dark";
 
@@ -17,7 +25,9 @@ export function useTheme() {
   return useContext(ThemeContext);
 }
 
-export default function ThemeProvider({ children }: { children: ReactNode }) {
+export default function ThemeProvider({
+  children,
+}: Readonly<{ children: ReactNode }>) {
   const [theme, setTheme] = useState<Theme>("light");
 
   useEffect(() => {
@@ -30,7 +40,9 @@ export default function ThemeProvider({ children }: { children: ReactNode }) {
         return;
       }
 
-      const prefersDark = globalThis.matchMedia?.("(prefers-color-scheme: dark)")?.matches;
+      const prefersDark = globalThis.matchMedia?.(
+        "(prefers-color-scheme: dark)"
+      )?.matches;
       if (prefersDark) {
         setTheme("dark");
         document.documentElement.dataset.theme = "dark";
@@ -63,5 +75,9 @@ export default function ThemeProvider({ children }: { children: ReactNode }) {
 
   const value = useMemo(() => ({ theme, toggle }), [theme]);
 
-  return <ThemeContext.Provider value={value}>{children}</ThemeContext.Provider>;
+  return (
+    <ThemeContext.Provider value={value}>
+      <SessionProvider>{children}</SessionProvider>
+    </ThemeContext.Provider>
+  );
 }
