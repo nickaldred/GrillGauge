@@ -4,22 +4,38 @@ import { useSession } from "next-auth/react";
 import { Header } from "./components/dashboardHeader";
 import { DashboardPage } from "./components/dashboardPage";
 import { useRouter } from "next/navigation";
-import { useEffect } from "react";
+// no React hooks from 'react' are needed here
+import { useTheme } from "../providers/ThemeProvider";
+import Footer from "../components/Footer";
 
 export default function Dashboard() {
-  const { status } = useSession();
   const router = useRouter();
+  const { theme } = useTheme();
+  const isDarkMode = theme === "dark";
 
-  useEffect(() => {
-    if (status === "unauthenticated") {
-      router.replace("/"); // Redirect to home if not logged in
-    }
-  }, [status, router]);
+  // Use `required: true` so unauthenticated users are redirected immediately.
+  const { status } = useSession({
+    required: true,
+    onUnauthenticated() {
+      router.replace("/");
+    },
+  });
+
+  // While session isn't authenticated, don't render the dashboard UI to avoid
+  // a flash of protected content before the redirect.
+  if (status !== "authenticated") {
+    return null;
+  }
 
   return (
-    <main className="p-6">
+    <main
+      className={`min-h-screen p-6 ${
+        isDarkMode ? "bg-gray-900" : "bg-gray-100"
+      }`}
+    >
       <Header />
       <DashboardPage />
+      <Footer />
     </main>
   );
 }

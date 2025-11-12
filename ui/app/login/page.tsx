@@ -157,9 +157,6 @@ export default function Login() {
               isDarkMode ? "text-gray-400" : "text-gray-600"
             }`}
           >
-            <p className="mb-2">
-              Demo: Click the button to sign in with a test account
-            </p>
             <Link
               href="/"
               className={`inline-block mt-2 ${

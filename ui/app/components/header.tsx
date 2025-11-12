@@ -20,7 +20,9 @@ export function Header() {
 
   return (
     <header
-      className={`w-full bg-white/80 border-b border-gray-200 backdrop-blur-md dark:bg-gray-900/80 dark:border-gray-800`}
+      className={`w-full ${
+        isDarkMode ? "bg-gray-800 border-gray-700" : "bg-white border-gray-200"
+      } backdrop-blur-md`}
     >
       <div className="container mx-auto px-6 py-4">
         <div className="flex justify-between items-center">
@@ -30,7 +32,11 @@ export function Header() {
             >
               <FlameIcon size={20} className="text-white" />
             </div>
-            <span className={`text-xl font-bold dark:text-white text-gray-900`}>
+            <span
+              className={`text-xl font-bold ${
+                isDarkMode ? "text-white" : "text-gray-900"
+              }`}
+            >
               Grill Gauge
             </span>
           </div>
@@ -38,14 +44,18 @@ export function Header() {
           <div className="flex items-center space-x-4">
             <button
               onClick={toggle}
-              className="p-2 rounded-lg transition-colors bg-gray-200 dark:bg-gray-800"
+              className={`p-2 rounded-lg transition-colors ${
+                isDarkMode
+                  ? "bg-gray-800 text-yellow-400 hover:bg-gray-700"
+                  : "bg-gray-200 text-gray-700 hover:bg-gray-300"
+              }`}
               aria-label="Toggle theme"
             >
-              {theme === "dark" ? (
+              {isDarkMode ? (
                 <svg
                   xmlns="http://www.w3.org/2000/svg"
-                  width="18"
-                  height="18"
+                  width="20"
+                  height="20"
                   viewBox="0 0 24 24"
                   fill="none"
                   stroke="currentColor"
@@ -67,8 +77,8 @@ export function Header() {
               ) : (
                 <svg
                   xmlns="http://www.w3.org/2000/svg"
-                  width="18"
-                  height="18"
+                  width="20"
+                  height="20"
                   viewBox="0 0 24 24"
                   fill="none"
                   stroke="currentColor"
