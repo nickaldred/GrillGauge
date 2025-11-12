@@ -7,6 +7,7 @@ import {
   CheckIcon,
   ArrowRightIcon,
 } from "lucide-react";
+import Footer from "./Footer";
 import { useTheme } from "../providers/ThemeProvider";
 
 export default function LandingPage() {
@@ -78,7 +79,18 @@ export default function LandingPage() {
                 aria-label="Toggle theme"
               >
                 {isDarkMode ? (
-                  <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="feather feather-sun">
+                  <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    width="20"
+                    height="20"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    strokeWidth="2"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    className="feather feather-sun"
+                  >
                     <circle cx="12" cy="12" r="5"></circle>
                     <line x1="12" y1="1" x2="12" y2="3"></line>
                     <line x1="12" y1="21" x2="12" y2="23"></line>
@@ -90,7 +102,18 @@ export default function LandingPage() {
                     <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line>
                   </svg>
                 ) : (
-                  <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="feather feather-moon">
+                  <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    width="20"
+                    height="20"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    strokeWidth="2"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    className="feather feather-moon"
+                  >
                     <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path>
                   </svg>
                 )}
@@ -313,38 +336,7 @@ export default function LandingPage() {
         </div>
       </section>
 
-      <footer
-        className={`py-12 ${
-          isDarkMode
-            ? "bg-gray-900 border-t border-gray-800"
-            : "bg-white border-t border-gray-200"
-        } transition-colors duration-500`}
-      >
-        <div className="container mx-auto px-6">
-          <div className="flex flex-col md:flex-row justify-between items-center">
-            <div className="flex items-center space-x-2 mb-4 md:mb-0">
-              <FlameIcon
-                size={24}
-                className={isDarkMode ? "text-orange-500" : "text-orange-600"}
-              />
-              <span
-                className={`text-lg font-semibold ${
-                  isDarkMode ? "text-white" : "text-gray-900"
-                }`}
-              >
-                Grill Gauge
-              </span>
-            </div>
-            <div
-              className={`text-sm ${
-                isDarkMode ? "text-gray-400" : "text-gray-600"
-              }`}
-            >
-              © 2025 Grill Gauge. All rights reserved.
-            </div>
-          </div>
-        </div>
-      </footer>
+      <Footer />
     </div>
   );
 }

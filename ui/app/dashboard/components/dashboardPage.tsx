@@ -8,6 +8,7 @@ import ProbeChart from "./probeChart";
 import HubChart from "./hubChart";
 import { useSession } from "next-auth/react";
 import { useRouter } from "next/navigation";
+import { useTheme } from "@/app/providers/ThemeProvider";
 
 const handleUpdateTargetTemp = async (probeId: number, temp: number) => {};
 const handleUpdateName = async (probeId: number, name: string) => {};
@@ -61,6 +62,9 @@ export function DashboardPage() {
     return () => clearInterval(intervalId);
   }, [user?.email]);
 
+  const { theme } = useTheme();
+  const isDarkMode = theme === "dark";
+
   const openProbeModal = (probe: Probe) => {
     setSelectedProbe(probe);
     setIsProbeModalOpen(true);
@@ -97,7 +101,9 @@ export function DashboardPage() {
                   onKeyDown={(e) => {
                     if (e.key === "Enter" || e.key === " ") openHubModal(hub);
                   }}
-                  className="text-2xl font-bold text-gray-800 cursor-pointer"
+                  className={`text-2xl font-bold ${
+                    isDarkMode ? "text-white" : "text-gray-800"
+                  } cursor-pointer`}
                 >
                   {hub.name}
                 </button>
@@ -105,8 +111,12 @@ export function DashboardPage() {
               <span
                 className={`ml-3 px-3 py-1 text-sm rounded-full ${
                   hub.connected
-                    ? "bg-green-100 text-green-800"
-                    : "bg-gray-100 text-gray-800"
+                    ? isDarkMode
+                      ? "bg-green-500/20 text-green-400"
+                      : "bg-green-100 text-green-800"
+                    : isDarkMode
+                    ? "bg-red-700 text-red-100"
+                    : "bg-red-100 text-red-800"
                 }`}
               >
                 {hub.connected ? "Connected" : "Disconnected"}
@@ -140,7 +150,11 @@ export function DashboardPage() {
             </h3>
             <button
               onClick={closeProbeModal}
-              className="ext-gray-500 hover:text-gray-700"
+              className={`${
+                isDarkMode
+                  ? "text-gray-300 hover:text-white"
+                  : "text-gray-500 hover:text-gray-700"
+              }`}
             >
               Close
             </button>
@@ -148,7 +162,11 @@ export function DashboardPage() {
 
           {selectedProbe ? (
             <div>
-              <p className="text-sm text-gray-600 mb-4">
+              <p
+                className={`text-sm ${
+                  isDarkMode ? "text-gray-300" : "text-gray-600"
+                } mb-4`}
+              >
                 Probe ID: {selectedProbe.id} | Current Temp:{" "}
                 {selectedProbe.currentTemp}°F
               </p>
@@ -172,7 +190,11 @@ export function DashboardPage() {
             </h3>
             <button
               onClick={closeHubModal}
-              className="ext-gray-500 hover:text-gray-700"
+              className={`${
+                isDarkMode
+                  ? "text-gray-300 hover:text-white"
+                  : "text-gray-500 hover:text-gray-700"
+              }`}
             >
               Close
             </button>
@@ -180,7 +202,11 @@ export function DashboardPage() {
 
           {selectedHub ? (
             <div>
-              <div className="text-sm text-gray-600 mb-4">
+              <div
+                className={`text-sm ${
+                  isDarkMode ? "text-gray-300" : "text-gray-600"
+                } mb-4`}
+              >
                 <p className="font-medium mb-2">Probes temperatures:</p>
                 <ul className="list-disc list-inside">
                   {selectedHub.probes.map((p) => (
