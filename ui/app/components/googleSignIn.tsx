@@ -41,8 +41,8 @@ export default function GoogleSignInButton() {
         onClick={handleSignOut}
         className={`${
           isDarkMode
-            ? "text-gray-300 hover:text-orange-400 hover:bg-gray-700"
-            : "text-gray-600 hover:text-red-600 hover:bg-gray-100"
+            ? "text-gray-300 hover:text-orange-400 hover:bg-gray-700 cursor-pointer"
+            : "text-gray-600 hover:text-red-600 hover:bg-gray-100 cursor-pointer"
         } p-2 rounded-lg flex items-center transition-colors`}
         aria-label="Logout"
       >
@@ -52,7 +52,7 @@ export default function GoogleSignInButton() {
   ) : (
     <button
       onClick={handleSignIn}
-      className="px-4 py-2 rounded-lg font-medium bg-gradient-to-r from-orange-500 to-red-600 text-white"
+      className="px-4 py-2 rounded-lg font-medium bg-gradient-to-r from-orange-500 to-red-600 text-white cursor-pointer"
     >
       Sign In
     </button>
