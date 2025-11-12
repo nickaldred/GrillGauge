@@ -50,23 +50,19 @@ public class DataLoader implements CommandLineRunner {
         userRepository.saveAll(List.of(testUser1, testUser2, testUser3, testUser4));
 
         Hub testHub1 = new Hub(testUser1, "123abc", "hub1");
-        Hub testHub2 = new Hub(testUser2, "456def", "hub2");
         Hub testHub3 = new Hub(testUser3, "789ghi", "hub3");
         Hub testHub4 = new Hub(testUser4, "101jkl", "hub4");
         Hub testHub5 = new Hub(testUser1, "112mno", "hub5");
-        Hub testHub6 = new Hub(testUser2, "131pqr", "hub6");
-        hubRepository.saveAll(List.of(testHub1, testHub2, testHub3, testHub4, testHub5, testHub6));
+        hubRepository.saveAll(List.of(testHub1, testHub3, testHub4, testHub5));
 
         Probe testProbe1 = new Probe(1, testHub1, testUser1, (float) 180.00, "probe1");
         Probe testProbe2 = new Probe(2, testHub1, testUser1, (float) 200.00, "probe2");
         Probe testProbe3 = new Probe(3, testHub1, testUser1, (float) 160.00, "probe3");
-        Probe testProbe4 = new Probe(1, testHub2, testUser2, (float) 150.00, "probe4");
-        Probe testProbe5 = new Probe(2, testHub2, testUser2, (float) 170.00, "probe5");
         Probe testProbe6 = new Probe(1, testHub3, testUser3, (float) 190.00, "probe6");
         Probe testProbe7 = new Probe(1, testHub4, testUser4, (float) 210.00, "probe7");
         Probe testProbe8 = new Probe(1, testHub5, testUser1, (float) 220.00, "probe8");
         probeRepository
-                .saveAll(List.of(testProbe1, testProbe2, testProbe3, testProbe4, testProbe5, testProbe6, testProbe7,
+                .saveAll(List.of(testProbe1, testProbe2, testProbe3, testProbe6, testProbe7,
                         testProbe8));
 
         Reading testReading1 = new Reading(testProbe1, (float) 135, Instant.now().minusSeconds(300));
