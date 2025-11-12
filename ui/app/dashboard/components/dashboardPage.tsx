@@ -29,8 +29,9 @@ async function getData(url: string) {
 }
 
 export function DashboardPage() {
-  const { status } = useSession();
+  const { data: session } = useSession();
   const router = useRouter();
+  const user = session?.user;
   const [dashboard, setDashboard] = useState<DashboardType | null>(null);
   const [isProbeModalOpen, setIsProbeModalOpen] = useState(false);
   const [isHubModalOpen, setIsHubModalOpen] = useState(false);
@@ -38,8 +39,15 @@ export function DashboardPage() {
   const [selectedHub, setSelectedHub] = useState<DashboardHub | null>(null);
 
   useEffect(() => {
+    if (!user?.email) return;
+
     const fetchData = () => {
-      getData("http://localhost:8080/api/v1/ui/dashboard?userId=1")
+      const email = user.email!;
+      const url =
+        "http://localhost:8080/api/v1/ui/dashboard?email=" +
+        encodeURIComponent(email);
+
+      getData(url)
         .then((data) => {
           setDashboard(data);
         })
@@ -47,10 +55,11 @@ export function DashboardPage() {
           console.error("Error fetching user:", error);
         });
     };
+
     fetchData();
     const intervalId = setInterval(fetchData, 30000);
     return () => clearInterval(intervalId);
-  }, []);
+  }, [user?.email]);
 
   const openProbeModal = (probe: Probe) => {
     setSelectedProbe(probe);
