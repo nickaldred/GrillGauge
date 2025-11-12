@@ -2,8 +2,6 @@ package com.grillgauge.api.domain.entitys;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.Table;
 import lombok.AllArgsConstructor;
@@ -19,11 +17,8 @@ import lombok.Setter;
 @Table(name = "users")
 public class User {
 
-    @GeneratedValue(strategy = GenerationType.AUTO)
     @Id
-    private Long id;
-
-    @Column(nullable = false)
+    @Column(nullable = false, unique = true)
     private String email;
 
     @Column(nullable = false)
@@ -31,10 +26,4 @@ public class User {
 
     @Column(nullable = false)
     private String lastName;
-
-    public User(final String email, final String firstName, final String lastName) {
-        this.email = email;
-        this.firstName = firstName;
-        this.lastName = lastName;
-    }
 }

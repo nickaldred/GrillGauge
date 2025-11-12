@@ -52,9 +52,9 @@ public class FrontEndService {
         }
     }
 
-    public Dashboard getDashboard(final long userId) {
-        LOG.info("Generating dashboard for user ID: {}", userId);
-        List<Hub> hubs = hubService.getHubsByUserId(userId);
+    public Dashboard getDashboard(final String email) {
+        LOG.info("Generating dashboard for user ID: {}", email);
+        List<Hub> hubs = hubService.getHubsByEmail(email);
 
         List<DashboardHub> dashboardHubs = hubs.stream()
                 .map(hub -> {
@@ -77,7 +77,7 @@ public class FrontEndService {
                 })
                 .toList();
 
-        LOG.info("Dashboard for user ID: {} has {} hubs", userId, dashboardHubs.size());
-        return new Dashboard(userId, dashboardHubs);
+        LOG.info("Dashboard for user ID: {} has {} hubs", email, dashboardHubs.size());
+        return new Dashboard(email, dashboardHubs);
     }
 }
