@@ -63,12 +63,12 @@ class HubControllerIntTest {
         assertNotNull(storedHub.getId());
         assertEquals(testHub.getName(), storedHub.getName());
         assertEquals(testHub.getApiKey(), storedHub.getApiKey());
-        assertEquals(testUser.getId(), storedHub.getOwner().getId());
+        assertEquals(testUser.getEmail(), storedHub.getOwner().getEmail());
         Hub fetchedHub = hubRepository.findById(storedHub.getId()).orElse(null);
         assertNotNull(fetchedHub);
         assertEquals(storedHub.getId(), fetchedHub.getId());
         assertEquals(storedHub.getName(), fetchedHub.getName());
         assertEquals(storedHub.getApiKey(), fetchedHub.getApiKey());
-        assertEquals(storedHub.getOwner().getId(), fetchedHub.getOwner().getId());
+        assertEquals(storedHub.getOwner().getEmail(), fetchedHub.getOwner().getEmail());
     }
 }

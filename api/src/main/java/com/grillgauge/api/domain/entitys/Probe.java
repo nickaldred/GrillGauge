@@ -30,7 +30,7 @@ public class Probe {
     private Hub hub;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "user_id", nullable = false)
+    @JoinColumn(name = "email", nullable = false)
     private User owner;
 
     @Column(nullable = true)
