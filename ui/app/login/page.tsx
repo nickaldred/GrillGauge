@@ -86,7 +86,7 @@ export default function Login() {
             <button
               onClick={handleGoogleLogin}
               disabled={status === "loading"}
-              className={`w-full py-3 px-4 rounded-lg font-medium flex items-center justify-center transition-all ${
+              className={`w-full py-3 px-4 rounded-lg font-medium flex items-center justify-center transition-all cursor-pointer ${
                 isDarkMode
                   ? "bg-white text-gray-900 hover:bg-gray-100"
                   : "bg-white text-gray-900 hover:bg-gray-50 border border-gray-300"

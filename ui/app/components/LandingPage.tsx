@@ -1,5 +1,5 @@
 "use client";
-import React from "react";
+import React, { useEffect } from "react";
 import { useRouter } from "next/navigation";
 import {
   ThermometerIcon,
@@ -9,11 +9,27 @@ import {
 } from "lucide-react";
 import Footer from "./Footer";
 import { useTheme } from "../providers/ThemeProvider";
+import { useSession } from "next-auth/react";
 
 export default function LandingPage() {
   const router = useRouter();
   const { theme, toggle } = useTheme();
   const isDarkMode = theme === "dark";
+
+  // Get session status and redirect authenticated users to the dashboard.
+  const { status } = useSession();
+
+  // When session becomes authenticated, immediately replace history with /dashboard.
+  useEffect(() => {
+    if (status === "authenticated") {
+      router.replace("/dashboard");
+    }
+  }, [status, router]);
+
+  // While redirecting (or checking session), don't render the landing page to avoid a flash.
+  if (status === "authenticated") {
+    return null;
+  }
 
   const features = [
     {
@@ -73,8 +89,8 @@ export default function LandingPage() {
                 onClick={toggle}
                 className={`p-2 rounded-lg transition-colors ${
                   isDarkMode
-                    ? "bg-gray-800 text-yellow-400 hover:bg-gray-700"
-                    : "bg-gray-200 text-gray-700 hover:bg-gray-300"
+                    ? "bg-gray-800 text-yellow-400 hover:bg-gray-700 cursor-pointer"
+                    : "bg-gray-200 text-gray-700 hover:bg-gray-300 cursor-pointer"
                 }`}
                 aria-label="Toggle theme"
               >
@@ -122,8 +138,8 @@ export default function LandingPage() {
                 onClick={() => router.push("/login")}
                 className={`px-6 py-2 rounded-lg font-medium transition-all ${
                   isDarkMode
-                    ? "bg-gradient-to-r from-orange-500 to-red-600 text-white hover:from-orange-600 hover:to-red-700"
-                    : "bg-gradient-to-r from-orange-400 to-red-500 text-white hover:from-orange-500 hover:to-red-600"
+                    ? "bg-gradient-to-r from-orange-500 to-red-600 text-white hover:from-orange-600 hover:to-red-700 cursor-pointer"
+                    : "bg-gradient-to-r from-orange-400 to-red-500 text-white hover:from-orange-500 hover:to-red-600 cursor-pointer"
                 }`}
               >
                 Sign In
@@ -188,7 +204,7 @@ export default function LandingPage() {
             <div className="flex flex-col sm:flex-row gap-4 justify-center">
               <button
                 onClick={() => router.push("/login")}
-                className="group px-8 py-4 rounded-lg font-semibold text-lg bg-gradient-to-r from-orange-500 to-red-600 text-white hover:from-orange-600 hover:to-red-700 transition-all shadow-lg hover:shadow-xl flex items-center justify-center"
+                className="group px-8 py-4 rounded-lg font-semibold text-lg bg-gradient-to-r from-orange-500 to-red-600 text-white hover cursor-pointer:from-orange-600 hover:to-red-700 transition-all shadow-lg hover:shadow-xl flex items-center justify-center cursor-pointer"
               >
                 Get Started
                 <ArrowRightIcon
@@ -197,9 +213,9 @@ export default function LandingPage() {
                 />
               </button>
               <button
-                className={`px-8 py-4 rounded-lg font-semibold text-lg transition-all ${
+                className={`px-8 py-4 rounded-lg font-semibold text-lg transition-all cursor-pointer ${
                   isDarkMode
-                    ? "bg-gray-800 text-white hover:bg-gray-700"
+                    ? "bg-gray-800 text-white hover:bg-gray-700 "
                     : "bg-white text-gray-900 hover:bg-gray-100 border border-gray-300"
                 }`}
               >
@@ -275,9 +291,9 @@ export default function LandingPage() {
         <div className="container mx-auto px-6">
           <div className="grid md:grid-cols-4 gap-8">
             {[
-              { value: "50K+", label: "Active Users" },
-              { value: "1M+", label: "Perfect Cooks" },
-              { value: "4.9★", label: "User Rating" },
+              { value: "1+", label: "Active Users" },
+              { value: "1+", label: "Perfect Cooks" },
+              { value: "4.99★", label: "User Rating" },
               { value: "24/7", label: "Support" },
             ].map((stat) => (
               <div key={stat.label} className="text-center">
@@ -324,7 +340,7 @@ export default function LandingPage() {
             </p>
             <button
               onClick={() => router.push("/login")}
-              className="group px-10 py-5 rounded-lg font-bold text-xl bg-gradient-to-r from-orange-500 to-red-600 text-white hover:from-orange-600 hover:to-red-700 transition-all shadow-2xl hover:shadow-3xl flex items-center justify-center mx-auto"
+              className="group px-10 py-5 rounded-lg font-bold text-xl bg-gradient-to-r from-orange-500 to-red-600 text-white hover:from-orange-600 hover cursor-pointer:to-red-700 transition-all shadow-2xl hover:shadow-3xl flex items-center justify-center mx-auto cursor-pointer"
             >
               Start Cooking Better Today
               <ArrowRightIcon

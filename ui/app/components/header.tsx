@@ -1,22 +1,31 @@
 "use client";
 import React from "react";
-import { useRouter, usePathname } from "next/navigation";
-import { FlameIcon } from "lucide-react";
+import { usePathname } from "next/navigation";
+import Link from "next/link";
+import { FlameIcon, SettingsIcon, UserIcon } from "lucide-react";
 import { useTheme } from "../providers/ThemeProvider";
 import GoogleSignInButton from "./googleSignIn";
 
-// Shared site header (derived from LandingPage nav). This component is a
-// client component so it can manage theme toggling and client navigation.
 export function Header() {
-  const router = useRouter();
   const pathname = usePathname();
   const { theme, toggle } = useTheme();
   const isDarkMode = theme === "dark";
-
-  // Keep landing page as-is (it renders its own nav). When this header is
-  // rendered on the root path we'll return null to avoid duplicate navs.
   if (pathname === "/") return null;
   if (pathname === "/login") return null;
+
+  const isDashboardActive = pathname === "/dashboard";
+  const isSettingsActive = pathname ? pathname.startsWith("/settings") : false;
+
+  const navClass = (isActive: boolean, withFlex = false) =>
+    `px-4 py-2 rounded-lg${withFlex ? " flex items-center" : ""} ${
+      isActive
+        ? isDarkMode
+          ? "bg-orange-500/20 text-orange-400"
+          : "bg-red-100 text-red-600"
+        : isDarkMode
+        ? "text-gray-300 hover:bg-gray-700"
+        : "hover:bg-gray-100"
+    }`;
 
   return (
     <header
@@ -42,9 +51,16 @@ export function Header() {
           </div>
 
           <div className="flex items-center space-x-4">
+            <Link href="/dashboard" className={navClass(isDashboardActive)}>
+              Dashboard
+            </Link>
+            <Link href="/settings" className={navClass(isSettingsActive, true)}>
+              <SettingsIcon size={18} className="mr-2" />
+              Settings
+            </Link>
             <button
               onClick={toggle}
-              className={`p-2 rounded-lg transition-colors ${
+              className={`p-2 rounded-lg transition-colors cursor-pointer ${
                 isDarkMode
                   ? "bg-gray-800 text-yellow-400 hover:bg-gray-700"
                   : "bg-gray-200 text-gray-700 hover:bg-gray-300"
