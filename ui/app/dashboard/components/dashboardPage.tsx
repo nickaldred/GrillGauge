@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { ProbeCard } from "../../components/probeCard";
-import { DashboardHub, DashboardType, Probe } from "../../types/types";
+import { Hub, Probe } from "../../types/types";
 import Modal from "../../components/modal";
 import ProbeChart from "./probeChart";
 import HubChart from "./hubChart";
@@ -19,11 +19,15 @@ export function DashboardPage() {
   const { data: session } = useSession();
   const router = useRouter();
   const user = session?.user;
-  const [dashboard, setDashboard] = useState<DashboardType | null>(null);
+
+  const { theme } = useTheme();
+  const isDarkMode = theme === "dark";
+
+  const [hubs, setHubs] = useState<Hub[] | null>(null);
   const [isProbeModalOpen, setIsProbeModalOpen] = useState(false);
   const [isHubModalOpen, setIsHubModalOpen] = useState(false);
   const [selectedProbe, setSelectedProbe] = useState<Probe | null>(null);
-  const [selectedHub, setSelectedHub] = useState<DashboardHub | null>(null);
+  const [selectedHub, setSelectedHub] = useState<Hub | null>(null);
 
   useEffect(() => {
     if (!user?.email) return;
@@ -31,12 +35,12 @@ export function DashboardPage() {
     const fetchData = () => {
       const email = user.email!;
       const url =
-        "http://localhost:8080/api/v1/ui/dashboard?email=" +
+        "http://localhost:8080/api/v1/ui/hubs?email=" +
         encodeURIComponent(email);
 
       getData(url)
         .then((data) => {
-          setDashboard(data);
+          setHubs(data);
         })
         .catch((error) => {
           console.error("Error fetching user:", error);
@@ -48,9 +52,7 @@ export function DashboardPage() {
     return () => clearInterval(intervalId);
   }, [user?.email]);
 
-  const { theme } = useTheme();
-  const isDarkMode = theme === "dark";
-
+  // ** Handle Modals **
   const openProbeModal = (probe: Probe) => {
     setSelectedProbe(probe);
     setIsProbeModalOpen(true);
@@ -61,7 +63,7 @@ export function DashboardPage() {
     setSelectedProbe(null);
   };
 
-  const openHubModal = (hub: DashboardHub) => {
+  const openHubModal = (hub: Hub) => {
     setSelectedHub(hub);
     setIsHubModalOpen(true);
   };
@@ -71,8 +73,8 @@ export function DashboardPage() {
     setSelectedHub(null);
   };
 
-  // Loading state: centered smoker SVG with animated smoke wisps
-  if (!dashboard)
+  // If can't fetch hubs for any reason show loading screen.
+  if (!hubs)
     return (
       <div className="flex items-center justify-center min-h-screen">
         <div
@@ -102,14 +104,13 @@ export function DashboardPage() {
   return (
     <main className="p-6">
       <div className="space-y-8">
-        {dashboard.hubs.length === 0 ? (
+        {hubs.length === 0 ? (
           <div
             className={`${
               isDarkMode
                 ? "bg-gray-800 border-gray-700"
                 : "bg-white border-gray-200"
             } max-w-xl w-full mx-auto text-center rounded-xl shadow-lg p-5 mb-6 border`}
-            // className="max-w-xl w-full mx-auto text-center px-6 py-8 border rounded-lg shadow-sm"
             aria-live="polite"
           >
             <h2
@@ -144,7 +145,7 @@ export function DashboardPage() {
             </div>
           </div>
         ) : (
-          dashboard.hubs.map((hub) => (
+          hubs.map((hub) => (
             <div key={hub.id} className="mb-10">
               <div className="flex items-center mb-4">
                 {/* Hub name (clickable to open hub modal) */}

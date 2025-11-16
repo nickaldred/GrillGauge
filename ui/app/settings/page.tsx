@@ -1,8 +1,8 @@
 "use client";
 
+import { PageHeader } from "../components/pageHeader";
 import { useTheme } from "../providers/ThemeProvider";
 import { HubManagement } from "./components/HubManagement";
-import { Header } from "./components/SetttingsHeader";
 
 export default function Settings() {
   const { theme } = useTheme();
@@ -15,7 +15,7 @@ export default function Settings() {
       } min-h-screen flex flex-col`}
     >
       <div className={`container mx-auto px-4 py-4`}>
-        <Header />
+        <PageHeader leftTitle="Settings" />
         <HubManagement />
       </div>
     </main>

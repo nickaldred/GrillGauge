@@ -1,24 +1,26 @@
 "use client";
 
 import { useTheme } from "@/app/providers/ThemeProvider";
-import { DashboardType, DashboardHub } from "@/app/types/types";
+import { Hub } from "@/app/types/types";
 import { getData } from "@/app/utils/requestUtils";
 import { EditIcon, PlusIcon, TrashIcon } from "lucide-react";
 import { useSession } from "next-auth/react";
 import { useEffect, useState } from "react";
 
+/**
+ * Component to allow users to manage Hubs.
+ */
 export function HubManagement() {
   const { data: session } = useSession();
   const user = session?.user;
-
-  function handleOpenAddHubModal() {}
-  function handleOpenDeleteHubModal(hub: DashboardHub) {}
-  function handleOpenEditHubModal(hub: DashboardHub) {}
-
-  const [dashboard, setDashboard] = useState<DashboardType | null>(null);
-
   const { theme } = useTheme();
   const isDarkMode = theme === "dark";
+
+  function handleOpenAddHubModal() {}
+  function handleOpenDeleteHubModal(hub: Hub) {}
+  function handleOpenEditHubModal(hub: Hub) {}
+
+  const [hubs, setHubs] = useState<Hub[] | null>(null);
 
   useEffect(() => {
     if (!user?.email) return;
@@ -26,12 +28,12 @@ export function HubManagement() {
     const fetchData = () => {
       const email = user.email!;
       const url =
-        "http://localhost:8080/api/v1/ui/dashboard?email=" +
+        "http://localhost:8080/api/v1/ui/hubs?email=" +
         encodeURIComponent(email);
 
       getData(url)
         .then((data) => {
-          setDashboard(data);
+          setHubs(data);
         })
         .catch((error) => {
           console.error("Error fetching user:", error);
@@ -66,7 +68,7 @@ export function HubManagement() {
         </button>
       </div>
 
-      {!dashboard || dashboard.hubs.length === 0 ? (
+      {!hubs || hubs.length === 0 ? (
         <div
           className={`text-center py-12 ${
             isDarkMode ? "text-gray-400" : "text-gray-500"
@@ -119,7 +121,7 @@ export function HubManagement() {
                 isDarkMode ? "divide-gray-700" : "divide-gray-200"
               } divide-y`}
             >
-              {dashboard.hubs.map((hub) => (
+              {hubs.map((hub) => (
                 <tr
                   key={hub.id}
                   className={`${
