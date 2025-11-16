@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react";
 import { ProbeCard } from "../../components/probeCard";
 import { DashboardHub, DashboardType, Probe } from "../../types/types";
-import Modal from "./modal";
+import Modal from "../../components/modal";
 import ProbeChart from "./probeChart";
 import HubChart from "./hubChart";
 import { useSession } from "next-auth/react";
