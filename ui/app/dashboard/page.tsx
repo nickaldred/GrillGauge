@@ -33,9 +33,10 @@ export default function Dashboard() {
         isDarkMode ? "bg-gray-900" : "bg-gray-100"
       }`}
     >
-      <Header />
-      <DashboardPage />
-      <Footer />
+      <div className="container mx-auto px-4 py-4">
+        <Header />
+        <DashboardPage />
+      </div>
     </main>
   );
 }
