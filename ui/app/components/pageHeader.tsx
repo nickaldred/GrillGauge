@@ -1,7 +1,13 @@
 import React from "react";
 import { ThermometerIcon } from "lucide-react";
 import { useTheme } from "@/app/providers/ThemeProvider";
-export function Header() {
+
+interface PageHeaderProps {
+  leftTitle: string;
+  rightTitle?: string;
+}
+
+export function PageHeader({ leftTitle, rightTitle }: PageHeaderProps) {
   const { theme } = useTheme();
   const isDarkMode = theme === "dark";
 
@@ -22,7 +28,7 @@ export function Header() {
               isDarkMode ? "text-white" : "text-gray-900"
             }`}
           >
-            Dashboard
+            {leftTitle}
           </h1>
         </div>
         <div className="flex items-center gap-4">
@@ -31,7 +37,7 @@ export function Header() {
               isDarkMode ? "text-gray-300" : "text-gray-500"
             }`}
           >
-            All temperatures shown in °F
+            {rightTitle}
           </p>
         </div>
       </div>

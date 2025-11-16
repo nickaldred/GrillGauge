@@ -18,11 +18,9 @@ import com.grillgauge.api.domain.models.ProbeReading;
  */
 @Service
 public class ExternalHubService {
-
     private static final Logger LOG = LoggerFactory.getLogger(ExternalHubService.class);
 
     private final HubService hubService;
-
     private final ProbeService probeService;
 
     public ExternalHubService(final HubService hubService, final ProbeService probeService) {
