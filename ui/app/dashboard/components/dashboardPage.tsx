@@ -10,25 +10,10 @@ import { useSession } from "next-auth/react";
 import { useRouter } from "next/navigation";
 import { useTheme } from "@/app/providers/ThemeProvider";
 import { MdOutlineOutdoorGrill } from "react-icons/md";
+import { getData } from "@/app/utils/requestUtils";
 
 const handleUpdateTargetTemp = async (probeId: number, temp: number) => {};
 const handleUpdateName = async (probeId: number, name: string) => {};
-
-async function getData(url: string) {
-  const response = await fetch(url, {
-    method: "GET",
-    headers: {
-      "Content-Type": "application/json",
-    },
-  });
-
-  if (!response.ok) {
-    throw new Error("Failed to fetch data");
-  }
-
-  const data = await response.json();
-  return data;
-}
 
 export function DashboardPage() {
   const { data: session } = useSession();

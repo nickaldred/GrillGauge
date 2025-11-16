@@ -19,7 +19,7 @@ public class FrontEndController {
     }
 
     @GetMapping("/dashboard")
-    public Dashboard getMethodName(@RequestParam String email) {
+    public Dashboard getDashboard(@RequestParam String email) {
         return frontEndService.getDashboard(email);
     }
 

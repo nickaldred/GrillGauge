@@ -17,7 +17,7 @@ import {
 } from "chart.js";
 import "chartjs-adapter-date-fns";
 import { useTheme } from "@/app/providers/ThemeProvider";
-import { DashboardHub } from "@/app/types/types";
+import { Hub } from "@/app/types/types";
 
 ChartJS.register(
   LineElement,
@@ -35,7 +35,7 @@ interface Reading {
 }
 
 interface HubChartProps {
-  hub: DashboardHub;
+  hub: Hub;
 }
 
 export default function HubChart({ hub }: HubChartProps) {

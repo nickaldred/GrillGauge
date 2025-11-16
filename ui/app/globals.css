@@ -45,3 +45,9 @@ html[data-theme="light"] {
 
 /* Small nicety to smooth theme transitions */
 * { transition: background-color 220ms ease, color 220ms ease, border-color 220ms ease; }
+
+/* Apply theme colors to html and body */
+html, body {
+	background-color: var(--theme-bg);
+	color: var(--theme-fg);
+}
