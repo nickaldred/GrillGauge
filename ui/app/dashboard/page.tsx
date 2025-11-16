@@ -1,12 +1,11 @@
 "use client";
 
 import { useSession } from "next-auth/react";
-import { Header } from "./components/dashboardHeader";
+import { PageHeader } from "../components/pageHeader";
 import { DashboardPage } from "./components/dashboardPage";
 import { useRouter } from "next/navigation";
 // no React hooks from 'react' are needed here
 import { useTheme } from "../providers/ThemeProvider";
-import Footer from "../components/Footer";
 
 export default function Dashboard() {
   const router = useRouter();
@@ -34,7 +33,10 @@ export default function Dashboard() {
       }`}
     >
       <div className="container mx-auto px-4 py-4">
-        <Header />
+        <PageHeader
+          leftTitle="Dashboard"
+          rightTitle="All temperatures shown in °F"
+        />
         <DashboardPage />
       </div>
     </main>

@@ -1,7 +1,5 @@
 package com.grillgauge.api.domain.models;
 
-import java.util.List;
-
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -11,10 +9,13 @@ import lombok.Setter;
 @Setter
 @AllArgsConstructor
 @NoArgsConstructor
-public class DashboardHub {
+public class FrontEndProbe {
 
     private Long id;
+    private Integer localId;
+    private Float targetTemp;
+    private Float currentTemp;
     private String name;
-    private List<DashboardProbe> probes;
-    private boolean connected;
+    private String colour;
+    private Boolean connected;
 }

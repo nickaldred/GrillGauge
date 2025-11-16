@@ -22,7 +22,6 @@ import com.grillgauge.api.domain.repositorys.ProbeRepository;
  */
 @Service
 public class ProbeService {
-
     private static final Logger LOG = LoggerFactory.getLogger(ProbeService.class);
 
     private ReadingService readingService;
