@@ -10,5 +10,5 @@ import com.grillgauge.api.domain.entitys.Hub;
 @Repository
 public interface HubRepository extends JpaRepository<Hub, Long> {
 
-    List<Hub> findByOwnerId(Long ownerId);
+    List<Hub> findByOwnerEmail(String email);
 }

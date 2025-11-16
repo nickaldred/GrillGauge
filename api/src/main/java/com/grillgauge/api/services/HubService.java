@@ -64,12 +64,12 @@ public class HubService {
     }
 
     /**
-     * Get all hubs for the given userId.
+     * Get all hubs for the given email address.
      * 
-     * @param userId userId to get the hubs for
+     * @param email email address to get the hubs for
      * @return List of Hub entities
      */
-    public List<Hub> getHubsByUserId(final Long userId) {
-        return hubRepository.findByOwnerId(userId);
+    public List<Hub> getHubsByEmail(final String email) {
+        return hubRepository.findByOwnerEmail(email);
     }
 }
