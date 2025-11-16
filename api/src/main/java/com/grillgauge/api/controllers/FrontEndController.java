@@ -19,8 +19,8 @@ public class FrontEndController {
     }
 
     @GetMapping("/dashboard")
-    public Dashboard getMethodName(@RequestParam long userId) {
-        return frontEndService.getDashboard(userId);
+    public Dashboard getMethodName(@RequestParam String email) {
+        return frontEndService.getDashboard(email);
     }
 
 }

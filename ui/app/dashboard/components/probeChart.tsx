@@ -14,6 +14,7 @@ import {
   ChartData,
 } from "chart.js";
 import "chartjs-adapter-date-fns";
+import { useTheme } from "@/app/providers/ThemeProvider";
 
 ChartJS.register(
   LineElement,
@@ -35,6 +36,8 @@ interface ProbeChartProps {
 }
 
 export default function ProbeChart({ probeId }: ProbeChartProps) {
+  const { theme } = useTheme();
+  const isDarkMode = theme === "dark";
   const [readings, setReadings] = useState<Reading[]>([]);
   const [timeframe, setTimeframe] = useState<number>(60); // minutes, default = 1 hour
   const [loading, setLoading] = useState(false);
@@ -67,11 +70,16 @@ export default function ProbeChart({ probeId }: ProbeChartProps) {
       {
         label: "Temperature (°F)",
         data: readings.map((r) => r.temperature),
-        fill: false,
-        borderColor: "#3b82f6",
-        backgroundColor: "#3b82f6",
-        tension: 0.3,
+        fill: true,
+        borderColor: isDarkMode ? "#60a5fa" : "#3b82f6",
+        backgroundColor: isDarkMode
+          ? "rgba(96,165,250,0.12)"
+          : "rgba(59,130,246,0.12)",
+        tension: 0.4,
         pointRadius: 0,
+        pointHoverRadius: 6,
+        pointHoverBackgroundColor: isDarkMode ? "#60a5fa" : "#3b82f6",
+        borderWidth: 2,
       },
     ],
   };
@@ -81,6 +89,7 @@ export default function ProbeChart({ probeId }: ProbeChartProps) {
 
   const options: ChartOptions<"line"> = {
     responsive: true,
+    maintainAspectRatio: false,
     scales: {
       x: {
         type: "time",
@@ -89,16 +98,42 @@ export default function ProbeChart({ probeId }: ProbeChartProps) {
         },
         min: start.getTime(),
         max: end.getTime(),
-        title: { display: true, text: "Time" },
+        title: {
+          display: true,
+          text: "Time",
+          color: isDarkMode ? "#94a3b8" : "#374151",
+        },
+        grid: {
+          color: isDarkMode ? "rgba(255,255,255,0.03)" : "rgba(0,0,0,0.04)",
+        },
+        ticks: { color: isDarkMode ? "#cbd5e1" : "#374151" },
       },
       y: {
-        title: { display: true, text: "Temperature (°F)" },
+        title: {
+          display: true,
+          text: "Temperature (°F)",
+          color: isDarkMode ? "#94a3b8" : "#374151",
+        },
+        grid: {
+          color: isDarkMode ? "rgba(255,255,255,0.03)" : "rgba(0,0,0,0.04)",
+        },
+        ticks: { color: isDarkMode ? "#cbd5e1" : "#374151" },
       },
     },
     plugins: {
       legend: { display: false },
-      tooltip: { mode: "index", intersect: false },
+      tooltip: {
+        mode: "index",
+        intersect: false,
+        backgroundColor: isDarkMode ? "#0f172a" : "#ffffff",
+        titleColor: isDarkMode ? "#e6eef8" : "#111827",
+        bodyColor: isDarkMode ? "#cbd5e1" : "#111827",
+        boxPadding: 6,
+        padding: 8,
+      },
     },
+    interaction: { mode: "index", intersect: false },
+    layout: { padding: { top: 6, right: 6, bottom: 6, left: 6 } },
   };
 
   const sliderToTimeframe = (sliderValue: number) => {
@@ -119,7 +154,11 @@ export default function ProbeChart({ probeId }: ProbeChartProps) {
   return (
     <div className="w-full">
       <div className="flex justify-between items-center mb-4">
-        <span className="text-sm text-gray-600">
+        <span
+          className={`text-sm ${
+            isDarkMode ? "text-gray-300" : "text-gray-600"
+          }`}
+        >
           Timeframe: last{" "}
           {timeframe >= 60 ? `${timeframe / 60}h` : `${timeframe}m`}
         </span>
@@ -132,16 +171,32 @@ export default function ProbeChart({ probeId }: ProbeChartProps) {
             Math.sqrt((timeframe - 5) / (1440 - 5)) * (1440 - 5) + 5
           )}
           onChange={handleSliderChange}
-          className="w-1/2 accent-blue-600"
+          className={`w-1/2 ${
+            isDarkMode ? "accent-sky-400" : "accent-blue-600"
+          }`}
         />
       </div>
 
       {loading ? (
-        <p className="text-center text-gray-500">Loading data...</p>
+        <p
+          className={`text-center ${
+            isDarkMode ? "text-gray-300" : "text-gray-500"
+          }`}
+        >
+          Loading data...
+        </p>
       ) : readings.length === 0 ? (
-        <p className="text-center text-gray-400">No readings available.</p>
+        <p
+          className={`text-center ${
+            isDarkMode ? "text-gray-400" : "text-gray-400"
+          }`}
+        >
+          No readings available.
+        </p>
       ) : (
-        <Line data={data} options={options} />
+        <div style={{ height: 300 }}>
+          <Line data={data} options={options} />
+        </div>
       )}
     </div>
   );
