@@ -3,6 +3,8 @@ package com.grillgauge.api.services;
 import java.util.List;
 import java.util.Optional;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -16,6 +18,7 @@ import com.grillgauge.api.domain.repositorys.HubRepository;
  */
 @Service
 public class HubService {
+    private static final Logger LOG = LoggerFactory.getLogger(HubService.class);
 
     private HubRepository hubRepository;
 
@@ -60,7 +63,9 @@ public class HubService {
      */
     @Transactional
     public void deleteHub(final Long hubId) {
+        LOG.info("Attempting to delete hub ID: {}", hubId);
         hubRepository.deleteById(hubId);
+        LOG.info("Successfully deleted hub ID: {}", hubId);
     }
 
     /**
