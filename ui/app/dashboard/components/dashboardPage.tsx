@@ -198,89 +198,65 @@ export function DashboardPage() {
       </div>
 
       {/* Probe Modal — shows when a probe has been selected */}
-      <Modal open={isProbeModalOpen} onClose={closeProbeModal}>
-        <div className="p-6">
-          <div className="flex justify-between items-start">
-            <h3 className="text-xl font-semibold">
-              {selectedProbe ? selectedProbe.name : "Probe"}
-            </h3>
-            <button
-              onClick={closeProbeModal}
-              className={`${
-                isDarkMode
-                  ? "text-gray-300 hover:text-white"
-                  : "text-gray-500 hover:text-gray-700"
-              }`}
+      <Modal
+        open={isProbeModalOpen}
+        onClose={closeProbeModal}
+        title={`${
+          selectedProbe ? selectedProbe.name : "Probe"
+        } Temperature History`}
+      >
+        {selectedProbe ? (
+          <div>
+            <p
+              className={`text-sm ${
+                isDarkMode ? "text-gray-300" : "text-gray-600"
+              } mb-4`}
             >
-              Close
-            </button>
-          </div>
+              Probe ID: {selectedProbe.id} | Current Temp:{" "}
+              {selectedProbe.currentTemp}°F
+            </p>
 
-          {selectedProbe ? (
-            <div>
-              <p
-                className={`text-sm ${
-                  isDarkMode ? "text-gray-300" : "text-gray-600"
-                } mb-4`}
-              >
-                Probe ID: {selectedProbe.id} | Current Temp:{" "}
-                {selectedProbe.currentTemp}°F
-              </p>
-
-              <div className="border rounded-lg p-4">
-                <ProbeChart probeId={selectedProbe.id} />
-              </div>
+            <div className="border rounded-lg p-4">
+              <ProbeChart probeId={selectedProbe.id} />
             </div>
-          ) : (
-            <p>Loading probe...</p>
-          )}
-        </div>
+          </div>
+        ) : (
+          <p>Loading probe...</p>
+        )}
       </Modal>
 
       {/* Hub Modal — shows when a hub has been selected */}
-      <Modal open={isHubModalOpen} onClose={closeHubModal}>
-        <div className="p-6">
-          <div className="flex justify-between items-start">
-            <h3 className="text-xl font-semibold">
-              {selectedHub ? selectedHub.name : "Hub"}
-            </h3>
-            <button
-              onClick={closeHubModal}
-              className={`${
-                isDarkMode
-                  ? "text-gray-300 hover:text-white"
-                  : "text-gray-500 hover:text-gray-700"
-              }`}
+      <Modal
+        open={isHubModalOpen}
+        onClose={closeHubModal}
+        title={`${
+          selectedHub ? selectedHub.name : "Probe"
+        } Temperature History`}
+      >
+        {selectedHub ? (
+          <div>
+            <div
+              className={`text-sm ${
+                isDarkMode ? "text-gray-300" : "text-gray-600"
+              } mb-4`}
             >
-              Close
-            </button>
-          </div>
-
-          {selectedHub ? (
-            <div>
-              <div
-                className={`text-sm ${
-                  isDarkMode ? "text-gray-300" : "text-gray-600"
-                } mb-4`}
-              >
-                <p className="font-medium mb-2">Probes temperatures:</p>
-                <ul className="list-disc list-inside">
-                  {selectedHub.probes.map((p) => (
-                    <li key={p.id}>
-                      {p.name ? `${p.name} ` : ""}(ID: {p.id}): {p.currentTemp}
-                      °F
-                    </li>
-                  ))}
-                </ul>
-              </div>
-              <div className="border rounded-lg p-4">
-                <HubChart hub={selectedHub} />
-              </div>
+              <p className="font-medium mb-2">Probes temperatures:</p>
+              <ul className="list-disc list-inside">
+                {selectedHub.probes.map((p) => (
+                  <li key={p.id}>
+                    {p.name ? `${p.name} ` : ""}(ID: {p.id}): {p.currentTemp}
+                    °F
+                  </li>
+                ))}
+              </ul>
             </div>
-          ) : (
-            <p>Loading hub...</p>
-          )}
-        </div>
+            <div className="border rounded-lg p-4">
+              <HubChart hub={selectedHub} />
+            </div>
+          </div>
+        ) : (
+          <p>Loading hub...</p>
+        )}
       </Modal>
     </main>
   );
