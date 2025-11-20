@@ -1,8 +1,9 @@
 "use client";
 
+import Modal from "@/app/components/modal";
 import { useTheme } from "@/app/providers/ThemeProvider";
 import { Hub } from "@/app/types/types";
-import { getData } from "@/app/utils/requestUtils";
+import { deleteHub, getData } from "@/app/utils/requestUtils";
 import { EditIcon, PlusIcon, TrashIcon } from "lucide-react";
 import { useSession } from "next-auth/react";
 import { useEffect, useState } from "react";
@@ -16,8 +17,31 @@ export function HubManagement() {
   const { theme } = useTheme();
   const isDarkMode = theme === "dark";
 
+  const [isDeleteHubModalOpen, setIsDeleteHubModalOpen] = useState(false);
+  const [hubToDelete, setHubToDelete] = useState<Hub | null>(null);
+
   function handleOpenAddHubModal() {}
-  function handleOpenDeleteHubModal(hub: Hub) {}
+
+  const handleOpenDeleteHubModal = (hub: Hub) => {
+    setHubToDelete(hub);
+    setIsDeleteHubModalOpen(true);
+  };
+
+  const handleDeleteHubConfirm = async () => {
+    if (!hubToDelete) return;
+    try {
+      await deleteHub(hubToDelete.id);
+      setHubs(
+        (prevHubs) =>
+          prevHubs?.filter((hub) => hub.id !== hubToDelete.id) || null
+      );
+      setIsDeleteHubModalOpen(false);
+      setHubToDelete(null);
+    } catch (error) {
+      console.error("Error deleting hub:", error);
+    }
+  };
+
   function handleOpenEditHubModal(hub: Hub) {}
 
   const [hubs, setHubs] = useState<Hub[] | null>(null);
@@ -190,6 +214,35 @@ export function HubManagement() {
           </table>
         </div>
       )}
+
+      <Modal
+        open={isDeleteHubModalOpen}
+        onClose={() => setIsDeleteHubModalOpen(false)}
+        title="Delete Hub"
+      >
+        <div className="space-y-4">
+          <p className={`${isDarkMode ? "text-gray-300" : "text-gray-600"}`}>
+            Are you sure you want to delete{" "}
+            <span className="font-semibold">{hubToDelete?.name}</span>? This
+            will also delete all probes associated with this hub. This action
+            cannot be undone.
+          </p>
+          <div className="flex justify-end space-x-3">
+            <button
+              onClick={() => setIsDeleteHubModalOpen(false)}
+              className="px-4 py-2 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50 cursor-pointer"
+            >
+              Cancel
+            </button>
+            <button
+              onClick={handleDeleteHubConfirm}
+              className="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 cursor-pointer"
+            >
+              Delete
+            </button>
+          </div>
+        </div>
+      </Modal>
     </div>
   );
 }
