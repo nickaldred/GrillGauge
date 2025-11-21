@@ -7,6 +7,7 @@ import { deleteHub, getData } from "@/app/utils/requestUtils";
 import { EditIcon, PlusIcon, TrashIcon } from "lucide-react";
 import { useSession } from "next-auth/react";
 import { useEffect, useState } from "react";
+import { HubForm } from "./hubForm";
 
 /**
  * Component to allow users to manage Hubs.
@@ -19,6 +20,8 @@ export function HubManagement() {
 
   const [isDeleteHubModalOpen, setIsDeleteHubModalOpen] = useState(false);
   const [hubToDelete, setHubToDelete] = useState<Hub | null>(null);
+  const [isEditHubModalOpen, setIsEditHubModalOpen] = useState(false);
+  const [hubToEdit, setHubToEdit] = useState<Hub | null>(null);
 
   function handleOpenAddHubModal() {}
 
@@ -42,7 +45,10 @@ export function HubManagement() {
     }
   };
 
-  function handleOpenEditHubModal(hub: Hub) {}
+  function handleOpenEditHubModal(hub: Hub) {
+    setHubToEdit(hub);
+    setIsEditHubModalOpen(true);
+  }
 
   const [hubs, setHubs] = useState<Hub[] | null>(null);
 
@@ -242,6 +248,18 @@ export function HubManagement() {
             </button>
           </div>
         </div>
+      </Modal>
+
+      <Modal
+        open={isEditHubModalOpen}
+        onClose={() => setIsEditHubModalOpen(false)}
+        title="Edit Hub"
+      >
+        <HubForm
+          hub={hubToEdit}
+          onSubmit={() => setIsEditHubModalOpen(false)}
+          onCancel={() => setIsEditHubModalOpen(false)}
+        ></HubForm>
       </Modal>
     </div>
   );
