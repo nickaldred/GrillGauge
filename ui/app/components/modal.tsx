@@ -31,7 +31,7 @@ export default function Modal({ open, onClose, title, children }: Modal) {
       aria-modal="true"
     >
       <div
-        className={`"p-5 overflow-auto max-h-[calc(90vh-80px)]" ${
+        className={`"p-5 overflow-auto max-h-[calc(90vh-80px)] w-full sm:w-[650px] md:w-[550px]" ${
           isDarkMode ? "bg-gray-800 text-gray-100" : "bg-white text-gray-900"
         } rounded-2xl shadow-lg`}
       >

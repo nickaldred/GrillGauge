@@ -149,7 +149,7 @@ export function DashboardPage() {
             <div key={hub.id} className="mb-10">
               <div className="flex items-center mb-4">
                 {/* Hub name (clickable to open hub modal) */}
-                <h2 className="mb-4">
+                <h2 className="mb-4 cursor-pointer">
                   <button
                     type="button"
                     onClick={() => openHubModal(hub)}
