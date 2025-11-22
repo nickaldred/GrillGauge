@@ -10,9 +10,13 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.grillgauge.api.domain.entitys.Probe;
+import com.grillgauge.api.domain.models.FrontEndProbe;
+import com.grillgauge.api.services.ProbeService;
 import com.grillgauge.api.services.ReadingService;
-
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 
 /**
  * Controller for managing probe-related operations.
@@ -24,9 +28,11 @@ import org.springframework.web.bind.annotation.GetMapping;
 public class ProbeController {
 
     private final ReadingService readingService;
+    private final ProbeService probeService;
 
-    public ProbeController(ReadingService readingService) {
+    public ProbeController(ReadingService readingService, ProbeService probeService) {
         this.readingService = readingService;
+        this.probeService = probeService;
     }
 
     /**
@@ -56,5 +62,17 @@ public class ProbeController {
                                 .stream()
                                 .map(r -> new ReadingDTO(r.getTimeStamp(), r.getCurrentTemp()))
                                 .toList()));
+    }
+
+    /**
+     * Update a probe.
+     * 
+     * @param probe The probe to update.
+     * @return The updated probe.
+     */
+    @PutMapping("/")
+    public FrontEndProbe updateProbe(@RequestBody FrontEndProbe probe) {
+        probeService.updateProbe(probe);
+        return probe;
     }
 }
