@@ -32,11 +32,23 @@ public class HubController {
         this.hubService = hubService;
     }
 
+    /**
+     * Get the hub for the given hubId.
+     * 
+     * @param hubId hubId to get the hub for.
+     * @return Hub entity.
+     */
     @GetMapping()
     public Hub getHub(@RequestParam long hubId) {
         return this.hubService.getHub(hubId);
     }
 
+    /**
+     * Store a new hub.
+     * 
+     * @param hub the Hub entity to store.
+     * @return the stored Hub entity.
+     */
     @PostMapping()
     @ResponseStatus(HttpStatus.CREATED) // 201
     public Hub storeHub(@RequestBody Hub hub) {
@@ -44,11 +56,22 @@ public class HubController {
 
     }
 
+    /**
+     * Delete a hub by its ID.
+     * 
+     * @param hubId the ID of the hub to delete.
+     */
     @DeleteMapping("/{hubId}")
     public void deleteHub(@PathVariable long hubId) {
         hubService.deleteHub(hubId);
     }
 
+    /**
+     * Update a hub.
+     * 
+     * @param hub the hub to update.
+     * @return the updated hub.
+     */
     @PutMapping()
     public FrontEndHub updateHub(@RequestBody FrontEndHub hub) {
         return this.hubService.updateHub(hub);
