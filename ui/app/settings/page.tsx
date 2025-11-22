@@ -10,6 +10,7 @@ import { HubManagement } from "./components/HubManagement";
  * @returns The Settings page.
  */
 export default function Settings() {
+  // ** Theme **
   const { theme } = useTheme();
   const isDarkMode = theme === "dark";
 

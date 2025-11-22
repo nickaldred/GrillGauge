@@ -4,13 +4,14 @@ import { useState, useEffect } from "react";
 import { useSession } from "next-auth/react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Hub } from "@/app/types/types";
-import { deleteHub, getData } from "@/app/utils/requestUtils";
+import { deleteRequest, getData } from "@/app/utils/requestUtils";
 import { useTheme } from "@/app/providers/ThemeProvider";
 import { PlusIcon, EditIcon, TrashIcon } from "lucide-react";
 import Modal from "@/app/components/modal";
 import { HubForm } from "./HubForm";
 
 import { ProbeManagement } from "./ProbeManagement";
+import { BASE_URL } from "@/app/utils/envVars";
 
 export function HubManagement() {
   const { data: session } = useSession();
@@ -32,7 +33,7 @@ export function HubManagement() {
     if (!user?.email) return;
 
     const fetchData = () => {
-      getData(`http://localhost:8080/api/v1/ui/hubs?email=${user.email}`)
+      getData(`${BASE_URL}/ui/hubs?email=${user.email}`)
         .then(setHubs)
         .catch(console.error);
     };
@@ -46,10 +47,13 @@ export function HubManagement() {
   const toggleHub = (hubId: number) =>
     setExpandedHubId((prev) => (prev === hubId ? null : hubId));
 
+  /**
+   * Handles confirming the deletion of a hub.
+   */
   const handleDeleteHubConfirm = async () => {
     if (!hubToDelete) return;
     try {
-      await deleteHub(hubToDelete.id);
+      await deleteRequest(`${BASE_URL}/hub/${hubToDelete.id}`);
       setHubs((prev) => prev?.filter((h) => h.id !== hubToDelete.id) || null);
       setIsDeleteHubModalOpen(false);
       setHubToDelete(null);
@@ -58,13 +62,18 @@ export function HubManagement() {
     }
   };
 
+  /**
+   * Handles submitting the edited hub data.
+   *
+   * @param updatedHubData The updated hub data.
+   */
   const handleSubmitEditHub = async (updatedHubData: Omit<Hub, "id">) => {
     if (!hubToEdit) return;
 
     try {
       const hubToSend: Hub = { ...hubToEdit, ...updatedHubData };
 
-      const res = await fetch("http://localhost:8080/api/v1/hub", {
+      const res = await fetch(`${BASE_URL}/hub`, {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(hubToSend),
@@ -259,13 +268,13 @@ export function HubManagement() {
           <div className="flex justify-end space-x-3">
             <button
               onClick={() => setIsDeleteHubModalOpen(false)}
-              className="px-4 py-2 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50"
+              className="px-4 py-2 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50 cursor-pointer"
             >
               Cancel
             </button>
             <button
               onClick={handleDeleteHubConfirm}
-              className="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700"
+              className="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 cursor-pointer"
             >
               Delete
             </button>
