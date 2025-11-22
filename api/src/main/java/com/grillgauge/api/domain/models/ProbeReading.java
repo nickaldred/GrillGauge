@@ -4,6 +4,11 @@ import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.Setter;
 
+/**
+ * Model representing a Probe's reading.
+ * 
+ * Contains the Probe's ID and its current temperature.
+ */
 @Getter
 @Setter
 @AllArgsConstructor

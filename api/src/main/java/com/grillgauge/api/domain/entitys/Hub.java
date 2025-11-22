@@ -3,7 +3,6 @@ package com.grillgauge.api.domain.entitys;
 import java.time.Instant;
 import java.util.ArrayList;
 import java.util.List;
-
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -19,6 +18,11 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
+/**
+ * Entity representing a Hub in the system.
+ * 
+ * A Hub is associated with a User (owner) and contains multiple Probes.
+ */
 @Getter
 @Setter
 @AllArgsConstructor
