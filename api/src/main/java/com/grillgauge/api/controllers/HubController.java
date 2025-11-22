@@ -10,9 +10,11 @@ import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.grillgauge.api.domain.entitys.Hub;
+import com.grillgauge.api.domain.models.FrontEndHub;
 import com.grillgauge.api.services.HubService;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PutMapping;
 
 /**
  * Controller for managing hub-related operations.
@@ -45,5 +47,10 @@ public class HubController {
     @DeleteMapping("/{hubId}")
     public void deleteHub(@PathVariable long hubId) {
         hubService.deleteHub(hubId);
+    }
+
+    @PutMapping()
+    public FrontEndHub updateHub(@RequestBody FrontEndHub hub) {
+        return this.hubService.updateHub(hub);
     }
 }
