@@ -1,76 +1,68 @@
 "use client";
 
-import Modal from "@/app/components/modal";
-import { useTheme } from "@/app/providers/ThemeProvider";
+import { useState, useEffect } from "react";
+import { useSession } from "next-auth/react";
+import { motion, AnimatePresence } from "framer-motion";
 import { Hub } from "@/app/types/types";
 import { deleteHub, getData } from "@/app/utils/requestUtils";
-import { EditIcon, PlusIcon, TrashIcon } from "lucide-react";
-import { useSession } from "next-auth/react";
-import { useEffect, useState } from "react";
+import { useTheme } from "@/app/providers/ThemeProvider";
+import { PlusIcon, EditIcon, TrashIcon } from "lucide-react";
+import Modal from "@/app/components/modal";
 import { HubForm } from "./HubForm";
 
-/**
- * Component to allow users to manage Hubs.
- */
+import { ProbeManagement } from "./ProbeManagement";
+
 export function HubManagement() {
   const { data: session } = useSession();
   const user = session?.user;
   const { theme } = useTheme();
   const isDarkMode = theme === "dark";
 
-  // States
+  const [hubs, setHubs] = useState<Hub[] | null>(null);
+  const [expandedHubId, setExpandedHubId] = useState<number | null>(null);
+
   const [isDeleteHubModalOpen, setIsDeleteHubModalOpen] = useState(false);
   const [hubToDelete, setHubToDelete] = useState<Hub | null>(null);
+
   const [isEditHubModalOpen, setIsEditHubModalOpen] = useState(false);
   const [hubToEdit, setHubToEdit] = useState<Hub | null>(null);
-  const [hubs, setHubs] = useState<Hub[] | null>(null);
 
-  // Opens the add hub modal.
-  function handleOpenAddHubModal() {}
+  // Fetch hubs
+  useEffect(() => {
+    if (!user?.email) return;
 
-  // Opens the delete hub confirmation modal.
-  const handleOpenDeleteHubModal = (hub: Hub) => {
-    setHubToDelete(hub);
-    setIsDeleteHubModalOpen(true);
-  };
+    const fetchData = () => {
+      getData(`http://localhost:8080/api/v1/ui/hubs?email=${user.email}`)
+        .then(setHubs)
+        .catch(console.error);
+    };
 
-  // Opens the edit hub modal with the selected hub's data.
-  function handleOpenEditHubModal(hub: Hub) {
-    setHubToEdit(hub);
-    setIsEditHubModalOpen(true);
-  }
+    fetchData();
+    const interval = setInterval(fetchData, 30000);
+    return () => clearInterval(interval);
+  }, [user?.email]);
 
-  /**
-   * Handles the confirmation of hub deletion.
-   */
+  // Toggle expandable row
+  const toggleHub = (hubId: number) =>
+    setExpandedHubId((prev) => (prev === hubId ? null : hubId));
+
   const handleDeleteHubConfirm = async () => {
     if (!hubToDelete) return;
     try {
       await deleteHub(hubToDelete.id);
-      setHubs(
-        (prevHubs) =>
-          prevHubs?.filter((hub) => hub.id !== hubToDelete.id) || null
-      );
+      setHubs((prev) => prev?.filter((h) => h.id !== hubToDelete.id) || null);
       setIsDeleteHubModalOpen(false);
       setHubToDelete(null);
-    } catch (error) {
-      console.error("Error deleting hub:", error);
+    } catch (e) {
+      console.error(e);
     }
   };
 
-  /**
-   * Handles the submission of edited hub data.
-   * @param updatedHubData The updated hub data excluding the ID.
-   * @returns A promise that resolves when the hub is successfully updated.
-   */
-  async function handleSubmitEditHub(updatedHubData: Omit<Hub, "id">) {
+  const handleSubmitEditHub = async (updatedHubData: Omit<Hub, "id">) => {
     if (!hubToEdit) return;
 
     try {
-      const hubToSend: Hub = {
-        ...hubToEdit,
-        ...updatedHubData,
-      };
+      const hubToSend: Hub = { ...hubToEdit, ...updatedHubData };
 
       const res = await fetch("http://localhost:8080/api/v1/hub", {
         method: "PUT",
@@ -85,45 +77,20 @@ export function HubManagement() {
       setHubs((prev) =>
         prev ? prev.map((h) => (h.id === updatedHub.id ? updatedHub : h)) : prev
       );
-
       setIsEditHubModalOpen(false);
       setHubToEdit(null);
     } catch (error) {
-      console.error("Failed updating hub:", error);
+      console.error(error);
     }
-  }
-
-  // Fetch hubs on component mount and set up polling every 30 seconds
-  useEffect(() => {
-    if (!user?.email) return;
-
-    const fetchData = () => {
-      const email = user.email!;
-      const url =
-        "http://localhost:8080/api/v1/ui/hubs?email=" +
-        encodeURIComponent(email);
-
-      getData(url)
-        .then((data) => {
-          setHubs(data);
-        })
-        .catch((error) => {
-          console.error("Error fetching user:", error);
-        });
-    };
-
-    fetchData();
-    const intervalId = setInterval(fetchData, 30000);
-    return () => clearInterval(intervalId);
-  }, [user?.email]);
+  };
 
   return (
     <div
-      className={`${
+      className={`rounded-xl shadow-lg p-5 mb-6 border ${
         isDarkMode ? "bg-gray-800 border-gray-700" : "bg-white border-gray-200"
-      } rounded-xl shadow-lg p-5 mb-6 border`}
+      }`}
     >
-      <div className="flex justify-between items-center mb-6">
+      <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-6 gap-4">
         <h1
           className={`text-2xl font-bold ${
             isDarkMode ? "text-white" : "text-gray-900"
@@ -132,8 +99,8 @@ export function HubManagement() {
           Hub Management
         </h1>
         <button
-          onClick={handleOpenAddHubModal}
-          className={`px-4 py-2 bg-red-600 text-white rounded-lg flex items-center hover:bg-red-700 cursor-pointer`}
+          className="px-4 py-2 bg-red-600 text-white rounded-lg flex items-center hover:bg-red-700"
+          onClick={() => {}}
         >
           <PlusIcon size={18} className="mr-2" />
           Add New Hub
@@ -146,61 +113,47 @@ export function HubManagement() {
             isDarkMode ? "text-gray-400" : "text-gray-500"
           }`}
         >
-          <p>No hubs registered yet. Click "Add New Hub" to get started.</p>
+          No hubs registered yet. Click "Add New Hub" to get started.
         </div>
       ) : (
         <div className="overflow-x-auto">
-          <table className="w-full">
+          <table className="w-full table-auto border-collapse">
             <thead
               className={`${
-                isDarkMode ? "bg-gray-700" : "bg-gray-50"
-              } text-left`}
+                isDarkMode
+                  ? "bg-gray-700 text-gray-300"
+                  : "bg-gray-50 text-gray-600"
+              }`}
             >
               <tr>
-                <th
-                  className={`px-4 py-3 ${
-                    isDarkMode ? "text-gray-300" : "text-gray-600"
-                  }`}
-                >
-                  Hub Name
-                </th>
-                <th
-                  className={`px-4 py-3 ${
-                    isDarkMode ? "text-gray-300" : "text-gray-600"
-                  }`}
-                >
-                  Status
-                </th>
-                <th
-                  className={`px-4 py-3 ${
-                    isDarkMode ? "text-gray-300" : "text-gray-600"
-                  }`}
-                >
-                  Probes
-                </th>
-                <th
-                  className={`px-4 py-3 ${
-                    isDarkMode ? "text-gray-300" : "text-gray-600"
-                  }`}
-                >
-                  Actions
-                </th>
+                <th className="px-4 py-3 text-left">Hub Name</th>
+                <th className="px-4 py-3 text-left">Status</th>
+                <th className="px-4 py-3 text-left">Probes</th>
+                <th className="px-4 py-3 text-left">Actions</th>
               </tr>
             </thead>
-
             <tbody
               className={`${
                 isDarkMode ? "divide-gray-700" : "divide-gray-200"
               } divide-y`}
             >
               {hubs.map((hub) => (
-                <tr
+                <motion.tr
                   key={hub.id}
-                  className={`${
-                    isDarkMode ? "hover:bg-gray-700" : "hover:bg-gray-50"
+                  layout
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: 1 }}
+                  exit={{ opacity: 0 }}
+                  className={`cursor-pointer hover:${
+                    isDarkMode ? "bg-gray-700" : "bg-gray-50"
                   }`}
                 >
-                  <td className="px-4 py-3 font-medium">{hub.name}</td>
+                  <td
+                    className="px-4 py-3 font-medium"
+                    onClick={() => toggleHub(hub.id)}
+                  >
+                    {hub.name}
+                  </td>
 
                   <td className="px-4 py-3">
                     <span
@@ -218,15 +171,16 @@ export function HubManagement() {
                     </span>
                   </td>
 
-                  <td className="px-4 py-3">
-                    {hub.probes.length}{" "}
-                    {hub.probes.length === 1 ? "probe" : "probes"}
-                  </td>
+                  <td className="px-4 py-3">{hub.probes.length}</td>
 
                   <td className="px-4 py-3">
                     <div className="flex space-x-2">
                       <button
-                        onClick={() => handleOpenEditHubModal(hub)}
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          setHubToEdit(hub);
+                          setIsEditHubModalOpen(true);
+                        }}
                         className={`p-1 rounded cursor-pointer ${
                           isDarkMode ? "hover:bg-gray-600" : "hover:bg-gray-100"
                         }`}
@@ -241,7 +195,11 @@ export function HubManagement() {
                       </button>
 
                       <button
-                        onClick={() => handleOpenDeleteHubModal(hub)}
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          setHubToDelete(hub);
+                          setIsDeleteHubModalOpen(true);
+                        }}
                         className={`p-1 rounded cursor-pointer ${
                           isDarkMode ? "hover:bg-gray-600" : "hover:bg-gray-100"
                         }`}
@@ -256,20 +214,43 @@ export function HubManagement() {
                       </button>
                     </div>
                   </td>
-                </tr>
+                </motion.tr>
               ))}
+
+              {/* Expandable Probe Rows */}
+              {hubs.map(
+                (hub) =>
+                  expandedHubId === hub.id && (
+                    <AnimatePresence key={`expand-${hub.id}`}>
+                      <motion.tr
+                        initial={{ opacity: 0, height: 0 }}
+                        animate={{ opacity: 1, height: "auto" }}
+                        exit={{ opacity: 0, height: 0 }}
+                        transition={{ duration: 0.3 }}
+                        className={`${
+                          isDarkMode ? "bg-gray-900" : "bg-gray-50"
+                        }`}
+                      >
+                        <td colSpan={4} className="p-4">
+                          <ProbeManagement hub={hub} />
+                        </td>
+                      </motion.tr>
+                    </AnimatePresence>
+                  )
+              )}
             </tbody>
           </table>
         </div>
       )}
 
+      {/* Modals */}
       <Modal
         open={isDeleteHubModalOpen}
         onClose={() => setIsDeleteHubModalOpen(false)}
         title="Delete Hub"
       >
         <div className="space-y-4">
-          <p className={`${isDarkMode ? "text-gray-300" : "text-gray-600"}`}>
+          <p className={isDarkMode ? "text-gray-300" : "text-gray-600"}>
             Are you sure you want to delete{" "}
             <span className="font-semibold">{hubToDelete?.name}</span>? This
             will also delete all probes associated with this hub. This action
@@ -278,13 +259,13 @@ export function HubManagement() {
           <div className="flex justify-end space-x-3">
             <button
               onClick={() => setIsDeleteHubModalOpen(false)}
-              className="px-4 py-2 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50 cursor-pointer"
+              className="px-4 py-2 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50"
             >
               Cancel
             </button>
             <button
               onClick={handleDeleteHubConfirm}
-              className="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 cursor-pointer"
+              className="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700"
             >
               Delete
             </button>
@@ -301,7 +282,7 @@ export function HubManagement() {
           hub={hubToEdit}
           onSubmit={handleSubmitEditHub}
           onCancel={() => setIsEditHubModalOpen(false)}
-        ></HubForm>
+        />
       </Modal>
     </div>
   );

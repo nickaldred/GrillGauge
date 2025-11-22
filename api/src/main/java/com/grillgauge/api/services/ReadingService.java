@@ -1,10 +1,8 @@
 package com.grillgauge.api.services;
 
-import java.sql.Timestamp;
 import java.time.Instant;
 import java.util.List;
 import java.util.Optional;
-import java.util.function.Predicate;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -38,6 +36,7 @@ public class ReadingService {
      * @return Optional containing the latest Reading if found, otherwise empty
      */
     public Optional<Reading> getLatestReading(Long probeId) {
+        LOG.debug("Retrieving latest reading for probe ID: {}", probeId);
         return readingRepository.findTopByProbeIdOrderByTimeStampDesc(probeId);
     }
 
@@ -50,8 +49,10 @@ public class ReadingService {
      */
     @Transactional
     public Reading saveCurrentReading(final Probe probe, final float currentTemp) {
+        LOG.debug("Saving current reading for probe ID: {}", probe.getId());
         Reading reading = new Reading(probe, currentTemp);
         readingRepository.save(reading);
+        LOG.debug("Successfully saved reading ID: {} for probe ID: {}", reading.getId(), probe.getId());
         return reading;
     }
 
@@ -65,12 +66,14 @@ public class ReadingService {
      */
     @Transactional
     public Long deleteAllReadings(final Long probeId) {
+        LOG.debug("Deleting all readings for probe ID: {}", probeId);
         Long deletedReadings = readingRepository.deleteAllByProbeId(probeId);
         if (deletedReadings == 0) {
             throw new ResponseStatusException(
                     HttpStatus.NOT_FOUND,
                     "No readings found for probe ID: %s".formatted(probeId));
         }
+        LOG.debug("Successfully deleted {} readings for probe ID: {}", deletedReadings, probeId);
         return deletedReadings;
     }
 
