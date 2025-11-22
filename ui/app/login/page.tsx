@@ -8,19 +8,25 @@ import { AlertCircleIcon, FlameIcon } from "lucide-react";
 import { useTheme } from "../providers/ThemeProvider";
 
 export default function Login() {
-  const [error, setError] = useState("");
+  // ** Session and Router **
+  const { status } = useSession();
   const router = useRouter();
-  const searchParams = useSearchParams();
-  const { data: session, status } = useSession();
-  const { theme } = useTheme();
-  const isDarkMode = theme === "dark";
-  const from = searchParams.get("from") || "/dashboard";
 
   // Redirect if already signed in
+  const searchParams = useSearchParams();
+  const from = searchParams.get("from") || "/dashboard";
   if (status === "authenticated") {
     router.replace(from);
   }
 
+  // ** Theme **
+  const { theme } = useTheme();
+  const isDarkMode = theme === "dark";
+
+  // ** States **
+  const [error, setError] = useState("");
+
+  // ** Handlers **
   const handleGoogleLogin = async (e: React.MouseEvent<HTMLButtonElement>) => {
     e.preventDefault();
     setError("");

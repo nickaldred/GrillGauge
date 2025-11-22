@@ -2,6 +2,14 @@ import { useEffect } from "react";
 import { useTheme } from "@/app/providers/ThemeProvider";
 import { XIcon } from "lucide-react";
 
+/**
+ * Modal Component
+ *
+ * @param open - Whether the modal is open.
+ * @param onClose - Function to call when closing the modal.
+ * @param title - Title of the modal.
+ * @param children - Content of the modal.
+ */
 interface Modal {
   open: boolean;
   onClose: () => void;
@@ -9,6 +17,15 @@ interface Modal {
   children?: React.ReactNode;
 }
 
+/**
+ * Modal component for displaying content in a dialog.
+ *
+ * @param {boolean} open - Whether the modal is open.
+ * @param {function} onClose - Function to call when closing the modal.
+ * @param {string} title - Title of the modal.
+ * @param {React.ReactNode} children - Content of the modal.
+ * @returns The Modal component.
+ */
 export default function Modal({ open, onClose, title, children }: Modal) {
   useEffect(() => {
     if (!open) return;

@@ -15,6 +15,7 @@ import {
 } from "chart.js";
 import "chartjs-adapter-date-fns";
 import { useTheme } from "@/app/providers/ThemeProvider";
+import { BASE_URL } from "@/app/utils/envVars";
 
 ChartJS.register(
   LineElement,
@@ -51,7 +52,7 @@ export default function ProbeChart({ probeId }: ProbeChartProps) {
     setLoading(true);
     const probeIdsParam = [probeId].join(",");
     fetch(
-      `http://localhost:8080/api/v1/probe/readings/between?probeIds=${probeIdsParam}&start=${startISO}&end=${endISO}`
+      `${BASE_URL}/probe/readings/between?probeIds=${probeIdsParam}&start=${startISO}&end=${endISO}`
     )
       .then((res) => {
         if (!res.ok) throw new Error("Failed to fetch readings");

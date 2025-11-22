@@ -106,16 +106,9 @@ public class ProbeService {
      *                                 given probeId
      */
     @Transactional
-    public int deleteProbe(final Long probeId) {
+    public void deleteProbe(final Long probeId) {
         LOG.info("Deleting probe for probe ID: {}", probeId);
-        int deletedProbe = probeRepository.deleteAllByHubId(probeId);
-        if (deletedProbe == 0) {
-            throw new ResponseStatusException(
-                    HttpStatus.NOT_FOUND,
-                    "No probe found for probe ID: %s".formatted(probeId));
-        }
-        LOG.info("Successfully deleted probe for probe ID: {}", probeId);
-        return deletedProbe;
+        probeRepository.deleteById(probeId);
     }
 
     /**

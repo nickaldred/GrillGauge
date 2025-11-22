@@ -2,12 +2,19 @@ import React from "react";
 import { ThermometerIcon } from "lucide-react";
 import { useTheme } from "@/app/providers/ThemeProvider";
 
+/**
+ * PageHeader component props.
+ *
+ * @param leftTitle - The title to display on the left side.
+ * @param rightTitle - (Optional) The title to display on the right side.
+ */
 interface PageHeaderProps {
   leftTitle: string;
   rightTitle?: string;
 }
 
 export function PageHeader({ leftTitle, rightTitle }: PageHeaderProps) {
+  // ** Theme **
   const { theme } = useTheme();
   const isDarkMode = theme === "dark";
 
