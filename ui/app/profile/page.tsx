@@ -1,7 +1,12 @@
 import { auth } from "@/auth";
 import { redirect } from "next/navigation";
 
-export default async function Secret() {
+/**
+ * The Profile page component.
+ *
+ * @returns The Profile page.
+ */
+export default async function Profile() {
   const session = await auth();
   if (!session) redirect("/");
   const user = session?.user;

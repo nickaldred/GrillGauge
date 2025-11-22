@@ -4,6 +4,11 @@ import { PageHeader } from "../components/pageHeader";
 import { useTheme } from "../providers/ThemeProvider";
 import { HubManagement } from "./components/HubManagement";
 
+/**
+ * The Settings page component.
+ *
+ * @returns The Settings page.
+ */
 export default function Settings() {
   const { theme } = useTheme();
   const isDarkMode = theme === "dark";
