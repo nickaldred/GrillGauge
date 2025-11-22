@@ -10,6 +10,11 @@ import com.grillgauge.api.domain.entitys.Hub;
 import com.grillgauge.api.domain.models.FrontEndHub;
 import com.grillgauge.api.domain.models.FrontEndProbe;
 
+/**
+ * Service class for managing front-end related operations.
+ * 
+ * Provides methods for retrieving hubs and their associated probes for a user.
+ */
 @Service
 public class FrontEndService {
     private static final Logger LOG = LoggerFactory.getLogger(FrontEndService.class);

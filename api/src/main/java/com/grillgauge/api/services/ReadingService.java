@@ -37,7 +37,14 @@ public class ReadingService {
      */
     public Optional<Reading> getLatestReading(Long probeId) {
         LOG.debug("Retrieving latest reading for probe ID: {}", probeId);
-        return readingRepository.findTopByProbeIdOrderByTimeStampDesc(probeId);
+        Optional<Reading> latestReading = readingRepository.findTopByProbeIdOrderByTimeStampDesc(probeId);
+        if (latestReading.isPresent()) {
+            LOG.debug("Successfully retrieved latest reading ID: {} for probe ID: {}", latestReading.get().getId(),
+                    probeId);
+        } else {
+            LOG.debug("No readings found for probe ID: {}", probeId);
+        }
+        return latestReading;
     }
 
     /**
@@ -90,14 +97,19 @@ public class ReadingService {
     public List<Reading> getReadingsForProbeBetween(Long probeId, String start, String end) {
         LOG.info("Getting readings for probeID: {}, between: {} - {}", probeId, start, end);
         try {
-            return readingRepository.findByProbe_IdAndTimeStampBetweenOrderByTimeStampAsc(
+            List<Reading> probeReadings = readingRepository.findByProbe_IdAndTimeStampBetweenOrderByTimeStampAsc(
                     probeId,
                     Instant.parse(start),
                     Instant.parse(end));
+            LOG.info("Successfully got {} readings for probeID: {}", probeReadings.size(), probeId);
+            return probeReadings;
         } catch (Exception e) {
+            String message = "Invalid date format for start: %s or end: %s, please use ISO 8601 format."
+                    .formatted(start, end);
+            LOG.error(message);
             throw new ResponseStatusException(
                     HttpStatus.BAD_REQUEST,
-                    "Invalid date format. Please use ISO 8601 format (e.g., 2023-10-01T12:00:00Z).");
+                    message);
         }
     }
 }
