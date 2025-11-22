@@ -7,7 +7,7 @@ import { deleteHub, getData } from "@/app/utils/requestUtils";
 import { EditIcon, PlusIcon, TrashIcon } from "lucide-react";
 import { useSession } from "next-auth/react";
 import { useEffect, useState } from "react";
-import { HubForm } from "./hubForm";
+import { HubForm } from "./HubForm";
 
 /**
  * Component to allow users to manage Hubs.
@@ -18,18 +18,31 @@ export function HubManagement() {
   const { theme } = useTheme();
   const isDarkMode = theme === "dark";
 
+  // States
   const [isDeleteHubModalOpen, setIsDeleteHubModalOpen] = useState(false);
   const [hubToDelete, setHubToDelete] = useState<Hub | null>(null);
   const [isEditHubModalOpen, setIsEditHubModalOpen] = useState(false);
   const [hubToEdit, setHubToEdit] = useState<Hub | null>(null);
+  const [hubs, setHubs] = useState<Hub[] | null>(null);
 
+  // Opens the add hub modal.
   function handleOpenAddHubModal() {}
 
+  // Opens the delete hub confirmation modal.
   const handleOpenDeleteHubModal = (hub: Hub) => {
     setHubToDelete(hub);
     setIsDeleteHubModalOpen(true);
   };
 
+  // Opens the edit hub modal with the selected hub's data.
+  function handleOpenEditHubModal(hub: Hub) {
+    setHubToEdit(hub);
+    setIsEditHubModalOpen(true);
+  }
+
+  /**
+   * Handles the confirmation of hub deletion.
+   */
   const handleDeleteHubConfirm = async () => {
     if (!hubToDelete) return;
     try {
@@ -45,13 +58,42 @@ export function HubManagement() {
     }
   };
 
-  function handleOpenEditHubModal(hub: Hub) {
-    setHubToEdit(hub);
-    setIsEditHubModalOpen(true);
+  /**
+   * Handles the submission of edited hub data.
+   * @param updatedHubData The updated hub data excluding the ID.
+   * @returns A promise that resolves when the hub is successfully updated.
+   */
+  async function handleSubmitEditHub(updatedHubData: Omit<Hub, "id">) {
+    if (!hubToEdit) return;
+
+    try {
+      const hubToSend: Hub = {
+        ...hubToEdit,
+        ...updatedHubData,
+      };
+
+      const res = await fetch("http://localhost:8080/api/v1/hub", {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(hubToSend),
+      });
+
+      if (!res.ok) throw new Error("Failed to update hub");
+
+      const updatedHub = await res.json();
+
+      setHubs((prev) =>
+        prev ? prev.map((h) => (h.id === updatedHub.id ? updatedHub : h)) : prev
+      );
+
+      setIsEditHubModalOpen(false);
+      setHubToEdit(null);
+    } catch (error) {
+      console.error("Failed updating hub:", error);
+    }
   }
 
-  const [hubs, setHubs] = useState<Hub[] | null>(null);
-
+  // Fetch hubs on component mount and set up polling every 30 seconds
   useEffect(() => {
     if (!user?.email) return;
 
@@ -257,7 +299,7 @@ export function HubManagement() {
       >
         <HubForm
           hub={hubToEdit}
-          onSubmit={() => setIsEditHubModalOpen(false)}
+          onSubmit={handleSubmitEditHub}
           onCancel={() => setIsEditHubModalOpen(false)}
         ></HubForm>
       </Modal>

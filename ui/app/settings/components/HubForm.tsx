@@ -2,23 +2,32 @@ import React, { useEffect, useState } from "react";
 import { Hub } from "@/app/types/types";
 import { useTheme } from "@/app/providers/ThemeProvider";
 
+/**
+ * Props for the HubForm component.
+ */
 interface HubFormProps {
   hub?: Hub | null;
   onSubmit: (hub: Omit<Hub, "id">) => void;
   onCancel: () => void;
 }
 
+/**
+ * The HubForm component allows users to add or edit a Hub.
+ *
+ * @param hub The hub to edit, or null for adding a new hub.
+ * @returns The HubForm component.
+ */
 export function HubForm({ hub = null, onSubmit, onCancel }: HubFormProps) {
   const { theme } = useTheme();
   const isDarkMode = theme === "dark";
-  const [name, setName] = useState("");
-  const [connected, setConnected] = useState(true);
 
+  // States
+  const [name, setName] = useState("");
+  const [connected, setConnected] = useState(hub?.connected || false);
   const [errors, setErrors] = useState<{
     name?: string;
   }>({});
 
-  // If editing an existing hub, populate the form
   useEffect(() => {
     if (hub) {
       setName(hub.name);
