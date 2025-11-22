@@ -4,16 +4,15 @@ import java.sql.Timestamp;
 import java.time.Instant;
 import java.util.List;
 import java.util.Optional;
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.server.ResponseStatusException;
-
 import com.grillgauge.api.domain.entitys.Probe;
 import com.grillgauge.api.domain.entitys.Reading;
+import com.grillgauge.api.domain.models.FrontEndProbe;
 import com.grillgauge.api.domain.models.ProbeReading;
 import com.grillgauge.api.domain.repositorys.ProbeRepository;
 
@@ -119,6 +118,14 @@ public class ProbeService {
         return deletedProbe;
     }
 
+    /**
+     * Get the current temperature for the given probeId.
+     * 
+     * @param probeId the probeId to get the current temperature for
+     * @return the current temperature, or null if no recent reading is available
+     * @throws ResponseStatusException with status 404 if no readings are found for
+     *                                 the given probeId
+     */
     public Float getCurrentTemperature(final Long probeId) {
         LOG.info("Getting current temp for probeID: {}", probeId);
         Optional<Reading> reading = readingService.getLatestReading(probeId);
@@ -138,5 +145,24 @@ public class ProbeService {
             LOG.info("Successfully got current temp for probeID: {}, temp is: {}", probeId, currentTemp);
         }
         return currentTemp;
+    }
+
+    /**
+     * Update the probe with the given FrontEndProbe data.
+     * 
+     * @param frontEndProbe the FrontEndProbe containing updated probe data.
+     */
+    public void updateProbe(final FrontEndProbe frontEndProbe) {
+        LOG.info("Updating probe with ID: {}", frontEndProbe.getId());
+        Probe probe = probeRepository.findById(frontEndProbe.getId())
+                .orElseThrow(() -> new ResponseStatusException(
+                        HttpStatus.NOT_FOUND,
+                        "No probe found for probe ID: %s".formatted(frontEndProbe.getId())));
+
+        probe.setName(frontEndProbe.getName());
+        probe.setTargetTemp(frontEndProbe.getTargetTemp());
+
+        probeRepository.save(probe);
+        LOG.info("Successfully updated probe with ID: {}", frontEndProbe.getId());
     }
 }

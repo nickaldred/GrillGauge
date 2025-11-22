@@ -5,6 +5,12 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
+/**
+ * Model representing a Probe for front-end consumption.
+ * 
+ * Contains the Probe's ID, local ID, target temperature, current temperature,
+ * name, colour, and connection status.
+ */
 @Getter
 @Setter
 @AllArgsConstructor
