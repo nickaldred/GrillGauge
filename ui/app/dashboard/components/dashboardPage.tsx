@@ -11,32 +11,35 @@ import { useRouter } from "next/navigation";
 import { useTheme } from "@/app/providers/ThemeProvider";
 import { MdOutlineOutdoorGrill } from "react-icons/md";
 import { getData } from "@/app/utils/requestUtils";
+import { BASE_URL } from "@/app/utils/envVars";
 
 const handleUpdateTargetTemp = async (probeId: number, temp: number) => {};
 const handleUpdateName = async (probeId: number, name: string) => {};
 
 export function DashboardPage() {
+  // ** Session & Router **
   const { data: session } = useSession();
   const router = useRouter();
   const user = session?.user;
 
+  // ** Theme **
   const { theme } = useTheme();
   const isDarkMode = theme === "dark";
 
+  // ** States **
   const [hubs, setHubs] = useState<Hub[] | null>(null);
   const [isProbeModalOpen, setIsProbeModalOpen] = useState(false);
   const [isHubModalOpen, setIsHubModalOpen] = useState(false);
   const [selectedProbe, setSelectedProbe] = useState<Probe | null>(null);
   const [selectedHub, setSelectedHub] = useState<Hub | null>(null);
 
+  // ** Fetch Hubs & Probes **
   useEffect(() => {
     if (!user?.email) return;
 
     const fetchData = () => {
       const email = user.email!;
-      const url =
-        "http://localhost:8080/api/v1/ui/hubs?email=" +
-        encodeURIComponent(email);
+      const url = `${BASE_URL}/ui/hubs?email=` + encodeURIComponent(email);
 
       getData(url)
         .then((data) => {

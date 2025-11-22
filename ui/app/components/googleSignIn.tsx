@@ -11,12 +11,16 @@ export const handleSignOut = async (e: React.MouseEvent<HTMLButtonElement>) => {
 };
 
 export default function GoogleSignInButton() {
+  // ** Session & Router **
   const { data: session } = useSession();
   const router = useRouter();
   const user = session?.user;
+
+  // ** Theme **
   const { theme } = useTheme();
   const isDarkMode = theme === "dark";
 
+  // ** Handlers **
   const handleSignIn = () => {
     router.push("/login");
   };

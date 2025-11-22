@@ -25,17 +25,17 @@ export async function getData(url: string) {
 }
 
 /**
- * Deletes a hub by its ID.
+ * Delete request
  *
- * @param hubId The ID of the hub to delete.
+ * @param url The URL to send the delete request to.
  * @throws An error if the deletion fails.
  */
-export async function deleteHub(hubId: number) {
-  const res = await fetch(`http://localhost:8080/api/v1/hub/${hubId}`, {
+export async function deleteRequest(url: string) {
+  const res = await fetch(url, {
     method: "DELETE",
   });
 
   if (!res.ok) {
-    throw new Error(`Failed to delete hub: ${res.status}`);
+    throw new Error(`Failed to perform delete request: ${res.status}`);
   }
 }

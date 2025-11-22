@@ -20,8 +20,11 @@ export function ProbeCard({
   onUpdateName,
   onClick,
 }: Readonly<ProbeProps>) {
+  // ** Theme **
   const { theme } = useTheme();
   const isDarkMode = theme === "dark";
+
+  // ** States **
   const [isEditingName, setIsEditingName] = useState(false);
   const [tempName, setTempName] = useState(probe.name);
   const [isEditingTarget, setIsEditingTarget] = useState(false);

@@ -7,30 +7,30 @@ import {
   CheckIcon,
   ArrowRightIcon,
 } from "lucide-react";
-import Footer from "./Footer";
 import { useTheme } from "../providers/ThemeProvider";
 import { useSession } from "next-auth/react";
 
 export default function LandingPage() {
-  const router = useRouter();
+  // ** Theme **
   const { theme, toggle } = useTheme();
   const isDarkMode = theme === "dark";
 
-  // Get session status and redirect authenticated users to the dashboard.
+  // ** Session & Router **
   const { status } = useSession();
+  const router = useRouter();
 
-  // When session becomes authenticated, immediately replace history with /dashboard.
+  // Redirect to dashboard if authenticated
   useEffect(() => {
     if (status === "authenticated") {
       router.replace("/dashboard");
     }
   }, [status, router]);
 
-  // While redirecting (or checking session), don't render the landing page to avoid a flash.
   if (status === "authenticated") {
     return null;
   }
 
+  // ** Features List **
   const features = [
     {
       title: "Multi-Probe Monitoring",
