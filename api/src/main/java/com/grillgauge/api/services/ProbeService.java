@@ -41,12 +41,14 @@ public class ProbeService {
      *                                 the given hubId
      */
     public List<Probe> getProbesByHubId(final Long hubId) {
+        LOG.info("Retrieving probes for hub ID: {}", hubId);
         List<Probe> probes = probeRepository.findByHubId(hubId);
         if (probes.isEmpty()) {
             throw new ResponseStatusException(
                     HttpStatus.NOT_FOUND,
                     "No probes found for hub ID: %s".formatted(hubId));
         }
+        LOG.info("Successfully retrieved {} probes for hub ID: {}", probes.size(), hubId);
         return probes;
     }
 
@@ -62,6 +64,7 @@ public class ProbeService {
      */
     @Transactional
     public Reading saveProbeReading(final ProbeReading probeReading, final Long hubId) {
+        LOG.debug("Saving probe reading for probe ID: {} under hub ID: {}", probeReading.getId(), hubId);
         List<Probe> probes = getProbesByHubId(hubId);
         Probe probe = probes.stream()
                 .filter(x -> x.getLocalId().equals(probeReading.getId()))
@@ -69,7 +72,9 @@ public class ProbeService {
                 .orElseThrow(() -> new ResponseStatusException(
                         HttpStatus.NOT_FOUND,
                         "Probe with ID: %s and HubId: %s not found".formatted(probeReading.getId(), hubId)));
-        return readingService.saveCurrentReading(probe, probeReading.getCurrentTemp());
+        Reading savedReading = readingService.saveCurrentReading(probe, probeReading.getCurrentTemp());
+        LOG.debug("Successfully saved reading for probe ID: {} under hub ID: {}", probeReading.getId(), hubId);
+        return savedReading;
     }
 
     /**
@@ -82,12 +87,14 @@ public class ProbeService {
      */
     @Transactional
     public int deleteAllProbesForHubId(final Long hubId) {
+        LOG.info("Deleting all probes for hub ID: {}", hubId);
         int deletedProbes = probeRepository.deleteAllByHubId(hubId);
         if (deletedProbes == 0) {
             throw new ResponseStatusException(
                     HttpStatus.NOT_FOUND,
                     "No probes found for hub ID: %s".formatted(hubId));
         }
+        LOG.info("Successfully deleted {} probes for hub ID: {}", deletedProbes, hubId);
         return deletedProbes;
     }
 
@@ -101,12 +108,14 @@ public class ProbeService {
      */
     @Transactional
     public int deleteProbe(final Long probeId) {
+        LOG.info("Deleting probe for probe ID: {}", probeId);
         int deletedProbe = probeRepository.deleteAllByHubId(probeId);
         if (deletedProbe == 0) {
             throw new ResponseStatusException(
                     HttpStatus.NOT_FOUND,
                     "No probe found for probe ID: %s".formatted(probeId));
         }
+        LOG.info("Successfully deleted probe for probe ID: {}", probeId);
         return deletedProbe;
     }
 
