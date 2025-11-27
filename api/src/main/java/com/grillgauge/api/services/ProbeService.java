@@ -158,4 +158,24 @@ public class ProbeService {
         probeRepository.save(probe);
         LOG.info("Successfully updated probe with ID: {}", frontEndProbe.getId());
     }
+
+    /**
+     * Update the target temperature of a probe.
+     * 
+     * @param probeId    The ID of the probe to update.
+     * @param targetTemp The new target temperature.
+     * @return The updated target temperature.
+     */
+    public float updateTargetTemp(final long probeId, final float targetTemp) {
+        LOG.info("Updating target temperature for probe ID: {} to {}", probeId, targetTemp);
+        Probe probe = probeRepository.findById(probeId)
+                .orElseThrow(() -> new ResponseStatusException(
+                        HttpStatus.NOT_FOUND,
+                        "No probe found for probe ID: %s".formatted(probeId)));
+
+        probe.setTargetTemp(targetTemp);
+        probeRepository.save(probe);
+        LOG.info("Successfully updated target temperature for probe ID: {} to {}", probeId, targetTemp);
+        return targetTemp;
+    }
 }
