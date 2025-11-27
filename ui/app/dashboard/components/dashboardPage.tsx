@@ -10,10 +10,9 @@ import { useSession } from "next-auth/react";
 import { useRouter } from "next/navigation";
 import { useTheme } from "@/app/providers/ThemeProvider";
 import { MdOutlineOutdoorGrill } from "react-icons/md";
-import { getData } from "@/app/utils/requestUtils";
+import { getData, putRequest } from "@/app/utils/requestUtils";
 import { BASE_URL } from "@/app/utils/envVars";
 
-const handleUpdateTargetTemp = async (probeId: number, temp: number) => {};
 const handleUpdateName = async (probeId: number, name: string) => {};
 
 export function DashboardPage() {
@@ -54,6 +53,32 @@ export function DashboardPage() {
     const intervalId = setInterval(fetchData, 30000);
     return () => clearInterval(intervalId);
   }, [user?.email]);
+
+  // ** Handlers **
+  const handleUpdateTargetTemp = async (
+    probeId: number,
+    updatedTargetTemp: number
+  ) => {
+    try {
+      await putRequest(
+        `${BASE_URL}/probe/targetTemp/${probeId}?targetTemp=${updatedTargetTemp}`,
+        {}
+      );
+
+      setHubs((prev) =>
+        prev
+          ? prev.map((h) => ({
+              ...h,
+              probes: h.probes.map((p) =>
+                p.id === probeId ? { ...p, targetTemp: updatedTargetTemp } : p
+              ),
+            }))
+          : prev
+      );
+    } catch (error) {
+      console.error(error);
+    }
+  };
 
   // ** Handle Modals **
   const openProbeModal = (probe: Probe) => {
