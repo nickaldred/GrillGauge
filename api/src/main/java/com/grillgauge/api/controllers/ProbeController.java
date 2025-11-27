@@ -77,6 +77,18 @@ public class ProbeController {
     }
 
     /**
+     * Update the target temperature of a probe.
+     *
+     * @param probeId    The ID of the probe to update.
+     * @param targetTemp The new target temperature.
+     * @return The updated target temperature.
+     */
+    @PutMapping("targetTemp/{probeId}")
+    public float updateTargetTemp(@PathVariable Long probeId, @RequestParam float targetTemp) {
+        return probeService.updateTargetTemp(probeId, targetTemp);
+    }
+
+    /**
      * Delete a probe by its ID.
      * 
      * @param probeId The ID of the probe to delete.
