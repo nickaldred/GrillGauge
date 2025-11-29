@@ -13,8 +13,12 @@ import { MdOutlineOutdoorGrill } from "react-icons/md";
 import { getData, putRequest } from "@/app/utils/requestUtils";
 import { BASE_URL } from "@/app/utils/envVars";
 
-const handleUpdateName = async (probeId: number, name: string) => {};
-
+/**
+ * The DashboardPage component displays the user's hubs and probes,
+ * allowing them to view and manage their grill monitoring setup.
+ *
+ * @returns The DashboardPage component.
+ */
 export function DashboardPage() {
   // ** Session & Router **
   const { data: session } = useSession();
@@ -55,6 +59,8 @@ export function DashboardPage() {
   }, [user?.email]);
 
   // ** Handlers **
+
+  // Update probe target temperature
   const handleUpdateTargetTemp = async (
     probeId: number,
     updatedTargetTemp: number
@@ -71,6 +77,31 @@ export function DashboardPage() {
               ...h,
               probes: h.probes.map((p) =>
                 p.id === probeId ? { ...p, targetTemp: updatedTargetTemp } : p
+              ),
+            }))
+          : prev
+      );
+    } catch (error) {
+      console.error(error);
+    }
+  };
+
+  // Update probe name
+  const handleUpdateName = async (probeId: number, updatedName: string) => {
+    try {
+      await putRequest(
+        `${BASE_URL}/probe/name/${probeId}?name=${encodeURIComponent(
+          updatedName
+        )}`,
+        {}
+      );
+
+      setHubs((prev) =>
+        prev
+          ? prev.map((h) => ({
+              ...h,
+              probes: h.probes.map((p) =>
+                p.id === probeId ? { ...p, name: updatedName } : p
               ),
             }))
           : prev

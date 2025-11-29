@@ -32,3 +32,12 @@ export interface Hub {
   probes: Probe[];
   connected: boolean;
 }
+
+/**
+ * Represents a temperature reading from a probe.
+ */
+export interface Reading {
+  id: number;
+  timestamp: string;
+  temperature: number;
+}
