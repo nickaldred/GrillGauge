@@ -89,6 +89,18 @@ public class ProbeController {
     }
 
     /**
+     * Updates the name of a probe.
+     * 
+     * @param probeId The ID of the probe to update.
+     * @param name    The updated name of the probe.
+     * @return The updated name of the probe.
+     */
+    @PutMapping("name/{probeId}")
+    public Map<String, Object> updateProbeName(@PathVariable Long probeId, @RequestParam String name) {
+        return probeService.updateProbeName(probeId, name);
+    }
+
+    /**
      * Delete a probe by its ID.
      * 
      * @param probeId The ID of the probe to delete.
