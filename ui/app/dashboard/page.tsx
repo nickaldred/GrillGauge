@@ -4,15 +4,21 @@ import { useSession } from "next-auth/react";
 import { PageHeader } from "../components/pageHeader";
 import { DashboardPage } from "./components/dashboardPage";
 import { useRouter } from "next/navigation";
-// no React hooks from 'react' are needed here
 import { useTheme } from "../providers/ThemeProvider";
 
+/**
+ * The Dashboard page is the main page for authenticated users,
+ * displaying their dashboard with hubs and probes.
+ *
+ * @returns The Dashboard page.
+ */
 export default function Dashboard() {
+  // ** Router & Theme **
   const router = useRouter();
   const { theme } = useTheme();
   const isDarkMode = theme === "dark";
 
-  // Use `required: true` so unauthenticated users are redirected immediately.
+  // Unauthenticated users are redirected immediately.
   const { status } = useSession({
     required: true,
     onUnauthenticated() {

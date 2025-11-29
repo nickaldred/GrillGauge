@@ -3,6 +3,7 @@ package com.grillgauge.api.services;
 import java.sql.Timestamp;
 import java.time.Instant;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -177,5 +178,25 @@ public class ProbeService {
         probeRepository.save(probe);
         LOG.info("Successfully updated target temperature for probe ID: {} to {}", probeId, targetTemp);
         return targetTemp;
+    }
+
+    /**
+     * Update the name of a probe.
+     *
+     * @param probeId The probe ID.
+     * @param name    The name to update.
+     * @return The updated name of the probe.
+     */
+    public Map<String, Object> updateProbeName(final long probeId, final String name) {
+        LOG.info("Updating name for probe ID: {} to {}", probeId, name);
+        Probe probe = probeRepository.findById(probeId)
+                .orElseThrow(() -> new ResponseStatusException(
+                        HttpStatus.NOT_FOUND,
+                        "No probe found for probe ID: %s".formatted(probeId)));
+
+        probe.setName(name);
+        probeRepository.save(probe);
+        LOG.info("Successfully updated name for probe ID: {} to {}", probeId, name);
+        return Map.of("probeId", probeId, "name", name);
     }
 }

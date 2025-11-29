@@ -17,7 +17,7 @@ import {
 } from "chart.js";
 import "chartjs-adapter-date-fns";
 import { useTheme } from "@/app/providers/ThemeProvider";
-import { Hub } from "@/app/types/types";
+import { Hub, Reading } from "@/app/types/types";
 import { BASE_URL } from "@/app/utils/envVars";
 
 ChartJS.register(
@@ -29,16 +29,18 @@ ChartJS.register(
   Legend
 );
 
-interface Reading {
-  id: number;
-  timestamp: string;
-  temperature: number;
-}
-
+// Props for the HubChart component.
 interface HubChartProps {
   hub: Hub;
 }
 
+/**
+ * The HubChart component displays a line chart of temperature readings
+ * for all probes associated with a given hub over a selectable timeframe.
+ *
+ * @param hub The hub whose probes' readings are to be displayed.
+ * @returns The HubChart component.
+ */
 export default function HubChart({ hub }: HubChartProps) {
   // ** Theme **
   const { theme } = useTheme();
@@ -56,6 +58,7 @@ export default function HubChart({ hub }: HubChartProps) {
     probeIdToNameMap[probe.id] = probe.name;
   });
 
+  // ** Fetch Readings **
   useEffect(() => {
     const end = new Date();
     const start = new Date(end.getTime() - timeframe * 60 * 1000);
