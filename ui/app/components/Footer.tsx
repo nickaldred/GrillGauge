@@ -5,6 +5,7 @@ import { FlameIcon } from "lucide-react";
 import { useTheme } from "../providers/ThemeProvider";
 
 export default function Footer() {
+  // ** Theme **
   const { theme } = useTheme();
   const isDarkMode = theme === "dark";
 

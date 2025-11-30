@@ -22,6 +22,13 @@ public class SecurityConfig {
         this.apiKeyAuthFilter = apiKeyAuthFilter;
     }
 
+    /**
+     * Configure the security filter chain.
+     *
+     * @param http the HttpSecurity to configure.
+     * @return the SecurityFilterChain.
+     * @throws Exception if an error occurs.
+     */
     @Bean
     SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
         http
@@ -36,7 +43,11 @@ public class SecurityConfig {
         return http.build();
     }
 
-    // ✅ Global CORS configuration
+    /**
+     * Configure CORS settings.
+     * 
+     * @return the WebMvcConfigurer with CORS settings.
+     */
     @Bean
     public WebMvcConfigurer corsConfigurer() {
         return new WebMvcConfigurer() {

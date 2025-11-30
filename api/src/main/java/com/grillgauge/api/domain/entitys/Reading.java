@@ -15,6 +15,12 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
+/**
+ * Entity representing a Reading taken from a Probe.
+ * 
+ * A Reading contains the current temperature and the timestamp when it was
+ * recorded.
+ */
 @Getter
 @Setter
 @NoArgsConstructor

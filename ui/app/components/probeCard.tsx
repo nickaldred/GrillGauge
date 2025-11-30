@@ -20,8 +20,11 @@ export function ProbeCard({
   onUpdateName,
   onClick,
 }: Readonly<ProbeProps>) {
+  // ** Theme **
   const { theme } = useTheme();
   const isDarkMode = theme === "dark";
+
+  // ** States **
   const [isEditingName, setIsEditingName] = useState(false);
   const [tempName, setTempName] = useState(probe.name);
   const [isEditingTarget, setIsEditingTarget] = useState(false);
@@ -121,9 +124,13 @@ export function ProbeCard({
       tabIndex={probe.connected ? 0 : -1}
       onKeyDown={handleKeyDown}
       className={`${
-        isDarkMode ? "bg-gray-800 border-gray-700" : "bg-white border-gray-200"
+        isDarkMode ? "bg-gray-800 border-gray-700" : "bg-white border-gray-200 "
       } rounded-xl shadow-lg p-6 border transition-all duration-500 ${
-        probe.connected ? "cursor-pointer hover:shadow-xl" : "opacity-75"
+        probe.connected
+          ? `cursor-pointer ${
+              isDarkMode ? "hover:border-gray-200" : "hover:shadow-xl"
+            }`
+          : "opacity-75"
       }`}
       onClick={probe.connected ? handleClick : undefined}
     >
@@ -181,7 +188,9 @@ export function ProbeCard({
               >
                 <EditIcon
                   size={16}
-                  className={isDarkMode ? "text-gray-400" : "text-gray-500"}
+                  className={`${
+                    isDarkMode ? "text-gray-400" : "text-gray-500"
+                  } cursor-pointer`}
                 />
               </button>
             </>
@@ -316,7 +325,9 @@ export function ProbeCard({
               >
                 <EditIcon
                   size={14}
-                  className={isDarkMode ? "text-gray-400" : "text-gray-500"}
+                  className={`${
+                    isDarkMode ? "text-gray-400" : "text-gray-500"
+                  } cursor-pointer`}
                 />
               </button>
             </>
