@@ -7,15 +7,18 @@ import { useTheme } from "../providers/ThemeProvider";
 import GoogleSignInButton from "./googleSignIn";
 
 export function Header() {
-  const pathname = usePathname();
+  // ** Theme **
   const { theme, toggle } = useTheme();
   const isDarkMode = theme === "dark";
+
+  // Do not render header on specific routes
+  const pathname = usePathname();
   if (pathname === "/") return null;
   if (pathname === "/login") return null;
-
   const isDashboardActive = pathname === "/dashboard";
   const isSettingsActive = pathname ? pathname.startsWith("/settings") : false;
 
+  // ** Nav Link Classnames **
   const navClass = (isActive: boolean, withFlex = false) =>
     `px-4 py-2 rounded-lg${withFlex ? " flex items-center" : ""} ${
       isActive

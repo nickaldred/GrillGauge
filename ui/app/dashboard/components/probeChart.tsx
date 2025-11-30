@@ -15,6 +15,8 @@ import {
 } from "chart.js";
 import "chartjs-adapter-date-fns";
 import { useTheme } from "@/app/providers/ThemeProvider";
+import { BASE_URL } from "@/app/utils/envVars";
+import { Reading } from "@/app/types/types";
 
 ChartJS.register(
   LineElement,
@@ -25,23 +27,22 @@ ChartJS.register(
   Legend
 );
 
-interface Reading {
-  id: number;
-  timestamp: string;
-  temperature: number;
-}
-
+// Props for the ProbeChart component.
 interface ProbeChartProps {
   probeId: number;
 }
 
 export default function ProbeChart({ probeId }: ProbeChartProps) {
+  // ** Theme **
   const { theme } = useTheme();
   const isDarkMode = theme === "dark";
+
+  // ** States **
   const [readings, setReadings] = useState<Reading[]>([]);
   const [timeframe, setTimeframe] = useState<number>(60); // minutes, default = 1 hour
   const [loading, setLoading] = useState(false);
 
+  // ** Fetch Readings **
   useEffect(() => {
     const end = new Date();
     const start = new Date(end.getTime() - timeframe * 60 * 1000);
@@ -51,7 +52,7 @@ export default function ProbeChart({ probeId }: ProbeChartProps) {
     setLoading(true);
     const probeIdsParam = [probeId].join(",");
     fetch(
-      `http://localhost:8080/api/v1/probe/readings/between?probeIds=${probeIdsParam}&start=${startISO}&end=${endISO}`
+      `${BASE_URL}/probe/readings/between?probeIds=${probeIdsParam}&start=${startISO}&end=${endISO}`
     )
       .then((res) => {
         if (!res.ok) throw new Error("Failed to fetch readings");

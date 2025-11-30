@@ -17,7 +17,8 @@ import {
 } from "chart.js";
 import "chartjs-adapter-date-fns";
 import { useTheme } from "@/app/providers/ThemeProvider";
-import { DashboardHub } from "@/app/types/types";
+import { Hub, Reading } from "@/app/types/types";
+import { BASE_URL } from "@/app/utils/envVars";
 
 ChartJS.register(
   LineElement,
@@ -28,19 +29,24 @@ ChartJS.register(
   Legend
 );
 
-interface Reading {
-  id: number;
-  timestamp: string;
-  temperature: number;
-}
-
+// Props for the HubChart component.
 interface HubChartProps {
-  hub: DashboardHub;
+  hub: Hub;
 }
 
+/**
+ * The HubChart component displays a line chart of temperature readings
+ * for all probes associated with a given hub over a selectable timeframe.
+ *
+ * @param hub The hub whose probes' readings are to be displayed.
+ * @returns The HubChart component.
+ */
 export default function HubChart({ hub }: HubChartProps) {
+  // ** Theme **
   const { theme } = useTheme();
   const isDarkMode = theme === "dark";
+
+  // ** States **
   const [readings, setReadings] = useState<Record<string, Reading[]>>({});
   const [timeframe, setTimeframe] = useState<number>(60); // minutes, default = 1 hour
   const [loading, setLoading] = useState(false);
@@ -52,6 +58,7 @@ export default function HubChart({ hub }: HubChartProps) {
     probeIdToNameMap[probe.id] = probe.name;
   });
 
+  // ** Fetch Readings **
   useEffect(() => {
     const end = new Date();
     const start = new Date(end.getTime() - timeframe * 60 * 1000);
@@ -60,7 +67,7 @@ export default function HubChart({ hub }: HubChartProps) {
 
     setLoading(true);
     fetch(
-      `http://localhost:8080/api/v1/probe/readings/between?probeIds=${probeIds.join(
+      `${BASE_URL}/probe/readings/between?probeIds=${probeIds.join(
         ","
       )}&start=${startISO}&end=${endISO}`
     )
@@ -83,7 +90,7 @@ export default function HubChart({ hub }: HubChartProps) {
   ];
 
   const hexToRgba = (hex: string, alpha: number) => {
-    // Normalize hex (#rrggbb or rrggbb or #rrggbbaa)
+    // Normalise hex (#rrggbb or rrggbb or #rrggbbaa)
     let h = hex.replace(/^#/, "");
     if (h.length === 8) h = h.slice(0, 6); // drop alpha if present
     if (h.length === 3)
@@ -115,7 +122,6 @@ export default function HubChart({ hub }: HubChartProps) {
     dataCount += 1;
   }
 
-  // build sorted, unique labels (Date objects) from all readings' timestamps
   const allTimestamps = Object.values(readings)
     .flat()
     .map((r) => new Date(r.timestamp).getTime());
