@@ -1,19 +1,24 @@
 "use client";
 
 import { useSession } from "next-auth/react";
-import { Header } from "./components/dashboardHeader";
+import { PageHeader } from "../components/pageHeader";
 import { DashboardPage } from "./components/dashboardPage";
 import { useRouter } from "next/navigation";
-// no React hooks from 'react' are needed here
 import { useTheme } from "../providers/ThemeProvider";
-import Footer from "../components/Footer";
 
+/**
+ * The Dashboard page is the main page for authenticated users,
+ * displaying their dashboard with hubs and probes.
+ *
+ * @returns The Dashboard page.
+ */
 export default function Dashboard() {
+  // ** Router & Theme **
   const router = useRouter();
   const { theme } = useTheme();
   const isDarkMode = theme === "dark";
 
-  // Use `required: true` so unauthenticated users are redirected immediately.
+  // Unauthenticated users are redirected immediately.
   const { status } = useSession({
     required: true,
     onUnauthenticated() {
@@ -33,9 +38,13 @@ export default function Dashboard() {
         isDarkMode ? "bg-gray-900" : "bg-gray-100"
       }`}
     >
-      <Header />
-      <DashboardPage />
-      <Footer />
+      <div className="container mx-auto px-4 py-4">
+        <PageHeader
+          leftTitle="Dashboard"
+          rightTitle="All temperatures shown in °F"
+        />
+        <DashboardPage />
+      </div>
     </main>
   );
 }

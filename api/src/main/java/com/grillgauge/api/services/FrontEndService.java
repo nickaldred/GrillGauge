@@ -7,22 +7,23 @@ import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
 import com.grillgauge.api.domain.entitys.Hub;
-import com.grillgauge.api.domain.models.Dashboard;
-import com.grillgauge.api.domain.models.DashboardHub;
-import com.grillgauge.api.domain.models.DashboardProbe;
+import com.grillgauge.api.domain.models.FrontEndHub;
+import com.grillgauge.api.domain.models.FrontEndProbe;
 
+/**
+ * Service class for managing front-end related operations.
+ * 
+ * Provides methods for retrieving hubs and their associated probes for a user.
+ */
 @Service
 public class FrontEndService {
-
     private static final Logger LOG = LoggerFactory.getLogger(FrontEndService.class);
 
     private HubService hubService;
-    private UserService userService;
     private ProbeService probeService;
 
-    public FrontEndService(HubService hubService, UserService userService, ProbeService probeService) {
+    public FrontEndService(HubService hubService, ProbeService probeService) {
         this.hubService = hubService;
-        this.userService = userService;
         this.probeService = probeService;
     }
 
@@ -38,30 +39,36 @@ public class FrontEndService {
         float difference = currentTemp - targetTemp;
 
         if (difference >= 10.0f) {
-            return "red"; // Well above target
+            return "red";
         } else if (difference >= 5.0f) {
-            return "darkgreen"; // Well above target
+            return "darkgreen";
         } else if (difference >= 0f) {
-            return "green"; // At or slightly above target
+            return "green";
         } else if (difference >= -10.0f) {
-            return "yellow"; // Almost there (within 2°C below target)
+            return "yellow";
         } else if (difference >= -20.0f) {
-            return "orange"; // Moderately below target
+            return "orange";
         } else {
-            return "lightblue"; // Far below target
+            return "lightblue";
         }
     }
 
-    public Dashboard getDashboard(final String email) {
-        LOG.info("Generating dashboard for user ID: {}", email);
+    /**
+     * Get all hubs and their probes for the given user email.
+     * 
+     * @param email user email
+     * @return List of FrontEndHub models.
+     */
+    public List<FrontEndHub> getHubs(final String email) {
+        LOG.info("Getting hubs for user ID: {}", email);
         List<Hub> hubs = hubService.getHubsByEmail(email);
 
-        List<DashboardHub> dashboardHubs = hubs.stream()
+        List<FrontEndHub> dashboardHubs = hubs.stream()
                 .map(hub -> {
-                    List<DashboardProbe> probes = probeService.getProbesByHubId(hub.getId()).stream()
+                    List<FrontEndProbe> probes = probeService.getProbesByHubId(hub.getId()).stream()
                             .map(probe -> {
                                 Float currentTemp = probeService.getCurrentTemperature(probe.getId());
-                                return new DashboardProbe(
+                                return new FrontEndProbe(
                                         probe.getId(),
                                         probe.getLocalId(),
                                         probe.getTargetTemp(),
@@ -73,11 +80,11 @@ public class FrontEndService {
                             .toList();
 
                     final boolean connected = probes.stream().anyMatch(p -> p.getConnected());
-                    return new DashboardHub(hub.getId(), hub.getName(), probes, connected);
+                    return new FrontEndHub(hub.getId(), hub.getName(), probes, connected);
                 })
                 .toList();
 
-        LOG.info("Dashboard for user ID: {} has {} hubs", email, dashboardHubs.size());
-        return new Dashboard(email, dashboardHubs);
+        LOG.info("Successfully got {} hubs for user ID: {}", dashboardHubs.size(), email);
+        return dashboardHubs;
     }
 }

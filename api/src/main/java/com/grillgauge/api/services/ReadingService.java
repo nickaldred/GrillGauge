@@ -1,10 +1,8 @@
 package com.grillgauge.api.services;
 
-import java.sql.Timestamp;
 import java.time.Instant;
 import java.util.List;
 import java.util.Optional;
-import java.util.function.Predicate;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -38,7 +36,15 @@ public class ReadingService {
      * @return Optional containing the latest Reading if found, otherwise empty
      */
     public Optional<Reading> getLatestReading(Long probeId) {
-        return readingRepository.findTopByProbeIdOrderByTimeStampDesc(probeId);
+        LOG.debug("Retrieving latest reading for probe ID: {}", probeId);
+        Optional<Reading> latestReading = readingRepository.findTopByProbeIdOrderByTimeStampDesc(probeId);
+        if (latestReading.isPresent()) {
+            LOG.debug("Successfully retrieved latest reading ID: {} for probe ID: {}", latestReading.get().getId(),
+                    probeId);
+        } else {
+            LOG.debug("No readings found for probe ID: {}", probeId);
+        }
+        return latestReading;
     }
 
     /**
@@ -50,8 +56,10 @@ public class ReadingService {
      */
     @Transactional
     public Reading saveCurrentReading(final Probe probe, final float currentTemp) {
+        LOG.debug("Saving current reading for probe ID: {}", probe.getId());
         Reading reading = new Reading(probe, currentTemp);
         readingRepository.save(reading);
+        LOG.debug("Successfully saved reading ID: {} for probe ID: {}", reading.getId(), probe.getId());
         return reading;
     }
 
@@ -65,12 +73,14 @@ public class ReadingService {
      */
     @Transactional
     public Long deleteAllReadings(final Long probeId) {
+        LOG.debug("Deleting all readings for probe ID: {}", probeId);
         Long deletedReadings = readingRepository.deleteAllByProbeId(probeId);
         if (deletedReadings == 0) {
             throw new ResponseStatusException(
                     HttpStatus.NOT_FOUND,
                     "No readings found for probe ID: %s".formatted(probeId));
         }
+        LOG.debug("Successfully deleted {} readings for probe ID: {}", deletedReadings, probeId);
         return deletedReadings;
     }
 
@@ -87,14 +97,19 @@ public class ReadingService {
     public List<Reading> getReadingsForProbeBetween(Long probeId, String start, String end) {
         LOG.info("Getting readings for probeID: {}, between: {} - {}", probeId, start, end);
         try {
-            return readingRepository.findByProbe_IdAndTimeStampBetweenOrderByTimeStampAsc(
+            List<Reading> probeReadings = readingRepository.findByProbe_IdAndTimeStampBetweenOrderByTimeStampAsc(
                     probeId,
                     Instant.parse(start),
                     Instant.parse(end));
+            LOG.info("Successfully got {} readings for probeID: {}", probeReadings.size(), probeId);
+            return probeReadings;
         } catch (Exception e) {
+            String message = "Invalid date format for start: %s or end: %s, please use ISO 8601 format."
+                    .formatted(start, end);
+            LOG.error(message);
             throw new ResponseStatusException(
                     HttpStatus.BAD_REQUEST,
-                    "Invalid date format. Please use ISO 8601 format (e.g., 2023-10-01T12:00:00Z).");
+                    message);
         }
     }
 }
