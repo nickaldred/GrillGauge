@@ -11,7 +11,6 @@ import { ProbeForm } from "./ProbeForm";
 interface ProbeManagementProps {
   hub: Hub;
 }
-
 /**
  * The ProbeManagement component displays and manages probes for a given hub.
  *
@@ -22,11 +21,10 @@ export function ProbeManagement({ hub }: ProbeManagementProps) {
   const { theme } = useTheme();
   const isDarkMode = theme === "dark";
 
-  // *** States ***
   const [isEditProbeModalOpen, setIsEditProbeModalOpen] = useState(false);
-  const [probeToEdit, setProbeToEdit] = useState<any | null>(null);
+  const [probeToEdit, setProbeToEdit] = useState<Probe | null>(null);
   const [isDeleteProbeModalOpen, setIsDeleteProbeModalOpen] = useState(false);
-  const [probeToDelete, setProbeToDelete] = useState<any | null>(null);
+  const [probeToDelete, setProbeToDelete] = useState<Probe | null>(null);
 
   // *** Handle Modals ***
 
@@ -34,9 +32,9 @@ export function ProbeManagement({ hub }: ProbeManagementProps) {
    * Handles opening the edit probe modal.
    * @param probe The probe to edit.
    */
-  const handleOpenEditProbeModal = (probe: any) => {
-    setIsEditProbeModalOpen(true);
+  const handleOpenEdit = (probe: Probe) => {
     setProbeToEdit(probe);
+    setIsEditProbeModalOpen(true);
   };
 
   /**
@@ -44,9 +42,9 @@ export function ProbeManagement({ hub }: ProbeManagementProps) {
    *
    * @param probe The probe to delete.
    */
-  const handleOpenDeleteProbeModal = (probe: any) => {
-    setIsDeleteProbeModalOpen(true);
+  const handleOpenDelete = (probe: Probe) => {
     setProbeToDelete(probe);
+    setIsDeleteProbeModalOpen(true);
   };
 
   // *** Utility Functions ***
@@ -54,7 +52,7 @@ export function ProbeManagement({ hub }: ProbeManagementProps) {
   /**
    * Handles confirming the deletion of a probe.
    */
-  const handleDeleteProbeConfirm = async () => {
+  const handleDeleteConfirm = async () => {
     if (!probeToDelete) return;
     try {
       await deleteRequest(`${BASE_URL}/probe/${probeToDelete.id}`);
@@ -66,11 +64,6 @@ export function ProbeManagement({ hub }: ProbeManagementProps) {
     }
   };
 
-  /**
-   * Handles submitting the edited probe data.
-   *
-   * @param updatedProbeData The updated probe data.
-   */
   const handleSubmitEditProbe = async (updatedProbeData: Omit<Probe, "id">) => {
     if (!probeToEdit) return;
     try {
@@ -82,7 +75,6 @@ export function ProbeManagement({ hub }: ProbeManagementProps) {
       });
       if (!res.ok) throw new Error("Failed to update probe");
       const updatedProbe = await res.json();
-      console.log("Updated Probe:", updatedProbe);
       hub.probes = hub.probes.map((p) =>
         p.id === updatedProbe.id ? updatedProbe : p
       );
@@ -107,87 +99,93 @@ export function ProbeManagement({ hub }: ProbeManagementProps) {
   }
 
   return (
-    <div className="overflow-x-auto">
-      <table
-        className={`min-w-full border ${
-          isDarkMode ? "border-gray-700" : "border-gray-200"
-        } text-left`}
+    <div
+      className={`space-y-5 p-6 rounded-xl border shadow-sm backdrop-blur ${
+        isDarkMode ? "bg-gray-800 border-gray-700" : "bg-white border-gray-200"
+      }`}
+    >
+      <h3
+        className={`text-lg font-semibold tracking-tight ${
+          isDarkMode ? "text-gray-100" : "text-gray-900"
+        }`}
       >
-        <thead
-          className={`${
-            isDarkMode
-              ? "bg-gray-900 text-gray-100"
-              : "bg-gray-50 text-gray-900"
-          }`}
-        >
-          <tr>
-            <th className="px-4 py-2">Name</th>
-            <th className="px-4 py-2">Target Temp</th>
-            <th className="px-4 py-2">Status</th>
-            <th className="px-4 py-2">Actions</th>
-          </tr>
-        </thead>
-        <tbody>
-          {hub.probes.map((probe) => (
-            <tr
-              key={probe.id}
-              className={`${
-                isDarkMode
-                  ? "bg-gray-800 text-gray-100"
-                  : "bg-white text-gray-900"
-              } border-b ${isDarkMode ? "border-gray-700" : "border-gray-200"}`}
-            >
-              <td className="px-4 py-2">{probe.name}</td>
-              <td className="px-4 py-2">{probe.targetTemp}°F</td>
-              <td className="px-4 py-2">
-                <span
-                  className={`px-2 py-1 rounded-full text-xs ${
-                    probe.connected
-                      ? isDarkMode
-                        ? "bg-green-900 text-green-300"
-                        : "bg-green-100 text-green-800"
-                      : isDarkMode
-                      ? "bg-gray-700 text-gray-300"
-                      : "bg-gray-100 text-gray-800"
-                  }`}
-                >
-                  {probe.connected ? "Connected" : "Disconnected"}
-                </span>
-              </td>
-              <td className="px-4 py-2 flex space-x-2">
-                <button
-                  onClick={() => handleOpenEditProbeModal(probe)}
-                  title="Edit Probe"
-                  className={`p-2 rounded transition cursor-pointer ${
-                    isDarkMode ? "hover:bg-gray-700" : "hover:bg-gray-200"
-                  }`}
-                >
-                  <EditIcon
-                    size={18}
-                    className={isDarkMode ? "text-blue-400" : "text-blue-600"}
-                  />
-                </button>
-                <button
-                  onClick={() => handleOpenDeleteProbeModal(probe)}
-                  title="Delete Probe"
-                  className={`p-2 rounded transition ${
-                    isDarkMode ? "hover:bg-gray-700" : "hover:bg-gray-200"
-                  }`}
-                >
-                  <TrashIcon
-                    size={18}
-                    className={`${
-                      isDarkMode ? "text-red-400" : "text-red-600"
-                    } cursor-pointer`}
-                  />
-                </button>
-              </td>
-            </tr>
-          ))}
-        </tbody>
-      </table>
+        Probe Management
+      </h3>
 
-      {/* Modals */}
+      <div className="grid grid-cols-4 gap-4 text-xs font-semibold uppercase tracking-wide text-gray-500 dark:text-gray-400 pb-2 border-b border-gray-200 dark:border-gray-700">
+        <span>Name</span>
+        <span>Target Temp</span>
+        <span>Status</span>
+        <span>Actions</span>
+      </div>
+
+      <div className="space-y-3">
+        {hub.probes.map((probe) => (
+          <div
+            key={probe.id}
+            className={`grid grid-cols-4 gap-4 items-center p-4 rounded-lg border shadow-sm hover:shadow transition duration-200 ${
+              isDarkMode
+                ? "bg-gray-700 border-gray-600"
+                : "bg-gray-50 border-gray-200"
+            }`}
+          >
+            <span
+              className={`font-medium ${
+                isDarkMode ? "text-gray-100" : "text-gray-900"
+              }`}
+            >
+              {probe.name}
+            </span>
+            <span
+              className={`${isDarkMode ? "text-gray-300" : "text-gray-800"}`}
+            >
+              {probe.targetTemp}°F
+            </span>
+            <span
+              className={`px-3 py-1 rounded-full text-xs font-medium w-fit ${
+                probe.connected
+                  ? isDarkMode
+                    ? "bg-green-900 text-green-300"
+                    : "bg-green-100 text-green-800"
+                  : isDarkMode
+                  ? "bg-gray-700 text-gray-300"
+                  : "bg-gray-100 text-gray-800"
+              }`}
+            >
+              {probe.connected ? "Connected" : "Disconnected"}
+            </span>
+            <div className="flex space-x-2">
+              <button
+                onClick={() => handleOpenEdit(probe)}
+                className={`p-2 rounded-lg transition cursor-pointer ${
+                  isDarkMode ? "hover:bg-gray-600" : "hover:bg-gray-100"
+                }`}
+                title="Edit"
+              >
+                <EditIcon
+                  className={`${
+                    isDarkMode ? "text-blue-400" : "text-blue-600"
+                  }`}
+                  size={18}
+                />
+              </button>
+              <button
+                onClick={() => handleOpenDelete(probe)}
+                className={`p-2 rounded-lg transition cursor-pointer ${
+                  isDarkMode ? "hover:bg-gray-600" : "hover:bg-gray-100"
+                }`}
+                title="Delete"
+              >
+                <TrashIcon
+                  className={`${isDarkMode ? "text-red-400" : "text-red-600"}`}
+                  size={18}
+                />
+              </button>
+            </div>
+          </div>
+        ))}
+      </div>
+
       <Modal
         open={isEditProbeModalOpen}
         onClose={() => setIsEditProbeModalOpen(false)}
@@ -209,19 +207,22 @@ export function ProbeManagement({ hub }: ProbeManagementProps) {
           <p className={isDarkMode ? "text-gray-300" : "text-gray-600"}>
             Are you sure you want to delete{" "}
             <span className="font-semibold">{probeToDelete?.name}</span>? This
-            will also delete all readings associated with this probe. This
-            action cannot be undone.
+            will also delete all readings associated with this probe.
           </p>
           <div className="flex justify-end space-x-3">
             <button
               onClick={() => setIsDeleteProbeModalOpen(false)}
-              className="px-4 py-2 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50 cursor-pointer"
+              className={`px-4 py-2 border rounded-lg ${
+                isDarkMode
+                  ? "border-gray-600 text-gray-300 hover:bg-gray-600"
+                  : "border-gray-300 text-gray-700 hover:bg-gray-50"
+              }`}
             >
               Cancel
             </button>
             <button
-              onClick={handleDeleteProbeConfirm}
-              className="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 cursor-pointer"
+              onClick={handleDeleteConfirm}
+              className="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700"
             >
               Delete
             </button>
