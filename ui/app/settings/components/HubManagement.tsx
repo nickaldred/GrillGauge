@@ -1,12 +1,12 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import React, { useState, useEffect } from "react";
 import { useSession } from "next-auth/react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Hub } from "@/app/types/types";
 import { deleteRequest, getData } from "@/app/utils/requestUtils";
 import { useTheme } from "@/app/providers/ThemeProvider";
-import { PlusIcon, EditIcon, TrashIcon } from "lucide-react";
+import { PlusIcon, EditIcon, TrashIcon, ChevronDown } from "lucide-react";
 import Modal from "@/app/components/modal";
 import { HubForm } from "./HubForm";
 
@@ -107,6 +107,7 @@ export function HubManagement() {
         >
           Hub Management
         </h1>
+
         <button
           className="px-4 py-2 bg-red-600 text-white rounded-lg flex items-center hover:bg-red-700"
           onClick={() => {}}
@@ -141,96 +142,111 @@ export function HubManagement() {
                 <th className="px-4 py-3 text-left">Actions</th>
               </tr>
             </thead>
+
             <tbody
               className={`${
                 isDarkMode ? "divide-gray-700" : "divide-gray-200"
               } divide-y`}
             >
               {hubs.map((hub) => (
-                <motion.tr
-                  key={hub.id}
-                  layout
-                  initial={{ opacity: 0 }}
-                  animate={{ opacity: 1 }}
-                  exit={{ opacity: 0 }}
-                  className={`cursor-pointer hover:${
-                    isDarkMode ? "bg-gray-700" : "bg-gray-50"
-                  }`}
-                >
-                  <td
-                    className="px-4 py-3 font-medium"
+                <React.Fragment key={hub.id}>
+                  {/* Hub Row */}
+                  <motion.tr
+                    layout
+                    initial={{ opacity: 0 }}
+                    animate={{ opacity: 1 }}
+                    exit={{ opacity: 0 }}
+                    className={`cursor-pointer hover:${
+                      isDarkMode ? "bg-gray-700" : "bg-gray-50"
+                    }`}
                     onClick={() => toggleHub(hub.id)}
                   >
-                    {hub.name}
-                  </td>
-
-                  <td className="px-4 py-3">
-                    <span
-                      className={`px-2 py-1 rounded-full text-xs ${
-                        hub.connected
-                          ? isDarkMode
-                            ? "bg-green-900 text-green-300"
-                            : "bg-green-100 text-green-800"
-                          : isDarkMode
-                          ? "bg-gray-700 text-gray-300"
-                          : "bg-gray-100 text-gray-800"
-                      }`}
-                    >
-                      {hub.connected ? "Connected" : "Disconnected"}
-                    </span>
-                  </td>
-
-                  <td className="px-4 py-3">{hub.probes.length}</td>
-
-                  <td className="px-4 py-3">
-                    <div className="flex space-x-2">
-                      <button
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          setHubToEdit(hub);
-                          setIsEditHubModalOpen(true);
+                    <td className="px-4 py-3 font-medium flex items-center space-x-2">
+                      <motion.div
+                        initial={false}
+                        animate={{ rotate: expandedHubId === hub.id ? 180 : 0 }}
+                        transition={{
+                          type: "spring",
+                          stiffness: 300,
+                          damping: 20,
                         }}
-                        className={`p-1 rounded cursor-pointer ${
-                          isDarkMode ? "hover:bg-gray-600" : "hover:bg-gray-100"
-                        }`}
-                        title="Edit Hub"
                       >
-                        <EditIcon
+                        <ChevronDown
                           size={18}
                           className={
-                            isDarkMode ? "text-blue-400" : "text-blue-600"
+                            isDarkMode ? "text-gray-300" : "text-gray-700"
                           }
                         />
-                      </button>
+                      </motion.div>
+                      <span>{hub.name}</span>
+                    </td>
 
-                      <button
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          setHubToDelete(hub);
-                          setIsDeleteHubModalOpen(true);
-                        }}
-                        className={`p-1 rounded cursor-pointer ${
-                          isDarkMode ? "hover:bg-gray-600" : "hover:bg-gray-100"
+                    <td className="px-4 py-3">
+                      <span
+                        className={`px-2 py-1 rounded-full text-xs ${
+                          hub.connected
+                            ? isDarkMode
+                              ? "bg-green-900 text-green-300"
+                              : "bg-green-100 text-green-800"
+                            : isDarkMode
+                            ? "bg-gray-700 text-gray-300"
+                            : "bg-gray-100 text-gray-800"
                         }`}
-                        title="Delete Hub"
                       >
-                        <TrashIcon
-                          size={18}
-                          className={
-                            isDarkMode ? "text-red-400" : "text-red-600"
-                          }
-                        />
-                      </button>
-                    </div>
-                  </td>
-                </motion.tr>
-              ))}
+                        {hub.connected ? "Connected" : "Disconnected"}
+                      </span>
+                    </td>
 
-              {/* Expandable Probe Rows */}
-              {hubs.map(
-                (hub) =>
-                  expandedHubId === hub.id && (
-                    <AnimatePresence key={`expand-${hub.id}`}>
+                    <td className="px-4 py-3">{hub.probes.length}</td>
+
+                    <td className="px-4 py-3">
+                      <div className="flex space-x-2">
+                        <button
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            setHubToEdit(hub);
+                            setIsEditHubModalOpen(true);
+                          }}
+                          className={`p-1 rounded cursor-pointer ${
+                            isDarkMode
+                              ? "hover:bg-gray-600"
+                              : "hover:bg-gray-100"
+                          }`}
+                        >
+                          <EditIcon
+                            size={18}
+                            className={
+                              isDarkMode ? "text-blue-400" : "text-blue-600"
+                            }
+                          />
+                        </button>
+
+                        <button
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            setHubToDelete(hub);
+                            setIsDeleteHubModalOpen(true);
+                          }}
+                          className={`p-1 rounded cursor-pointer ${
+                            isDarkMode
+                              ? "hover:bg-gray-600"
+                              : "hover:bg-gray-100"
+                          }`}
+                        >
+                          <TrashIcon
+                            size={18}
+                            className={
+                              isDarkMode ? "text-red-400" : "text-red-600"
+                            }
+                          />
+                        </button>
+                      </div>
+                    </td>
+                  </motion.tr>
+
+                  {/* Expanded Probe Row */}
+                  <AnimatePresence>
+                    {expandedHubId === hub.id && (
                       <motion.tr
                         initial={{ opacity: 0, height: 0 }}
                         animate={{ opacity: 1, height: "auto" }}
@@ -244,15 +260,16 @@ export function HubManagement() {
                           <ProbeManagement hub={hub} />
                         </td>
                       </motion.tr>
-                    </AnimatePresence>
-                  )
-              )}
+                    )}
+                  </AnimatePresence>
+                </React.Fragment>
+              ))}
             </tbody>
           </table>
         </div>
       )}
 
-      {/* Modals */}
+      {/* Delete Hub Modal */}
       <Modal
         open={isDeleteHubModalOpen}
         onClose={() => setIsDeleteHubModalOpen(false)}
@@ -282,6 +299,7 @@ export function HubManagement() {
         </div>
       </Modal>
 
+      {/* Edit Hub Modal */}
       <Modal
         open={isEditHubModalOpen}
         onClose={() => setIsEditHubModalOpen(false)}
