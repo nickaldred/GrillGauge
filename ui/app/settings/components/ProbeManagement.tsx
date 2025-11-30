@@ -1,10 +1,11 @@
-import { Hub } from "@/app/types/types";
+import { Hub, Probe } from "@/app/types/types";
 import { EditIcon, TrashIcon } from "lucide-react";
 import { useTheme } from "@/app/providers/ThemeProvider";
 import Modal from "@/app/components/modal";
 import { useState } from "react";
 import { deleteRequest } from "@/app/utils/requestUtils";
 import { BASE_URL } from "@/app/utils/envVars";
+import { ProbeForm } from "./ProbeForm";
 
 // Props for the ProbeManagement component.
 interface ProbeManagementProps {
@@ -62,6 +63,33 @@ export function ProbeManagement({ hub }: ProbeManagementProps) {
       setProbeToDelete(null);
     } catch (e) {
       console.error(e);
+    }
+  };
+
+  /**
+   * Handles submitting the edited probe data.
+   *
+   * @param updatedProbeData The updated probe data.
+   */
+  const handleSubmitEditProbe = async (updatedProbeData: Omit<Probe, "id">) => {
+    if (!probeToEdit) return;
+    try {
+      const probeToSend: Probe = { ...probeToEdit, ...updatedProbeData };
+      const res = await fetch(`${BASE_URL}/probe`, {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(probeToSend),
+      });
+      if (!res.ok) throw new Error("Failed to update probe");
+      const updatedProbe = await res.json();
+      console.log("Updated Probe:", updatedProbe);
+      hub.probes = hub.probes.map((p) =>
+        p.id === updatedProbe.id ? updatedProbe : p
+      );
+      setIsEditProbeModalOpen(false);
+      setProbeToEdit(null);
+    } catch (error) {
+      console.error(error);
     }
   };
 
@@ -164,7 +192,13 @@ export function ProbeManagement({ hub }: ProbeManagementProps) {
         open={isEditProbeModalOpen}
         onClose={() => setIsEditProbeModalOpen(false)}
         title="Edit Probe"
-      ></Modal>
+      >
+        <ProbeForm
+          probe={probeToEdit}
+          onSubmit={handleSubmitEditProbe}
+          onCancel={() => setIsEditProbeModalOpen(false)}
+        />
+      </Modal>
 
       <Modal
         open={isDeleteProbeModalOpen}

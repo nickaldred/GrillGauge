@@ -70,7 +70,7 @@ public class ProbeController {
      * @param probe The probe to update.
      * @return The updated probe.
      */
-    @PutMapping("/")
+    @PutMapping()
     public FrontEndProbe updateProbe(@RequestBody FrontEndProbe probe) {
         probeService.updateProbe(probe);
         return probe;
