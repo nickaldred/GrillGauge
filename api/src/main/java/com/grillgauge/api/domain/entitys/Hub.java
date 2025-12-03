@@ -21,7 +21,10 @@ import lombok.Setter;
 /**
  * Entity representing a Hub in the system.
  * 
- * A Hub is associated with a User (owner) and contains multiple Probes.
+ * Supports PKI-based device identity:
+ * - Hub submits CSR
+ * - Server signs certificate
+ * - Hub authenticates with mTLS
  */
 @Getter
 @Setter
@@ -34,24 +37,88 @@ public class Hub {
     @GeneratedValue(strategy = GenerationType.AUTO)
     private Long id;
 
+    /** Owner is null until pairing is completed */
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "email", nullable = false)
+    @JoinColumn(name = "email", nullable = true)
     private User owner;
 
-    @Column(nullable = false)
-    private String apiKey;
-
+    /** Human-readable name (optional) */
     @Column(nullable = true)
     private String name;
+
+    // -------------------------------
+    // Pairing / OTP fields
+    // -------------------------------
+
+    /** Temporary pairing code shown on the hub */
+    @Column(nullable = true)
+    private String pairingCode;
+
+    /** Optional hashed version for security (recommended) */
+    @Column(nullable = true)
+    private String pairingCodeHash;
+
+    @Column(nullable = true)
+    private Instant pairingCodeExpiresAt;
+
+    // -------------------------------
+    // PKI fields
+    // -------------------------------
+
+    /** CSR submitted by the hub */
+    @Column(nullable = true, columnDefinition = "TEXT")
+    private String csrPem;
+
+    /** Extracted public key from CSR */
+    @Column(nullable = true, columnDefinition = "TEXT")
+    private String publicKeyPem;
+
+    /** Signed X.509 certificate returned to the hub */
+    @Column(nullable = true, columnDefinition = "TEXT")
+    private String certificatePem;
+
+    /** Certificate serial number (unique per certificate) */
+    @Column(nullable = true)
+    private Long certificateSerial;
+
+    /** Certificate issued + expiration timestamps */
+    @Column(nullable = true)
+    private Instant certificateIssuedAt;
+
+    @Column(nullable = true)
+    private Instant certificateExpiresAt;
+
+    /** Indicates whether hub is fully paired + certificate issued */
+    @Column(nullable = false)
+    private boolean paired = false;
+
+    // -------------------------------
+    // General hub info
+    // -------------------------------
 
     @OneToMany(mappedBy = "hub", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Probe> probes = new ArrayList<>();
 
     private Instant createdAt = Instant.now();
 
-    public Hub(final User owner, final String apiKey, final String name) {
+    private Instant updatedAt = Instant.now();
+
+    private Instant lastSeenAt;
+
+    /** Optional: revocation info */
+    @Column(nullable = true)
+    private Instant revokedAt;
+
+    @Column(nullable = true)
+    private String revocationReason;
+
+    // Convenience constructor
+    public Hub(final String name) {
+        this.name = name;
+    }
+
+    public Hub(final User owner, final String name) {
         this.owner = owner;
-        this.apiKey = apiKey;
         this.name = name;
     }
 }
