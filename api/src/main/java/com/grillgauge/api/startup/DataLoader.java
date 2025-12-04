@@ -49,10 +49,10 @@ public class DataLoader implements CommandLineRunner {
         User testUser4 = new User("tom@askjeeves.com", "tom", "jones");
         userRepository.saveAll(List.of(testUser1, testUser2, testUser3, testUser4));
 
-        Hub testHub1 = new Hub(testUser1, "123abc", "hub1");
-        Hub testHub3 = new Hub(testUser3, "789ghi", "hub3");
-        Hub testHub4 = new Hub(testUser4, "101jkl", "hub4");
-        Hub testHub5 = new Hub(testUser1, "112mno", "hub5");
+        Hub testHub1 = new Hub(testUser1, "hub1");
+        Hub testHub3 = new Hub(testUser3, "hub3");
+        Hub testHub4 = new Hub(testUser4, "hub4");
+        Hub testHub5 = new Hub(testUser1, "hub5");
         hubRepository.saveAll(List.of(testHub1, testHub3, testHub4, testHub5));
 
         Probe testProbe1 = new Probe(1, testHub1, testUser1, (float) 180.00, "probe1");

@@ -1,17 +1,17 @@
 package com.grillgauge.api.controllers;
 
 import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
+import com.grillgauge.api.domain.models.HubRegistrationRequest;
+import com.grillgauge.api.domain.models.HubRegistrationResponse;
 import com.grillgauge.api.services.RegisterHubService;
 import org.springframework.web.bind.annotation.RequestBody;
-
-record RegisterHubResponse(Long hubId, Integer otp, String otpExpiresAt) {
-}
 
 /**
  * Controller for registering hubs.
@@ -29,9 +29,11 @@ public class RegisterHubController {
 
     }
 
-    @PostMapping("")
-    public RegisterHubResponse registerHub() {
-        return new RegisterHubResponse(123L, 123, "yes");
+    @PostMapping("/register")
+    public ResponseEntity<HubRegistrationResponse> registerHub(
+            @RequestBody(required = false) HubRegistrationRequest request) {
+        HubRegistrationResponse response = registerHubService.registerHub(request);
+        return ResponseEntity.ok(response);
     }
 
     @PostMapping("/confirm")
