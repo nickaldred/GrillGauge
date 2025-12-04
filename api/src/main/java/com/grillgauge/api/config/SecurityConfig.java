@@ -1,6 +1,5 @@
 package com.grillgauge.api.config;
 
-import com.grillgauge.api.utils.ApiKeyAuthFilter;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
@@ -16,10 +15,7 @@ import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 @Configuration
 public class SecurityConfig {
 
-    private final ApiKeyAuthFilter apiKeyAuthFilter;
-
-    public SecurityConfig(ApiKeyAuthFilter apiKeyAuthFilter) {
-        this.apiKeyAuthFilter = apiKeyAuthFilter;
+    public SecurityConfig() {
     }
 
     /**
@@ -34,11 +30,7 @@ public class SecurityConfig {
         http
                 .cors() // ✅ enable CORS support
                 .and()
-                .csrf(csrf -> csrf.disable()) // disable CSRF for APIs
-                .authorizeHttpRequests(auth -> auth
-                        .requestMatchers("/api/v1/externalHub/**").authenticated()
-                        .anyRequest().permitAll())
-                .addFilterBefore(apiKeyAuthFilter, UsernamePasswordAuthenticationFilter.class);
+                .csrf(csrf -> csrf.disable()); // disable CSRF for APIs
 
         return http.build();
     }
