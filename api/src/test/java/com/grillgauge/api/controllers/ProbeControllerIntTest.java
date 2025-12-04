@@ -54,7 +54,7 @@ class ProbeControllerIntTest {
         void setUp() {
                 testUser = new User("nick@hotmail.co.uk", "Nick", "Bloggs");
                 userRepository.save(testUser);
-                testHub = new Hub(testUser, "apiKey", "Test Hub");
+                testHub = new Hub(testUser, "Test Hub");
                 hubRepository.save(testHub);
                 testProbe = new Probe(1, testHub, testUser, (float) 200, "probe 1");
                 probeRepository.save(testProbe);
