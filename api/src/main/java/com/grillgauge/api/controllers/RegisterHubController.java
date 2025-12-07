@@ -29,11 +29,30 @@ public class RegisterHubController {
 
     }
 
+    /**
+     * DTO class for Hub registration requests.
+     */
     public record HubRegistrationRequest(
             String model,
             String fwVersion) {
     }
 
+    /**
+     * DTO class for Hub registration confirmation.
+     */
+    public record HubConfirmRequest(
+            Long id,
+            String otp) {
+
+    }
+
+    /**
+     * Register a new Hub.
+     *
+     * @param request The registration request containing model and firmware
+     *                version.
+     * @return The registration response with hub ID, OTP, and OTP expiration time.
+     */
     @PostMapping("/register")
     public ResponseEntity<HubRegistrationResponse> registerHub(
             @RequestBody(required = false) HubRegistrationRequest request) {
@@ -41,9 +60,16 @@ public class RegisterHubController {
         return ResponseEntity.ok(response);
     }
 
+    /**
+     * Confirm a Hub's registration using the provided OTP.
+     *
+     * @param hubConfirm The confirmation request containing hub ID and OTP.
+     */
     @PostMapping("/confirm")
-    @ResponseStatus(HttpStatus.OK)
-    public void confirmAuthenticated(final @RequestParam String hubId, @RequestParam Integer otp) {
+    @ResponseStatus(HttpStatus.CREATED)
+    public void confirmAuthenticated(
+            final @RequestBody(required = true) HubConfirmRequest hubConfirm) {
+        registerHubService.confirmHub(hubConfirm);
     }
 
     @PostMapping("/{hubId}/csr")
