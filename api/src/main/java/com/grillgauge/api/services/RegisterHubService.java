@@ -4,25 +4,27 @@ import java.security.SecureRandom;
 import java.time.Instant;
 import java.util.HashMap;
 import java.util.Map;
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
-
 import com.grillgauge.api.controllers.RegisterHubController.HubConfirmRequest;
 import com.grillgauge.api.controllers.RegisterHubController.HubRegistrationRequest;
 import com.grillgauge.api.domain.entitys.Hub;
+import com.grillgauge.api.domain.entitys.User;
 import com.grillgauge.api.domain.repositorys.HubRepository;
+import com.grillgauge.api.domain.repositorys.UserRepository;
 
 @Service
 public class RegisterHubService {
-    private static final Logger LOG = LoggerFactory.getLogger(RegisterHubService.class)
+    private static final Logger LOG = LoggerFactory.getLogger(RegisterHubService.class);
 
     private final HubRepository hubRepository;
+    private final UserRepository userRepository;
     private final SecureRandom secureRandom = new SecureRandom();
 
-    public RegisterHubService(final HubRepository hubRepository) {
+    public RegisterHubService(final HubRepository hubRepository, final UserRepository userRepository) {
         this.hubRepository = hubRepository;
+        this.userRepository = userRepository;
     }
 
     /**
@@ -57,10 +59,25 @@ public class RegisterHubService {
     /**
      * Confirm a Hub's registration using the provided OTP.
      *
-     * @param hubConfirmRequest The confirmation request containing hub ID and OTP.
+     * @param hubConfirmRequest The confirmation request containing hub ID, user ID
+     *                          and OTP.
      */
     public void confirmHub(final HubConfirmRequest hubConfirmRequest) {
         LOG.info("Confirming hub with ID: {}", hubConfirmRequest.id());
+        Hub hub = hubRepository.findById(hubConfirmRequest.id())
+                .orElseThrow(() -> new IllegalArgumentException("Invalid Hub ID"));
+        if (hub.getOtpExpiresAt().isBefore(Instant.now())) {
+            throw new IllegalArgumentException("OTP has expired");
+        }
+        if (!hub.getOtp().equals(hubConfirmRequest.otp())) {
+            throw new IllegalArgumentException("Invalid OTP");
+        }
+
+        User user = userRepository.findById(hubConfirmRequest.userId())
+                .orElseThrow(() -> new IllegalArgumentException("Invalid User ID"));
+        hub.setOwner(user);
+
+        hub.setStatus(Hub.HubStatus.CONFIRMED);
         LOG.info("Successfully Confirmed hub with ID: {}", hubConfirmRequest.id());
     }
 

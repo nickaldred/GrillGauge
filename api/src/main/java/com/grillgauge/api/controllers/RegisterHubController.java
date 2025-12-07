@@ -42,7 +42,8 @@ public class RegisterHubController {
      */
     public record HubConfirmRequest(
             Long id,
-            String otp) {
+            String otp,
+            String userId) {
 
     }
 

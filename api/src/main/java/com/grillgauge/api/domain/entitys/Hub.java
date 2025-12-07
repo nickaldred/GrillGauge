@@ -4,7 +4,6 @@ import java.time.Instant;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
-import com.grillgauge.api.domain.enums.HubStatus;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -48,16 +47,16 @@ public class Hub {
      * Recommended: null this after hashing.
      */
     @Column(nullable = true)
-    private String pairingCode;
+    private String otp;
 
     /**
      * Secure hashed OTP (preferred).
      */
     @Column(nullable = true)
-    private String pairingCodeHash;
+    private String otpHash;
 
     @Column(nullable = true)
-    private Instant pairingCodeExpiresAt;
+    private Instant otpExpiresAt;
 
     @Column(nullable = false)
     private HubStatus status = HubStatus.PENDING;
@@ -123,6 +122,14 @@ public class Hub {
     @Column(nullable = true)
     private String revocationReason;
 
+    // Status
+    public enum HubStatus {
+        PENDING, // OTP generated, waiting for user confirmation
+        CONFIRMED, // OTP validated, waiting for CSR
+        REGISTERED, // Certificate issued
+        REVOKED // Device no longer trusted
+    }
+
     // Convenience constructors
 
     public Hub(final String name) {
@@ -135,8 +142,8 @@ public class Hub {
     }
 
     public Hub(final String otp, final Instant otpExpiresAt, final Map<String, String> metaData) {
-        this.pairingCode = otp;
-        this.pairingCodeExpiresAt = otpExpiresAt;
+        this.otp = otp;
+        this.otpExpiresAt = otpExpiresAt;
         this.metadata = metaData;
     }
 }
