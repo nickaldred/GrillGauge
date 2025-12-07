@@ -108,7 +108,9 @@ public class Hub {
     private Instant lastSeenAt;
 
     @JdbcTypeCode(SqlTypes.JSON)
-    @Column(columnDefinition = "jsonb")
+    // Use a text column for H2 (in-memory/test). PostgreSQL can use `jsonb` in
+    // production.
+    @Column(columnDefinition = "text")
     private Map<String, String> metadata;
 
     // -------------------------------
