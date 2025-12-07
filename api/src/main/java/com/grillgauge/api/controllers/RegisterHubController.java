@@ -8,9 +8,9 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
-import com.grillgauge.api.domain.models.HubRegistrationRequest;
-import com.grillgauge.api.domain.models.HubRegistrationResponse;
 import com.grillgauge.api.services.RegisterHubService;
+import com.grillgauge.api.services.RegisterHubService.HubRegistrationResponse;
+
 import org.springframework.web.bind.annotation.RequestBody;
 
 /**
@@ -27,6 +27,11 @@ public class RegisterHubController {
     public RegisterHubController(final RegisterHubService registerHubService) {
         this.registerHubService = registerHubService;
 
+    }
+
+    public record HubRegistrationRequest(
+            String model,
+            String fwVersion) {
     }
 
     @PostMapping("/register")
