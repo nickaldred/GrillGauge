@@ -7,9 +7,8 @@ import java.util.Map;
 
 import org.springframework.stereotype.Service;
 
+import com.grillgauge.api.controllers.RegisterHubController.HubRegistrationRequest;
 import com.grillgauge.api.domain.entitys.Hub;
-import com.grillgauge.api.domain.models.HubRegistrationRequest;
-import com.grillgauge.api.domain.models.HubRegistrationResponse;
 import com.grillgauge.api.domain.repositorys.HubRepository;
 
 @Service
@@ -20,6 +19,12 @@ public class RegisterHubService {
 
     public RegisterHubService(final HubRepository hubRepository) {
         this.hubRepository = hubRepository;
+    }
+
+    public record HubRegistrationResponse(
+            Long hubId,
+            String otp,
+            Instant otpExpiresAt) {
     }
 
     public HubRegistrationResponse registerHub(HubRegistrationRequest request) {
