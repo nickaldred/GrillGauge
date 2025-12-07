@@ -5,7 +5,6 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 import com.grillgauge.api.services.RegisterHubService;
@@ -67,16 +66,23 @@ public class RegisterHubController {
      * @param hubConfirm The confirmation request containing hub ID and OTP.
      */
     @PostMapping("/confirm")
-    @ResponseStatus(HttpStatus.CREATED)
+    @ResponseStatus(HttpStatus.OK)
     public void confirmAuthenticated(
-            final @RequestBody(required = true) HubConfirmRequest hubConfirm) {
+            final @RequestBody() HubConfirmRequest hubConfirm) {
         registerHubService.confirmHub(hubConfirm);
     }
 
+    /**
+     * Signs a certificate signing request (CSR) for the specified hub.
+     *
+     * @param hubId  The ID of the hub.
+     * @param csrPem The CSR in PEM format.
+     * @return The signed certificate in PEM format.
+     */
     @PostMapping("/{hubId}/csr")
-    @ResponseStatus(HttpStatus.OK)
+    @ResponseStatus(HttpStatus.CREATED)
     public String signCertificate(final @PathVariable String hubId, @RequestBody String csrPem) {
-        return csrPem;
+        return registerHubService.signCsr(hubId, csrPem);
     }
 
     @PostMapping("/{hubId}/revoke")
