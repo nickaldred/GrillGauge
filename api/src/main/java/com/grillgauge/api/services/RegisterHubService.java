@@ -1,6 +1,7 @@
 package com.grillgauge.api.services;
 
 import java.security.SecureRandom;
+import java.security.cert.X509Certificate;
 import java.time.Instant;
 import java.util.HashMap;
 import java.util.Map;
@@ -14,6 +15,11 @@ import com.grillgauge.api.domain.entitys.User;
 import com.grillgauge.api.domain.repositorys.HubRepository;
 import com.grillgauge.api.domain.repositorys.UserRepository;
 
+/**
+ * Service for registering hubs.
+ * 
+ * Handles the business logic for registering and confirming hubs.
+ */
 @Service
 public class RegisterHubService {
     private static final Logger LOG = LoggerFactory.getLogger(RegisterHubService.class);
@@ -21,10 +27,13 @@ public class RegisterHubService {
     private final HubRepository hubRepository;
     private final UserRepository userRepository;
     private final SecureRandom secureRandom = new SecureRandom();
+    private final CertificateService certificateService;
 
-    public RegisterHubService(final HubRepository hubRepository, final UserRepository userRepository) {
+    public RegisterHubService(final HubRepository hubRepository, final UserRepository userRepository,
+            final CertificateService certificateService) {
         this.hubRepository = hubRepository;
         this.userRepository = userRepository;
+        this.certificateService = certificateService;
     }
 
     /**
@@ -76,7 +85,6 @@ public class RegisterHubService {
         if (!hub.getOtp().equals(hubConfirmRequest.otp())) {
             throw new IllegalArgumentException("Invalid OTP");
         }
-
         String userEmail = hubConfirmRequest.userId();
         if (userEmail == null || userEmail.isBlank()) {
             throw new IllegalArgumentException("Invalid User ID");
@@ -87,6 +95,20 @@ public class RegisterHubService {
 
         hub.setStatus(Hub.HubStatus.CONFIRMED);
         LOG.info("Successfully Confirmed hub with ID: {}", hubConfirmRequest.id());
+    }
+
+    /**
+     * Sign a certificate signing request (CSR) for the specified hub.
+     * 
+     * @param hubId  The ID of the hub.
+     * @param csrPem The CSR in PEM format.
+     * @return The signed certificate in PEM format.
+     */
+    public String signCsr(final String hubId, final String csrPem) {
+        LOG.info("Signing CSR for hub ID: {}", hubId);
+        X509Certificate signedCert = certificateService.sign(certificateService.loadCsrFromPem(csrPem));
+        LOG.info("Successfully signed CSR for hub ID: {}", hubId);
+        return certificateService.convertToPem(signedCert);
     }
 
     // Helper methods
