@@ -64,7 +64,11 @@ public class RegisterHubService {
      */
     public void confirmHub(final HubConfirmRequest hubConfirmRequest) {
         LOG.info("Confirming hub with ID: {}", hubConfirmRequest.id());
-        Hub hub = hubRepository.findById(hubConfirmRequest.id())
+        Long hubId = hubConfirmRequest.id();
+        if (hubId == null) {
+            throw new IllegalArgumentException("Invalid Hub ID");
+        }
+        Hub hub = hubRepository.findById(hubId)
                 .orElseThrow(() -> new IllegalArgumentException("Invalid Hub ID"));
         if (hub.getOtpExpiresAt().isBefore(Instant.now())) {
             throw new IllegalArgumentException("OTP has expired");
@@ -73,7 +77,11 @@ public class RegisterHubService {
             throw new IllegalArgumentException("Invalid OTP");
         }
 
-        User user = userRepository.findById(hubConfirmRequest.userId())
+        String userEmail = hubConfirmRequest.userId();
+        if (userEmail == null || userEmail.isBlank()) {
+            throw new IllegalArgumentException("Invalid User ID");
+        }
+        User user = userRepository.findById(userEmail)
                 .orElseThrow(() -> new IllegalArgumentException("Invalid User ID"));
         hub.setOwner(user);
 
