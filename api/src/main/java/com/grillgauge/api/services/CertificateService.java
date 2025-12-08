@@ -36,6 +36,10 @@ import org.bouncycastle.util.io.pem.PemObject;
 import org.bouncycastle.util.io.pem.PemReader;
 import org.bouncycastle.util.io.pem.PemWriter;
 import org.bouncycastle.openssl.PEMParser;
+import org.bouncycastle.openssl.PEMDecryptorProvider;
+import org.bouncycastle.openssl.jcajce.JcePEMDecryptorProviderBuilder;
+import org.bouncycastle.openssl.jcajce.JceOpenSSLPKCS8DecryptorProviderBuilder;
+import org.bouncycastle.operator.InputDecryptorProvider;
 import org.bouncycastle.openssl.PEMKeyPair;
 import org.bouncycastle.openssl.PEMEncryptedKeyPair;
 import org.bouncycastle.openssl.jcajce.JcaPEMKeyConverter;
@@ -53,7 +57,7 @@ import jakarta.annotation.PostConstruct;
 @Service
 public class CertificateService {
 
-    @Value("${certificate.validity-days:365}") // default 1 year if unset
+    @Value("${certificate.validity-days:365}")
     private long validityDays;
 
     @Value("${certificate.ca-cert}")
@@ -62,6 +66,8 @@ public class CertificateService {
     @Value("${certificate.ca-key}")
     private String caKeyPath;
 
+    @Value("${certificate.ca-key-passphrase:}")
+    private String caKeyPassphrase;
     private X509Certificate caCertificate;
     private PrivateKey caPrivateKey;
 
@@ -145,26 +151,39 @@ public class CertificateService {
             }
 
             JcaPEMKeyConverter converter = new JcaPEMKeyConverter().setProvider("BC");
-
             // Unencrypted key pair
             if (obj instanceof PEMKeyPair) {
                 java.security.KeyPair kp = converter.getKeyPair((PEMKeyPair) obj);
                 return kp.getPrivate();
             }
 
-            // Encrypted key types - not supported for now
+            // Encrypted PEM key pair
             if (obj instanceof PEMEncryptedKeyPair) {
-                throw new CertificateServiceException(
-                        "Encrypted private key found; passphrase support not implemented");
+                if (caKeyPassphrase == null || caKeyPassphrase.isEmpty()) {
+                    throw new CertificateServiceException(
+                            "Encrypted private key found; passphrase required (set certificate.ca-key-passphrase)");
+                }
+                PEMDecryptorProvider decProv = new JcePEMDecryptorProviderBuilder()
+                        .build(caKeyPassphrase.toCharArray());
+                PEMKeyPair decrypted = ((PEMEncryptedKeyPair) obj).decryptKeyPair(decProv);
+                return converter.getKeyPair(decrypted).getPrivate();
+            }
+
+            // PKCS#8 encrypted private key
+            if (obj instanceof PKCS8EncryptedPrivateKeyInfo) {
+                if (caKeyPassphrase == null || caKeyPassphrase.isEmpty()) {
+                    throw new CertificateServiceException(
+                            "Encrypted PKCS#8 private key found; passphrase required (set certificate.ca-key-passphrase)");
+                }
+                PKCS8EncryptedPrivateKeyInfo encInfo = (PKCS8EncryptedPrivateKeyInfo) obj;
+                InputDecryptorProvider pkcs8Prov = new JceOpenSSLPKCS8DecryptorProviderBuilder()
+                        .build(caKeyPassphrase.toCharArray());
+                PrivateKeyInfo pki = encInfo.decryptPrivateKeyInfo(pkcs8Prov);
+                return converter.getPrivateKey(pki);
             }
 
             if (obj instanceof PrivateKeyInfo) {
                 return converter.getPrivateKey((PrivateKeyInfo) obj);
-            }
-
-            if (obj instanceof PKCS8EncryptedPrivateKeyInfo) {
-                throw new CertificateServiceException(
-                        "Encrypted PKCS#8 private key found; passphrase support not implemented");
             }
 
             throw new CertificateServiceException("Unsupported PEM object: " + obj.getClass().getName());
