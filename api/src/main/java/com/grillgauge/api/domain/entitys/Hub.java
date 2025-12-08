@@ -88,10 +88,6 @@ public class Hub {
     @Column(nullable = true)
     private Instant certificateExpiresAt;
 
-    /** True = hub has completed pairing + certificate issuance */
-    @Column(nullable = false)
-    private boolean paired = false;
-
     // -------------------------------
     // Generic Hub Info
     // -------------------------------

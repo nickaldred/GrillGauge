@@ -45,6 +45,7 @@ import org.bouncycastle.openssl.PEMEncryptedKeyPair;
 import org.bouncycastle.openssl.jcajce.JcaPEMKeyConverter;
 import org.bouncycastle.pkcs.PKCS8EncryptedPrivateKeyInfo;
 import org.bouncycastle.asn1.pkcs.PrivateKeyInfo;
+import java.security.PublicKey;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
@@ -223,6 +224,56 @@ public class CertificateService {
             throw new CertificateServiceRuntimeException("Failed to convert certificate to PEM", e);
         }
         return stringWriter.toString();
+    }
+
+    /**
+     * Convert a public key to PEM format.
+     *
+     * @param publicKey The public key to convert.
+     * @return The PEM-encoded public key as a String.
+     */
+    public String convertPublicKeyToPem(final PublicKey publicKey) {
+        StringWriter stringWriter = new StringWriter();
+        try (PemWriter pemWriter = new PemWriter(stringWriter)) {
+            pemWriter.writeObject(new PemObject("PUBLIC KEY", publicKey.getEncoded()));
+        } catch (final Exception e) {
+            throw new CertificateServiceRuntimeException("Failed to convert public key to PEM", e);
+        }
+        return stringWriter.toString();
+    }
+
+    /**
+     * Extract a public key from a CSR PEM string and return it as PEM.
+     *
+     * @param csrPem PEM-encoded CSR string
+     * @return PEM-encoded public key
+     */
+    public String extractPublicKeyFromCsrPem(final String csrPem) {
+        try {
+            PKCS10CertificationRequest csr = loadCsrFromPem(csrPem);
+            JcaPKCS10CertificationRequest jcaReq = new JcaPKCS10CertificationRequest(csr);
+            PublicKey pub = jcaReq.getPublicKey();
+            return convertPublicKeyToPem(pub);
+        } catch (final Exception e) {
+            throw new CertificateServiceRuntimeException("Failed to extract public key from CSR PEM", e);
+        }
+    }
+
+    /**
+     * Extract a public key from a certificate PEM string and return it as PEM.
+     *
+     * @param certPem PEM-encoded certificate string
+     * @return PEM-encoded public key
+     */
+    public String extractPublicKeyFromCertPem(final String certPem) {
+        try (PemReader pemReader = new PemReader(new StringReader(certPem))) {
+            byte[] content = pemReader.readPemObject().getContent();
+            X509CertificateHolder holder = new X509CertificateHolder(content);
+            X509Certificate cert = new JcaX509CertificateConverter().setProvider("BC").getCertificate(holder);
+            return convertPublicKeyToPem(cert.getPublicKey());
+        } catch (final Exception e) {
+            throw new CertificateServiceRuntimeException("Failed to extract public key from certificate PEM", e);
+        }
     }
 
     /**

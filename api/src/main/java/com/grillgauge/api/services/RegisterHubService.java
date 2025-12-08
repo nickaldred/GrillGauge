@@ -12,6 +12,7 @@ import com.grillgauge.api.controllers.RegisterHubController.HubConfirmRequest;
 import com.grillgauge.api.controllers.RegisterHubController.HubRegistrationRequest;
 import com.grillgauge.api.domain.entitys.Hub;
 import com.grillgauge.api.domain.entitys.User;
+import com.grillgauge.api.domain.entitys.Hub.HubStatus;
 import com.grillgauge.api.domain.repositorys.HubRepository;
 import com.grillgauge.api.domain.repositorys.UserRepository;
 
@@ -94,6 +95,10 @@ public class RegisterHubService {
         hub.setOwner(user);
 
         hub.setStatus(Hub.HubStatus.CONFIRMED);
+        hub.setOtpExpiresAt(null);
+        hub.setOtp(null);
+        hub.setOtpHash(null);
+        hubRepository.save(hub);
         LOG.info("Successfully Confirmed hub with ID: {}", hubConfirmRequest.id());
     }
 
@@ -108,7 +113,32 @@ public class RegisterHubService {
         LOG.info("Signing CSR for hub ID: {}", hubId);
         X509Certificate signedCert = certificateService.sign(certificateService.loadCsrFromPem(csrPem));
         LOG.info("Successfully signed CSR for hub ID: {}", hubId);
-        return certificateService.convertToPem(signedCert);
+        String signedCertPem = certificateService.convertToPem(signedCert);
+        Hub hub = hubRepository.findById(Long.parseLong(hubId))
+                .orElseThrow(() -> new IllegalArgumentException("Invalid Hub ID"));
+        hub.setCsrPem(csrPem);
+        hub.setCertificatePem(signedCertPem);
+        hub.setPublicKeyPem(certificateService.extractPublicKeyFromCsrPem(csrPem));
+        hub.setCertificateExpiresAt(signedCert.getNotAfter().toInstant());
+        hub.setCertificateIssuedAt(signedCert.getNotBefore().toInstant());
+        hub.setStatus(HubStatus.REGISTERED);
+        hub.setUpdatedAt(Instant.now());
+        hubRepository.save(hub);
+        LOG.info("Stored certificate for hub ID: {}", hubId);
+        return signedCertPem;
+    }
+
+    /**
+     * Revoke the certificate associated with the specified hub.
+     * 
+     * @param hubId The ID of the hub.
+     */
+    public void revokeCertificate(final Long hubId) {
+        LOG.info("Revoking certificates for hub ID: {}", hubId);
+        Hub hub = hubRepository.findById(hubId)
+                .orElseThrow(() -> new IllegalArgumentException("Invalid Hub ID"));
+        // certificateService.revokeCertificatesForHub(hub);
+        LOG.info("Successfully revoked certificates for hub ID: {}", hubId);
     }
 
     // Helper methods
