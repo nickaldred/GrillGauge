@@ -87,7 +87,8 @@ public class RegisterHubController {
 
     @PostMapping("/{hubId}/revoke")
     @ResponseStatus(HttpStatus.OK)
-    public void revokeCertificate(final @PathVariable String hubId) {
+    public void revokeCertificate(final @PathVariable Long hubId) {
+        registerHubService.revokeCertificate(hubId);
     }
 
 }
