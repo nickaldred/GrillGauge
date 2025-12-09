@@ -46,6 +46,11 @@ import org.bouncycastle.openssl.jcajce.JcaPEMKeyConverter;
 import org.bouncycastle.pkcs.PKCS8EncryptedPrivateKeyInfo;
 import org.bouncycastle.asn1.pkcs.PrivateKeyInfo;
 import java.security.PublicKey;
+import java.security.cert.X509CRL;
+import org.bouncycastle.cert.X509v2CRLBuilder;
+import org.bouncycastle.cert.X509CRLHolder;
+import org.bouncycastle.cert.jcajce.JcaX509CRLConverter;
+import org.bouncycastle.asn1.ASN1Integer;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
@@ -372,6 +377,79 @@ public class CertificateService {
         } catch (Exception e) {
             throw new CertificateServiceRuntimeException("Failed to sign certificate", e);
         }
+    }
+
+    /**
+     * Revoke a signed certificate (convenience method).
+     * Uses the current time as revocation date and `cessationOfOperation` as
+     * reason.
+     *
+     * @param certificate the issued certificate to revoke
+     * @return the generated X509CRL containing the revoked certificate
+     */
+    public X509CRL revokeSignedCertificate(final X509Certificate certificate) {
+        return revokeBySerial(certificate.getSerialNumber(), new Date(), 5); // 5 = cessationOfOperation
+    }
+
+    /**
+     * Revoke a certificate by serial number. Returns a signed CRL containing the
+     * revocation.
+     *
+     * @param serial         serial number of the certificate to revoke
+     * @param revocationDate date of revocation
+     * @param reason         numeric CRL reason code (see RFC5280)
+     * @return signed X509CRL
+     */
+    public X509CRL revokeBySerial(final BigInteger serial, final Date revocationDate, final int reason) {
+        try {
+            // Issuer must be the CA
+            X500Name issuer = new X500Name(caCertificate.getSubjectX500Principal().getName());
+
+            // Build CRL
+            X509v2CRLBuilder crlBuilder = new X509v2CRLBuilder(issuer, new Date());
+            crlBuilder.addCRLEntry(serial, revocationDate, reason);
+
+            // Add authority key identifier
+            JcaX509ExtensionUtils extUtils = new JcaX509ExtensionUtils();
+            crlBuilder.addExtension(
+                    Extension.authorityKeyIdentifier,
+                    false,
+                    extUtils.createAuthorityKeyIdentifier(new X509CertificateHolder(caCertificate.getEncoded())));
+
+            // Add a CRL number (use timestamp-based value)
+            BigInteger crlNumber = BigInteger.valueOf(System.currentTimeMillis());
+            crlBuilder.addExtension(Extension.cRLNumber, false, new ASN1Integer(crlNumber));
+
+            // Sign CRL with CA private key
+            AsymmetricKeyParameter caKeyParam = PrivateKeyFactory.createKey(caPrivateKey.getEncoded());
+            AlgorithmIdentifier sigAlgId = new DefaultSignatureAlgorithmIdentifierFinder().find("SHA256withRSA");
+            AlgorithmIdentifier digAlgId = new DefaultDigestAlgorithmIdentifierFinder().find(sigAlgId);
+
+            ContentSigner signer = new BcRSAContentSignerBuilder(sigAlgId, digAlgId).build(caKeyParam);
+
+            X509CRLHolder holder = crlBuilder.build(signer);
+
+            return new JcaX509CRLConverter().setProvider("BC").getCRL(holder);
+
+        } catch (Exception e) {
+            throw new CertificateServiceRuntimeException("Failed to revoke certificate", e);
+        }
+    }
+
+    /**
+     * Convert an X509CRL to PEM format.
+     *
+     * @param crl the CRL to convert
+     * @return PEM-encoded CRL as String
+     */
+    public String convertCrlToPem(final X509CRL crl) {
+        StringWriter stringWriter = new StringWriter();
+        try (PemWriter pemWriter = new PemWriter(stringWriter)) {
+            pemWriter.writeObject(new PemObject("X509 CRL", crl.getEncoded()));
+        } catch (final Exception e) {
+            throw new CertificateServiceRuntimeException("Failed to convert CRL to PEM", e);
+        }
+        return stringWriter.toString();
     }
 
 }
