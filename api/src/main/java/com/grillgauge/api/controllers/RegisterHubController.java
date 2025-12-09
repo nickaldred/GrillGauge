@@ -55,7 +55,7 @@ public class RegisterHubController {
      */
     @PostMapping("/register")
     public ResponseEntity<HubRegistrationResponse> registerHub(
-            @RequestBody(required = false) HubRegistrationRequest request) {
+            @RequestBody() HubRegistrationRequest request) {
         HubRegistrationResponse response = registerHubService.registerHub(request);
         return ResponseEntity.ok(response);
     }
@@ -85,6 +85,11 @@ public class RegisterHubController {
         return registerHubService.signCsr(hubId, csrPem);
     }
 
+    /**
+     * Revoke the certificate for the specified hub.
+     *
+     * @param hubId The ID of the hub.
+     */
     @PostMapping("/{hubId}/revoke")
     @ResponseStatus(HttpStatus.OK)
     public void revokeCertificate(final @PathVariable Long hubId) {

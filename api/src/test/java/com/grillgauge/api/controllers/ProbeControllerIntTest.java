@@ -2,8 +2,6 @@ package com.grillgauge.api.controllers;
 
 import java.time.Instant;
 import java.util.List;
-
-import org.aspectj.lang.annotation.Before;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -12,8 +10,6 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 import org.springframework.transaction.annotation.Transactional;
-
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.grillgauge.api.domain.entitys.Hub;
 import com.grillgauge.api.domain.entitys.Probe;
 import com.grillgauge.api.domain.entitys.Reading;
@@ -22,8 +18,6 @@ import com.grillgauge.api.domain.repositorys.HubRepository;
 import com.grillgauge.api.domain.repositorys.ProbeRepository;
 import com.grillgauge.api.domain.repositorys.ReadingRepository;
 import com.grillgauge.api.domain.repositorys.UserRepository;
-
-import jakarta.persistence.criteria.CriteriaBuilder.In;
 
 @AutoConfigureMockMvc
 @SpringBootTest
