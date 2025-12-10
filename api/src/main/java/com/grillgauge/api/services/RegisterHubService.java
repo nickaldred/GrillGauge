@@ -13,6 +13,7 @@ import com.grillgauge.api.controllers.RegisterHubController.HubRegistrationReque
 import com.grillgauge.api.domain.entitys.Hub;
 import com.grillgauge.api.domain.entitys.User;
 import com.grillgauge.api.domain.entitys.Hub.HubStatus;
+import com.grillgauge.api.domain.models.FrontEndHub;
 import com.grillgauge.api.domain.repositorys.HubRepository;
 import com.grillgauge.api.domain.repositorys.UserRepository;
 
@@ -71,10 +72,11 @@ public class RegisterHubService {
      *
      * @param hubConfirmRequest The confirmation request containing hub ID, user ID
      *                          and OTP.
+     * @return The confirmed hub's ID.
      */
-    public void confirmHub(final HubConfirmRequest hubConfirmRequest) {
-        LOG.info("Confirming hub with ID: {}", hubConfirmRequest.id());
-        Long hubId = hubConfirmRequest.id();
+    public Long confirmHub(final HubConfirmRequest hubConfirmRequest) {
+        LOG.info("Confirming hub with ID: {}", hubConfirmRequest.hubId());
+        Long hubId = hubConfirmRequest.hubId();
         if (hubId == null) {
             throw new IllegalArgumentException("Invalid Hub ID");
         }
@@ -99,7 +101,8 @@ public class RegisterHubService {
         hub.setOtp(null);
         hub.setOtpHash(null);
         hubRepository.save(hub);
-        LOG.info("Successfully Confirmed hub with ID: {}", hubConfirmRequest.id());
+        LOG.info("Successfully Confirmed hub with ID: {}, Hub ID: {}", hubConfirmRequest.hubId());
+        return hub.getId();
     }
 
     /**
