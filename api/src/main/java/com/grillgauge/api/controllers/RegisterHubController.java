@@ -40,7 +40,7 @@ public class RegisterHubController {
      * DTO class for Hub registration confirmation.
      */
     public record HubConfirmRequest(
-            Long id,
+            Long hubId,
             String otp,
             String userId) {
 
