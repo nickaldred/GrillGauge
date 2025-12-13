@@ -4,9 +4,11 @@ import org.junit.jupiter.api.Test;
 import static org.junit.jupiter.api.Assertions.*;
 import org.junit.jupiter.api.BeforeEach;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.web.client.TestRestTemplate;
 import org.springframework.http.ResponseEntity;
+import org.springframework.test.context.bean.override.convention.TestBean;
 
 import com.grillgauge.api.controllers.RegisterHubController.HubConfirmRequest;
 import com.grillgauge.api.controllers.RegisterHubController.HubRegistrationRequest;
@@ -22,6 +24,9 @@ public class RegisterHubControllerIntTest {
 
     private static final String REGISTER_URL = "/api/v1/register/register";
     private static final String CONFIRM_URL = "/api/v1/register/confirm";
+
+    @Value("${otp.expiry.seconds}")
+    private int otpExpirySeconds;
 
     @Autowired
     private TestRestTemplate restTemplate;
@@ -141,6 +146,35 @@ public class RegisterHubControllerIntTest {
         // Given
         User testUser = createUser("nickaldred@hotmail.co.uk", "Nick", "Aldred");
         HubRegistrationResponse hubRegistrationResponse = registerHub(REGISTER_URL, REGISTER_URL);
+        Long hubId = hubRegistrationResponse.hubId();
+        assertNotNull(hubId);
+        Hub unConfirmedHub = hubRepository.findById(hubId).orElse(null);
+        unConfirmedHub.setOtpExpiresAt(unConfirmedHub.getOtpExpiresAt().minusSeconds(otpExpirySeconds + 1));
+        hubRepository.save(unConfirmedHub);
+
+        // When
+        HubConfirmRequest confirmRequest = new HubConfirmRequest(
+                hubRegistrationResponse.hubId(), hubRegistrationResponse.otp(), testUser.getEmail());
+        ResponseEntity<Void> confirmResponse = restTemplate.postForEntity(CONFIRM_URL,
+                confirmRequest,
+                Void.class);
+
+        // Then
+        assertTrue(confirmResponse.getStatusCode().is5xxServerError());
+        assertNotNull(hubId);
+        Hub confirmedHub = hubRepository.findById(hubId).orElse(null);
+        assertNotNull(confirmedHub);
+        assertNull(confirmedHub.getOwner());
+        assertEquals(Hub.HubStatus.PENDING, confirmedHub.getStatus());
+        assertNotNull(confirmedHub.getOtp());
+        assertNotNull(confirmedHub.getOtpExpiresAt());
+    }
+
+    @Test
+    public void testConfirmHubExpiredOTP() {
+        // Given
+        User testUser = createUser("nickaldred@hotmail.co.uk", "Nick", "Aldred");
+        HubRegistrationResponse hubRegistrationResponse = registerHub(REGISTER_URL, REGISTER_URL);
 
         // When
         HubConfirmRequest confirmRequest = new HubConfirmRequest(
@@ -159,4 +193,5 @@ public class RegisterHubControllerIntTest {
         assertNotNull(confirmedHub.getOtp());
         assertNotNull(confirmedHub.getOtpExpiresAt());
     }
+
 }
