@@ -7,13 +7,13 @@ import java.util.HashMap;
 import java.util.Map;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import com.grillgauge.api.controllers.RegisterHubController.HubConfirmRequest;
 import com.grillgauge.api.controllers.RegisterHubController.HubRegistrationRequest;
 import com.grillgauge.api.domain.entitys.Hub;
 import com.grillgauge.api.domain.entitys.User;
 import com.grillgauge.api.domain.entitys.Hub.HubStatus;
-import com.grillgauge.api.domain.models.FrontEndHub;
 import com.grillgauge.api.domain.repositorys.HubRepository;
 import com.grillgauge.api.domain.repositorys.UserRepository;
 
@@ -30,6 +30,9 @@ public class RegisterHubService {
     private final UserRepository userRepository;
     private final SecureRandom secureRandom = new SecureRandom();
     private final CertificateService certificateService;
+
+    @Value("${otp.expiry.seconds}")
+    private int otpExpirySeconds;
 
     public RegisterHubService(final HubRepository hubRepository, final UserRepository userRepository,
             final CertificateService certificateService) {
@@ -57,7 +60,7 @@ public class RegisterHubService {
     public HubRegistrationResponse registerHub(final HubRegistrationRequest request) {
         LOG.info("Registering Hub with model: {}, fwVersion: {}");
         String otp = generateOtp();
-        Instant expiresAt = Instant.now().plusSeconds(300);
+        Instant expiresAt = Instant.now().plusSeconds(otpExpirySeconds);
         Hub hub = new Hub(otp, expiresAt, buildMetadata(request)); // Save Hub as PENDING
         Hub savedHub = hubRepository.save(hub);
         LOG.info("Successfully registered hub with ID: {}", savedHub.getId());
