@@ -120,9 +120,9 @@ public class RegisterHubControllerIntTest {
         assertNotNull(confirmedHub);
         assertEquals(testUser.getEmail(), confirmedHub.getOwner().getEmail());
         assertEquals(Hub.HubStatus.CONFIRMED, confirmedHub.getStatus());
-        assertEquals(null, confirmedHub.getOtp());
-        assertEquals(null, confirmedHub.getOtpExpiresAt());
-        assertEquals(null, confirmedHub.getOtpHash());
+        assertNull(confirmedHub.getOtp());
+        assertNull(confirmedHub.getOtpExpiresAt());
+        assertNull(confirmedHub.getOtpHash());
     }
 
     @Test
@@ -134,5 +134,29 @@ public class RegisterHubControllerIntTest {
                 Void.class);
         // Then
         assertTrue(response.getStatusCode().is4xxClientError());
+    }
+
+    @Test
+    public void testConfirmHubInvalidOTP() {
+        // Given
+        User testUser = createUser("nickaldred@hotmail.co.uk", "Nick", "Aldred");
+        HubRegistrationResponse hubRegistrationResponse = registerHub(REGISTER_URL, REGISTER_URL);
+
+        // When
+        HubConfirmRequest confirmRequest = new HubConfirmRequest(
+                hubRegistrationResponse.hubId(), "bad-otp", testUser.getEmail());
+        ResponseEntity<Void> confirmResponse = restTemplate.postForEntity(CONFIRM_URL,
+                confirmRequest,
+                Void.class);
+        // Then
+        assertTrue(confirmResponse.getStatusCode().is5xxServerError());
+        Long hubId = hubRegistrationResponse.hubId();
+        assertNotNull(hubId);
+        Hub confirmedHub = hubRepository.findById(hubId).orElse(null);
+        assertNotNull(confirmedHub);
+        assertNull(confirmedHub.getOwner());
+        assertEquals(Hub.HubStatus.PENDING, confirmedHub.getStatus());
+        assertNotNull(confirmedHub.getOtp());
+        assertNotNull(confirmedHub.getOtpExpiresAt());
     }
 }
