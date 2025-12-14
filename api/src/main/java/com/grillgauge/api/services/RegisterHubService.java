@@ -1,7 +1,9 @@
 package com.grillgauge.api.services;
 
+import java.math.BigInteger;
 import java.security.SecureRandom;
 import java.security.cert.X509Certificate;
+import java.util.Date;
 import java.time.Instant;
 import java.util.HashMap;
 import java.util.Map;
@@ -149,13 +151,39 @@ public class RegisterHubService {
     /**
      * Revoke the certificate associated with the specified hub.
      * 
-     * @param hubId The ID of the hub.
+     * @param hubId  The ID of the hub.
+     * @param reason The reason code for revocation.
      */
-    public void revokeCertificate(final Long hubId) {
+    public void revokeCertificate(final Long hubId, final int reason) {
         LOG.info("Revoking certificates for hub ID: {}", hubId);
         Hub hub = hubRepository.findById(hubId)
                 .orElseThrow(() -> new IllegalArgumentException("Invalid Hub ID"));
-        // certificateService.revokeCertificatesForHub(hub);
+        Object certSerialObj = hub.getCertificateSerial();
+        if (certSerialObj == null) {
+            throw new IllegalStateException("Hub does not have a certificate serial");
+        }
+
+        final BigInteger serial;
+        if (certSerialObj instanceof BigInteger) {
+            serial = (BigInteger) certSerialObj;
+        } else if (certSerialObj instanceof Number) {
+            serial = BigInteger.valueOf(((Number) certSerialObj).longValue());
+        } else if (certSerialObj instanceof String) {
+            serial = new BigInteger((String) certSerialObj);
+        } else {
+            throw new IllegalStateException("Unsupported certificate serial type: " + certSerialObj.getClass().getName());
+        }
+
+        certificateService.revokeBySerial(serial, Date.from(Instant.now()), reason);
+
+        hub.setCertificatePem(null);
+        hub.setCertificateExpiresAt(null);
+        hub.setCertificateIssuedAt(null);
+        hub.setCsrPem(null);
+        hub.setPublicKeyPem(null);
+        hub.setStatus(HubStatus.CONFIRMED);
+        hub.setUpdatedAt(Instant.now());
+        hubRepository.save(hub);
         LOG.info("Successfully revoked certificates for hub ID: {}", hubId);
     }
 
