@@ -284,4 +284,50 @@ public class RegisterHubControllerIntTest {
         assertEquals(testUser.getEmail(), updatedHub.getOwner().getEmail());
     }
 
+    @Test
+    public void testSignCsrForUnconfirmedHub() {
+        // Given
+        HubRegistrationResponse hubRegistrationResponse = registerHub("ModelX", "1.0.0");
+        Long hubId = hubRegistrationResponse.hubId();
+        assertNotNull(hubId);
+        String csrPem = "-----BEGIN CERTIFICATE REQUEST-----\n"
+                + "MIICWjCCAEMCAQAwTjELMAkGA1UEBhMCVVMxCzAJBgNVBAgMAkNBMQswCQYDVQQH\n"
+                + "DAJMQTEPMA0GA1UECgwGQ29tcGFueTEPMA0GA1UEAwwGdGVzdC5jb20wggEiMA0G\n"
+                + "CSqGSIb3DQEBAQUAA4IBDwAwggEKAoIBAQDFakeCSRl6YQ1Z6j0K3z3T8j6+X9O/\n"
+                + "-----END CERTIFICATE REQUEST-----";
+
+        // When
+        String csrUrl = "/api/v1/register/" + hubId + "/csr";
+        ResponseEntity<String> csrResponse = restTemplate.postForEntity(csrUrl, csrPem, String.class);
+        // Then
+        assertEquals(500, csrResponse.getStatusCode().value());
+    }
+
+    @Test
+    public void testSignCsrWithNullBody() {
+        // Given
+        HubRegistrationResponse hubRegistrationResponse = registerHub("ModelX", "1.0.0");
+        Long hubId = hubRegistrationResponse.hubId();
+        assertNotNull(hubId);
+        // When
+        String csrUrl = "/api/v1/register/" + hubId + "/csr";
+        ResponseEntity<String> csrResponse = restTemplate.postForEntity(csrUrl, null, String.class);
+        // Then
+        assertEquals(400, csrResponse.getStatusCode().value());
+    }
+
+    @Test
+    public void testSignCsrForNonexistentHub() {
+        // Given
+        String csrPem = "-----BEGIN CERTIFICATE REQUEST-----\n"
+                + "MIICWjCCAEMCAQAwTjELMAkGA1UEBhMCVVMxCzAJBgNVBAgMAkNBMQswCQYDVQQH\n"
+                + "DAJMQTEPMA0GA1UECgwGQ29tcGFueTEPMA0GA1UEAwwGdGVzdC5jb20wggEiMA0G\n"
+                + "CSqGSIb3DQEBAQUAA4IBDwAwggEKAoIBAQDFakeCSRl6YQ1Z6j0K3z3T8j6+X9O/\n"
+                + "-----END CERTIFICATE REQUEST-----";
+        // When
+        String csrUrl = "/api/v1/register/99999/csr";
+        ResponseEntity<String> csrResponse = restTemplate.postForEntity(csrUrl, csrPem, String.class);
+        // Then
+        assertEquals(500, csrResponse.getStatusCode().value());
+    }
 }
