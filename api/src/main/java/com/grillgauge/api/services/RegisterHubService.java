@@ -122,6 +122,18 @@ public class RegisterHubService {
         String signedCertPem = certificateService.convertToPem(signedCert);
         Hub hub = hubRepository.findById(Long.parseLong(hubId))
                 .orElseThrow(() -> new IllegalArgumentException("Invalid Hub ID"));
+
+        // Validations
+        if (hub.getStatus() != HubStatus.CONFIRMED) {
+            throw new IllegalStateException("Hub must be CONFIRMED to sign CSR");
+        }
+        if (hub.getCertificatePem() != null) {
+            throw new IllegalStateException("Hub already has a signed certificate");
+        }
+        if (hub.getOwner() == null) {
+            throw new IllegalStateException("Hub must have an owner to sign CSR");
+        }
+
         hub.setCsrPem(csrPem);
         hub.setCertificatePem(signedCertPem);
         hub.setPublicKeyPem(certificateService.extractPublicKeyFromCsrPem(csrPem));
