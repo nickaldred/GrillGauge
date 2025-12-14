@@ -424,4 +424,26 @@ public class RegisterHubControllerIntTest {
         assertNull(updatedHub.getCertificateExpiresAt());
         assertEquals(Hub.HubStatus.CONFIRMED, updatedHub.getStatus());
     }
+
+    @Test
+    public void testRevokeCertificateForNonexistentHub() {
+        // When
+        String revokeUrl = "/api/v1/register/99999/revoke?reason=5";
+        ResponseEntity<Void> revokeResponse = restTemplate.postForEntity(revokeUrl, null, Void.class);
+        // Then
+        assertEquals(500, revokeResponse.getStatusCode().value());
+    }
+
+    @Test
+    public void testRevokeCertificateForHubWithoutCertificateSerial() {
+        // Given
+        HubRegistrationResponse hubRegistrationResponse = registerHub("ModelX", "1.0.0");
+        Long hubId = hubRegistrationResponse.hubId();
+        assertNotNull(hubId);
+        // When
+        String revokeUrl = "/api/v1/register/" + hubId + "/revoke?reason=5";
+        ResponseEntity<Void> revokeResponse = restTemplate.postForEntity(revokeUrl, null, Void.class);
+        // Then
+        assertEquals(500, revokeResponse.getStatusCode().value());
+    }
 }
