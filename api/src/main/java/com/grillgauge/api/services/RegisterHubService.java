@@ -162,6 +162,15 @@ public class RegisterHubService {
         if (certSerialObj == null) {
             throw new IllegalStateException("Hub does not have a certificate serial");
         }
+        if (hub.getStatus() != HubStatus.REGISTERED) {
+            throw new IllegalStateException("Hub must be in REGISTERED status to revoke certificate");
+        }
+        if (hub.getCertificatePem() == null) {
+            throw new IllegalStateException("Hub does not have a certificate to revoke");
+        }
+        if (hub.getOwner() == null) {
+            throw new IllegalStateException("Hub must have an owner to revoke certificate");
+        }
 
         final BigInteger serial;
         if (certSerialObj instanceof BigInteger) {
@@ -171,7 +180,8 @@ public class RegisterHubService {
         } else if (certSerialObj instanceof String) {
             serial = new BigInteger((String) certSerialObj);
         } else {
-            throw new IllegalStateException("Unsupported certificate serial type: " + certSerialObj.getClass().getName());
+            throw new IllegalStateException(
+                    "Unsupported certificate serial type: " + certSerialObj.getClass().getName());
         }
 
         certificateService.revokeBySerial(serial, Date.from(Instant.now()), reason);
@@ -181,7 +191,7 @@ public class RegisterHubService {
         hub.setCertificateIssuedAt(null);
         hub.setCsrPem(null);
         hub.setPublicKeyPem(null);
-        hub.setStatus(HubStatus.CONFIRMED);
+        hub.setStatus(HubStatus.REVOKED);
         hub.setUpdatedAt(Instant.now());
         hubRepository.save(hub);
         LOG.info("Successfully revoked certificates for hub ID: {}", hubId);
