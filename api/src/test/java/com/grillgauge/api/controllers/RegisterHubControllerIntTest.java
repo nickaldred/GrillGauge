@@ -8,8 +8,6 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.web.client.TestRestTemplate;
 import org.springframework.http.ResponseEntity;
-import org.springframework.test.context.bean.override.convention.TestBean;
-
 import com.grillgauge.api.controllers.RegisterHubController.HubConfirmRequest;
 import com.grillgauge.api.controllers.RegisterHubController.HubRegistrationRequest;
 import com.grillgauge.api.domain.entitys.Hub;
@@ -29,6 +27,15 @@ import org.bouncycastle.util.io.pem.PemObject;
 import org.bouncycastle.util.io.pem.PemWriter;
 import java.io.StringWriter;
 import java.security.cert.CertificateFactory;
+import java.security.cert.CertStore;
+import java.security.cert.CertStoreParameters;
+import java.security.cert.CollectionCertStoreParameters;
+import java.security.cert.CertPath;
+import java.security.cert.CertPathValidator;
+import java.security.cert.CertPathValidatorException;
+import java.security.cert.PKIXParameters;
+import java.security.cert.TrustAnchor;
+import java.security.cert.X509CRL;
 import java.security.cert.X509Certificate;
 import java.io.ByteArrayInputStream;
 import java.nio.file.Files;
@@ -37,6 +44,8 @@ import java.nio.charset.StandardCharsets;
 import javax.security.auth.x500.X500Principal;
 import javax.naming.ldap.LdapName;
 import javax.naming.ldap.Rdn;
+import java.util.Date;
+import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -63,6 +72,9 @@ public class RegisterHubControllerIntTest {
 
     @Autowired
     private HubRepository hubRepository;
+
+    @Autowired
+    private com.grillgauge.api.services.CertificateService certificateService;
 
     @BeforeEach
     public void setup() {
@@ -98,6 +110,73 @@ public class RegisterHubControllerIntTest {
     private User createUser(final String email, final String firstName, final String lastName) {
         User testUser = new User(email, firstName, lastName);
         return userRepository.save(testUser);
+    }
+
+    private void confirmHub(final HubRegistrationResponse regResp, final String userEmail) {
+        HubConfirmRequest confirmRequest = new HubConfirmRequest(regResp.hubId(), regResp.otp(), userEmail);
+        ResponseEntity<Void> confirmResponse = restTemplate.postForEntity(CONFIRM_URL, confirmRequest, Void.class);
+        assertTrue(confirmResponse.getStatusCode().is2xxSuccessful());
+    }
+
+    private String generateCsrPem(final Long hubId) throws Exception {
+        KeyPairGenerator kpg = KeyPairGenerator.getInstance("RSA");
+        kpg.initialize(2048);
+        KeyPair keyPair = kpg.generateKeyPair();
+        X500Name subject = new X500Name("CN=hub-" + hubId);
+        JcaPKCS10CertificationRequestBuilder p10Builder = new JcaPKCS10CertificationRequestBuilder(subject,
+                keyPair.getPublic());
+        ContentSigner signer = new JcaContentSignerBuilder("SHA256withRSA").build(keyPair.getPrivate());
+        PKCS10CertificationRequest csr = p10Builder.build(signer);
+        StringWriter sw = new StringWriter();
+        try (PemWriter pw = new PemWriter(sw)) {
+            pw.writeObject(new PemObject("CERTIFICATE REQUEST", csr.getEncoded()));
+        }
+        return sw.toString();
+    }
+
+    private X509Certificate loadCertificateFromPem(final String pem) throws Exception {
+        CertificateFactory cf = CertificateFactory.getInstance("X.509");
+        try (ByteArrayInputStream in = new ByteArrayInputStream(pem.getBytes(StandardCharsets.UTF_8))) {
+            return (X509Certificate) cf.generateCertificate(in);
+        }
+    }
+
+    private X509Certificate loadCaCertificate() throws Exception {
+        byte[] caBytes = Files.readAllBytes(Paths.get(caCertPath));
+        CertificateFactory cf = CertificateFactory.getInstance("X.509");
+        try (ByteArrayInputStream in2 = new ByteArrayInputStream(caBytes)) {
+            return (X509Certificate) cf.generateCertificate(in2);
+        }
+    }
+
+    private void setHubCertificateSerialFromCert(final Long hubId, final X509Certificate cert) {
+        Hub hub = hubRepository.findById(hubId).orElseThrow();
+        hub.setCertificateSerial(cert.getSerialNumber().longValue());
+        hubRepository.save(hub);
+    }
+
+    private void assertCertRevoked(final X509Certificate signedCert) throws Exception {
+        X509CRL crl = certificateService.revokeBySerial(signedCert.getSerialNumber(), new Date(), 5);
+        List<X509CRL> crlList = List.of(crl);
+        CertStoreParameters csParams = new CollectionCertStoreParameters(crlList);
+        CertStore crlStore = CertStore.getInstance("Collection", csParams);
+
+        X509Certificate caCert = loadCaCertificate();
+        TrustAnchor ta = new TrustAnchor(caCert, null);
+        Set<TrustAnchor> trustAnchors = Set.of(ta);
+        PKIXParameters pkixParams = new PKIXParameters(trustAnchors);
+        pkixParams.setRevocationEnabled(true);
+        pkixParams.addCertStore(crlStore);
+
+        CertificateFactory cf = CertificateFactory.getInstance("X.509");
+        CertPath certPath = cf.generateCertPath(List.of(signedCert));
+        CertPathValidator validator = CertPathValidator.getInstance("PKIX");
+        try {
+            validator.validate(certPath, pkixParams);
+            fail("Expected validation to fail for revoked certificate");
+        } catch (CertPathValidatorException expected) {
+            // expected - certificate is revoked
+        }
     }
 
     @Test
@@ -219,27 +298,10 @@ public class RegisterHubControllerIntTest {
         assertNotNull(hubId);
 
         // Confirm the hub
-        HubConfirmRequest confirmRequest = new HubConfirmRequest(
-                hubRegistrationResponse.hubId(), hubRegistrationResponse.otp(), testUser.getEmail());
-        ResponseEntity<Void> confirmResponse = restTemplate.postForEntity(CONFIRM_URL,
-                confirmRequest,
-                Void.class);
-        assertTrue(confirmResponse.getStatusCode().is2xxSuccessful());
+        confirmHub(hubRegistrationResponse, testUser.getEmail());
 
-        // Generate a CSR (PKCS#10) using BouncyCastle
-        KeyPairGenerator kpg = KeyPairGenerator.getInstance("RSA");
-        kpg.initialize(2048);
-        KeyPair keyPair = kpg.generateKeyPair();
-        X500Name subject = new X500Name("CN=hub-" + hubId);
-        JcaPKCS10CertificationRequestBuilder p10Builder = new JcaPKCS10CertificationRequestBuilder(subject,
-                keyPair.getPublic());
-        ContentSigner signer = new JcaContentSignerBuilder("SHA256withRSA").build(keyPair.getPrivate());
-        PKCS10CertificationRequest csr = p10Builder.build(signer);
-        StringWriter sw = new StringWriter();
-        try (PemWriter pw = new PemWriter(sw)) {
-            pw.writeObject(new PemObject("CERTIFICATE REQUEST", csr.getEncoded()));
-        }
-        String csrPem = sw.toString();
+        // Generate CSR
+        String csrPem = generateCsrPem(hubId);
 
         // When
         String csrUrl = "/api/v1/register/" + hubId + "/csr";
@@ -252,16 +314,8 @@ public class RegisterHubControllerIntTest {
         assertTrue(signedCertPem.contains("BEGIN CERTIFICATE"));
 
         // Load signed cert and CA cert, verify signed cert is issued by CA
-        CertificateFactory cf = CertificateFactory.getInstance("X.509");
-        X509Certificate signedCert;
-        try (ByteArrayInputStream in = new ByteArrayInputStream(signedCertPem.getBytes(StandardCharsets.UTF_8))) {
-            signedCert = (X509Certificate) cf.generateCertificate(in);
-        }
-        byte[] caBytes = Files.readAllBytes(Paths.get(caCertPath));
-        X509Certificate caCert;
-        try (ByteArrayInputStream in2 = new ByteArrayInputStream(caBytes)) {
-            caCert = (X509Certificate) cf.generateCertificate(in2);
-        }
+        X509Certificate signedCert = loadCertificateFromPem(signedCertPem);
+        X509Certificate caCert = loadCaCertificate();
 
         // Verify signature and issuer (compare DN components order-insensitively)
         signedCert.verify(caCert.getPublicKey());
@@ -329,5 +383,48 @@ public class RegisterHubControllerIntTest {
         ResponseEntity<String> csrResponse = restTemplate.postForEntity(csrUrl, csrPem, String.class);
         // Then
         assertEquals(500, csrResponse.getStatusCode().value());
+    }
+
+    @Test
+    public void testRevokeCertificateSuccess() throws Exception {
+        // Given
+        User testUser = createUser("nickaldred@hotmail.co.uk", "Nick", "Aldred");
+        HubRegistrationResponse hubRegistrationResponse = registerHub("ModelX", "1.0.0");
+        Long hubId = hubRegistrationResponse.hubId();
+        assertNotNull(hubId);
+
+        // Confirm the hub
+        confirmHub(hubRegistrationResponse, testUser.getEmail());
+
+        // Generate CSR
+        String csrPem = generateCsrPem(hubId);
+
+        // When - sign CSR
+        String csrUrl = "/api/v1/register/" + hubId + "/csr";
+        ResponseEntity<String> csrResponse = restTemplate.postForEntity(csrUrl, csrPem, String.class);
+        assertEquals(201, csrResponse.getStatusCode().value());
+        String signedCertPem = csrResponse.getBody();
+        assertNotNull(signedCertPem);
+
+        // Parse signed cert and set certificate serial on hub so revoke can find it
+        X509Certificate signedCert = loadCertificateFromPem(signedCertPem);
+        setHubCertificateSerialFromCert(hubId, signedCert);
+
+        // When - revoke
+        String revokeUrl = "/api/v1/register/" + hubId + "/revoke?reason=5";
+        ResponseEntity<Void> revokeResponse = restTemplate.postForEntity(revokeUrl, null, Void.class);
+
+        // Then
+        assertTrue(revokeResponse.getStatusCode().is2xxSuccessful());
+        // Validate that the certificate is revoked according to CA
+        assertCertRevoked(signedCert);
+        Hub updatedHub = hubRepository.findById(hubId).orElse(null);
+        assertNotNull(updatedHub);
+        assertNull(updatedHub.getCertificatePem());
+        assertNull(updatedHub.getCsrPem());
+        assertNull(updatedHub.getPublicKeyPem());
+        assertNull(updatedHub.getCertificateIssuedAt());
+        assertNull(updatedHub.getCertificateExpiresAt());
+        assertEquals(Hub.HubStatus.CONFIRMED, updatedHub.getStatus());
     }
 }
