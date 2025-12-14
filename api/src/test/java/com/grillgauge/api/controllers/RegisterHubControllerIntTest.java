@@ -393,10 +393,7 @@ public class RegisterHubControllerIntTest {
         Long hubId = hubRegistrationResponse.hubId();
         assertNotNull(hubId);
 
-        // Confirm the hub
         confirmHub(hubRegistrationResponse, testUser.getEmail());
-
-        // Generate CSR
         String csrPem = generateCsrPem(hubId);
 
         // When - sign CSR
