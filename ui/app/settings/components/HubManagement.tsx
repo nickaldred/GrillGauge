@@ -8,6 +8,7 @@ import { deleteRequest, getData } from "@/app/utils/requestUtils";
 import { useTheme } from "@/app/providers/ThemeProvider";
 import { PlusIcon, EditIcon, TrashIcon, ChevronDown } from "lucide-react";
 import Modal from "@/app/components/modal";
+import RegisterHubModal from "./RegisterHubModal";
 import { HubForm } from "./HubForm";
 
 import { ProbeManagement } from "./ProbeManagement";
@@ -27,6 +28,7 @@ export function HubManagement() {
 
   const [isEditHubModalOpen, setIsEditHubModalOpen] = useState(false);
   const [hubToEdit, setHubToEdit] = useState<Hub | null>(null);
+  const [isRegisterModalOpen, setIsRegisterModalOpen] = useState(false);
 
   // Fetch hubs
   useEffect(() => {
@@ -109,8 +111,8 @@ export function HubManagement() {
         </h1>
 
         <button
-          className="px-4 py-2 bg-red-600 text-white rounded-lg flex items-center hover:bg-red-700"
-          onClick={() => {}}
+          className="px-4 py-2 bg-red-600 text-white rounded-lg flex items-center cursor-pointer hover:bg-red-700"
+          onClick={() => setIsRegisterModalOpen(true)}
         >
           <PlusIcon size={18} className="mr-2" />
           Add New Hub
@@ -311,6 +313,18 @@ export function HubManagement() {
           onCancel={() => setIsEditHubModalOpen(false)}
         />
       </Modal>
+
+      <RegisterHubModal
+        open={isRegisterModalOpen}
+        onClose={() => setIsRegisterModalOpen(false)}
+        onRegistered={() => {
+          // refresh hubs after a new hub is registered/confirmed
+          if (!user?.email) return;
+          getData(`${BASE_URL}/ui/hubs?email=${user.email}`)
+            .then(setHubs)
+            .catch(console.error);
+        }}
+      />
     </div>
   );
 }
