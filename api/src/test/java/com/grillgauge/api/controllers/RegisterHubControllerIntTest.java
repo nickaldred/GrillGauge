@@ -81,14 +81,6 @@ public class RegisterHubControllerIntTest {
         testUtils.clearDatabase();
     }
 
-    /**
-     * Helper method to register a hub.
-     * 
-     * @param model     The hub model.
-     * @param fwVersion The firmware version.
-     * @return The HubRegistrationResponse containing hub ID, OTP, and expiration
-     *         time.
-     */
     private HubRegistrationResponse registerHub(final String model, final String fwVersion) {
         HubRegistrationRequest registerRequest = new HubRegistrationRequest(model, fwVersion);
         ResponseEntity<HubRegistrationResponse> hubRegistrationResponse = restTemplate.postForEntity(REGISTER_URL,
@@ -99,14 +91,6 @@ public class RegisterHubControllerIntTest {
         return registrationBody;
     }
 
-    /**
-     * Create a test user.
-     * 
-     * @param email     The user's email.
-     * @param firstName The user's first name.
-     * @param lastName  The user's last name.
-     * @return The created User entity.
-     */
     private User createUser(final String email, final String firstName, final String lastName) {
         User testUser = new User(email, firstName, lastName);
         return userRepository.save(testUser);
@@ -175,7 +159,7 @@ public class RegisterHubControllerIntTest {
             validator.validate(certPath, pkixParams);
             fail("Expected validation to fail for revoked certificate");
         } catch (CertPathValidatorException expected) {
-            // expected - certificate is revoked
+            assertTrue(true); // Expected exception
         }
     }
 
@@ -312,8 +296,6 @@ public class RegisterHubControllerIntTest {
         String signedCertPem = csrResponse.getBody();
         assertNotNull(signedCertPem);
         assertTrue(signedCertPem.contains("BEGIN CERTIFICATE"));
-
-        // Load signed cert and CA cert, verify signed cert is issued by CA
         X509Certificate signedCert = loadCertificateFromPem(signedCertPem);
         X509Certificate caCert = loadCaCertificate();
 
@@ -422,7 +404,7 @@ public class RegisterHubControllerIntTest {
         assertNull(updatedHub.getPublicKeyPem());
         assertNull(updatedHub.getCertificateIssuedAt());
         assertNull(updatedHub.getCertificateExpiresAt());
-        assertEquals(Hub.HubStatus.CONFIRMED, updatedHub.getStatus());
+        assertEquals(Hub.HubStatus.REVOKED, updatedHub.getStatus());
     }
 
     @Test
