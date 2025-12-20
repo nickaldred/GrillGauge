@@ -6,6 +6,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 import java.util.List;
 
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
@@ -17,6 +18,7 @@ import org.springframework.transaction.annotation.Transactional;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.grillgauge.api.domain.entitys.User;
 import com.grillgauge.api.domain.repositorys.UserRepository;
+import com.grillgauge.api.utils.TestUtils;
 
 @SpringBootTest
 @AutoConfigureMockMvc
@@ -31,6 +33,14 @@ class UserControllerIntTest {
 
     @Autowired
     private ObjectMapper objectMapper;
+
+    @Autowired
+    private TestUtils testUtils;
+
+    @BeforeEach
+    public void setup() {
+        testUtils.clearDatabase();
+    }
 
     @Test
     void storeUserSuccessful() throws Exception {

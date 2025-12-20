@@ -18,6 +18,7 @@ import com.grillgauge.api.domain.repositorys.HubRepository;
 import com.grillgauge.api.domain.repositorys.ProbeRepository;
 import com.grillgauge.api.domain.repositorys.ReadingRepository;
 import com.grillgauge.api.domain.repositorys.UserRepository;
+import com.grillgauge.api.utils.TestUtils;
 
 @AutoConfigureMockMvc
 @SpringBootTest
@@ -39,6 +40,9 @@ class ProbeControllerIntTest {
         @Autowired
         private UserRepository userRepository;
 
+        @Autowired
+        private TestUtils testUtils;
+
         private List<Reading> readings;
         private User testUser;
         private Hub testHub;
@@ -46,6 +50,7 @@ class ProbeControllerIntTest {
 
         @BeforeEach
         void setUp() {
+                testUtils.clearDatabase();
                 testUser = new User("nick@hotmail.co.uk", "Nick", "Bloggs");
                 userRepository.save(testUser);
                 testHub = new Hub(testUser, "Test Hub");
