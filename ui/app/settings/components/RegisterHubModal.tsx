@@ -155,13 +155,11 @@ export default function RegisterHubModal({
 
         {step === 1 && (
           <div>
-            <p className="text-sm mb-2">
-              Waiting for the Hub to pair and request a certificate.
-            </p>
+            <p className="text-sm mb-2">Waiting for the Hub to pair.</p>
             <p className="text-sm text-gray-500 mb-4">
-              The Hub should post its CSR automatically once it has your OTP and
-              network access. The UI will poll the server and update when the
-              Hub becomes registered.
+              The Hub should pair automatically once it has your OTP and network
+              access. The UI will poll the server and update when the Hub
+              becomes registered.
             </p>
 
             <div className="flex items-center space-x-3">
@@ -172,14 +170,18 @@ export default function RegisterHubModal({
             <div className="flex justify-between mt-4">
               <button
                 onClick={() => setStep(0)}
-                className="px-3 py-1 border rounded"
+                className={`px-3 py-1 border rounded cursor-pointer ${
+                  isDarkMode ? "hover:bg-gray-700" : "hover:bg-gray-100"
+                }`}
               >
                 Back
               </button>
               <div>
                 <button
                   onClick={closeAndReset}
-                  className="px-3 py-1 border rounded"
+                  className={`px-3 py-1 border rounded cursor-pointer ${
+                    isDarkMode ? "hover:bg-gray-700" : "hover:bg-gray-100"
+                  }`}
                 >
                   Cancel
                 </button>
@@ -202,7 +204,9 @@ export default function RegisterHubModal({
                 onClick={() => {
                   navigator.clipboard?.writeText(signedCertPem);
                 }}
-                className="px-3 py-1 border rounded"
+                className={`px-3 py-1 border rounded cursor-pointer ${
+                  isDarkMode ? "hover:bg-gray-700" : "hover:bg-gray-100"
+                }`}
               >
                 Copy
               </button>
