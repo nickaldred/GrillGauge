@@ -26,11 +26,41 @@ export default function RegisterHubModal({
   const { theme } = useTheme();
   const isDarkMode = theme === "dark";
 
+  type ButtonProps = {
+    children: React.ReactNode;
+    onClick?: React.MouseEventHandler<HTMLButtonElement> | (() => void);
+    variant?: "primary" | "secondary";
+    disabled?: boolean;
+  };
+
+  const Button = ({
+    children,
+    onClick,
+    variant = "primary",
+    disabled = false,
+  }: ButtonProps) => {
+    const base = "px-3 py-1 rounded focus:outline-none";
+    const primary = `bg-blue-600 text-white ${
+      disabled
+        ? "opacity-50 cursor-not-allowed"
+        : "hover:bg-blue-500 cursor-pointer"
+    }`;
+    const secondary = isDarkMode
+      ? "border text-gray-300 hover:bg-gray-700 cursor-pointer"
+      : "border text-gray-700 hover:bg-gray-100 cursor-pointer";
+    const classes = `${base} ${variant === "primary" ? primary : secondary}`;
+
+    return (
+      <button onClick={onClick as any} disabled={disabled} className={classes}>
+        {children}
+      </button>
+    );
+  };
+
   // ** State **
   const [step, setStep] = useState<number>(0);
   const [hubIdInput, setHubIdInput] = useState("");
   const [otpInput, setOtpInput] = useState("");
-  const [signedCertPem, setSignedCertPem] = useState<string | null>(null);
   const [polling, setPolling] = useState(false);
   const pollingRef = useRef<number | null>(null);
 
@@ -43,7 +73,6 @@ export default function RegisterHubModal({
     setStep(0);
     setHubIdInput("");
     setOtpInput("");
-    setSignedCertPem(null);
   };
 
   const closeAndReset = () => {
@@ -66,7 +95,6 @@ export default function RegisterHubModal({
         if (!res.ok) throw new Error(`Failed to fetch hub: ${res.status}`);
         const hub = await res.json();
         if (hub?.status === "REGISTERED") {
-          setSignedCertPem(hub.certificatePem || null);
           setPolling(false);
           if (pollingRef.current) {
             clearInterval(pollingRef.current);
@@ -134,21 +162,15 @@ export default function RegisterHubModal({
             />
 
             <div className="flex justify-end mt-4 space-x-2">
-              <button
-                onClick={closeAndReset}
-                className={`px-3 py-1 border rounded cursor-pointer ${
-                  isDarkMode ? "hover:bg-gray-700" : "hover:bg-gray-100"
-                }`}
-              >
+              <Button variant="secondary" onClick={closeAndReset}>
                 Cancel
-              </button>
-              <button
+              </Button>
+              <Button
                 onClick={handleConfirm}
-                className="px-3 py-1 bg-blue-600 text-white rounded cursor-pointer hover:bg-blue-700"
                 disabled={!hubIdInput || !otpInput}
               >
                 Confirm
-              </button>
+              </Button>
             </div>
           </div>
         )}
@@ -168,72 +190,30 @@ export default function RegisterHubModal({
             </div>
 
             <div className="flex justify-between mt-4">
-              <button
-                onClick={() => setStep(0)}
-                className={`px-3 py-1 border rounded cursor-pointer ${
-                  isDarkMode ? "hover:bg-gray-700" : "hover:bg-gray-100"
-                }`}
-              >
+              <Button variant="secondary" onClick={() => setStep(0)}>
                 Back
-              </button>
+              </Button>
               <div>
-                <button
-                  onClick={closeAndReset}
-                  className={`px-3 py-1 border rounded cursor-pointer ${
-                    isDarkMode ? "hover:bg-gray-700" : "hover:bg-gray-100"
-                  }`}
-                >
+                <Button variant="secondary" onClick={closeAndReset}>
                   Cancel
-                </button>
+                </Button>
               </div>
             </div>
           </div>
         )}
 
-        {step === 2 && signedCertPem && (
+        {step === 2 && (
           <div>
-            <p className="text-sm mb-2">Signed certificate (PEM)</p>
-            <textarea
-              value={signedCertPem}
-              readOnly
-              rows={10}
-              className="w-full p-2 border rounded"
-            />
-            <div className="flex justify-end mt-3 space-x-2">
-              <button
-                onClick={() => {
-                  navigator.clipboard?.writeText(signedCertPem);
-                }}
-                className={`px-3 py-1 border rounded cursor-pointer ${
-                  isDarkMode ? "hover:bg-gray-700" : "hover:bg-gray-100"
-                }`}
-              >
-                Copy
-              </button>
-              <button
-                onClick={() => {
-                  const blob = new Blob([signedCertPem], {
-                    type: "application/x-pem-file",
-                  });
-                  const url = URL.createObjectURL(blob);
-                  const a = document.createElement("a");
-                  a.href = url;
-                  a.download = `hub-${hubIdInput}-cert.pem`;
-                  a.click();
-                  URL.revokeObjectURL(url);
-                }}
-                className="px-3 py-1 bg-green-600 text-white rounded"
-              >
-                Download
-              </button>
-              <button
-                onClick={() => {
-                  closeAndReset();
-                }}
-                className="px-3 py-1 bg-gray-600 text-white rounded"
-              >
+            <p className="text-sm mb-2">Hub successfully paired.</p>
+            <p className="text-sm text-gray-500 mb-4">
+              The Hub has been successfully paired with your account. You can
+              close this dialog.
+            </p>
+
+            <div className="flex justify-end mt-3">
+              <Button variant="secondary" onClick={closeAndReset}>
                 Done
-              </button>
+              </Button>
             </div>
           </div>
         )}

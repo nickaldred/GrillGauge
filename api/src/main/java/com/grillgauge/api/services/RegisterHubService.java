@@ -103,8 +103,12 @@ public class RegisterHubService {
     User user = userRepository
         .findById(userEmail)
         .orElseThrow(() -> new IllegalArgumentException("Invalid User ID"));
-    hub.setOwner(user);
 
+    StringBuilder hubNameBuilder = new StringBuilder();
+    hubNameBuilder.append("hub-").append(hubId).append("-").append(userEmail);
+
+    hub.setOwner(user);
+    hub.setName(hubNameBuilder.toString());
     hub.setStatus(Hub.HubStatus.CONFIRMED);
     hub.setOtpExpiresAt(null);
     hub.setOtp(null);
@@ -144,6 +148,7 @@ public class RegisterHubService {
     hub.setCsrPem(csrPem);
     hub.setCertificatePem(signedCertPem);
     hub.setPublicKeyPem(certificateService.extractPublicKeyFromCsrPem(csrPem));
+    hub.setCertificateSerial(signedCert.getSerialNumber().longValue());
     hub.setCertificateExpiresAt(signedCert.getNotAfter().toInstant());
     hub.setCertificateIssuedAt(signedCert.getNotBefore().toInstant());
     hub.setStatus(HubStatus.REGISTERED);
@@ -191,7 +196,7 @@ public class RegisterHubService {
     }
 
     certificateService.revokeBySerial(serial, Date.from(Instant.now()), reason);
-
+    hub.setCertificateSerial(null);
     hub.setCertificatePem(null);
     hub.setCertificateExpiresAt(null);
     hub.setCertificateIssuedAt(null);

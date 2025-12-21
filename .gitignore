@@ -2,3 +2,7 @@ ui/package-lock.json
 api/log.json
 .vscode/launch.json
 .vscode/settings.json
+*.key
+*.csr
+*.pem
+*.crt
