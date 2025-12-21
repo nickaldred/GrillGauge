@@ -7,13 +7,13 @@ import lombok.Setter;
 
 /**
  * Model representing a Hub's readings.
- * 
- * Contains the Hub's ID and a list of ProbeReadings.
+ *
+ * <p>Contains the Hub's ID and a list of ProbeReadings.
  */
 @Getter
 @Setter
 @AllArgsConstructor
 public class HubReading {
-    private Long id;
-    private List<ProbeReading> probeReadings;
+  private Long id;
+  private List<ProbeReading> probeReadings;
 }
