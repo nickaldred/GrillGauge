@@ -20,55 +20,59 @@ import com.grillgauge.api.domain.entitys.Hub;
 import com.grillgauge.api.domain.entitys.User;
 import com.grillgauge.api.domain.repositorys.HubRepository;
 import com.grillgauge.api.domain.repositorys.UserRepository;
+import com.grillgauge.api.utils.TestUtils;
 
 @SpringBootTest
 @AutoConfigureMockMvc
 @Transactional
 class HubControllerIntTest {
 
-    @Autowired
-    private MockMvc mockMvc;
+  @Autowired
+  private MockMvc mockMvc;
 
-    @Autowired
-    private HubRepository hubRepository;
+  @Autowired
+  private HubRepository hubRepository;
 
-    @Autowired
-    private UserRepository userRepository;
+  @Autowired
+  private UserRepository userRepository;
 
-    @Autowired
-    private ObjectMapper objectMapper;
+  @Autowired
+  private ObjectMapper objectMapper;
 
-    private User testUser;
-    private Hub testHub;
+  @Autowired
+  private TestUtils testUtils;
 
-    @BeforeEach
-    void setUp() {
-        testUser = new User("nick@hotmail.co.uk", "Nick", "Bloggs");
-        testUser = userRepository.save(testUser);
-        Hub hub = new Hub(testUser, "apiKey", "Test Hub");
-        testHub = hubRepository.save(hub);
-    }
+  private User testUser;
+  private Hub testHub;
 
-    @Test
-    void testStoreHubSuccessful() throws Exception {
-        // When
-        MvcResult result = mockMvc.perform(post("/api/v1/hub")
-                .contentType(MediaType.APPLICATION_JSON)
-                .content(objectMapper.writeValueAsString(testHub)))
-                .andExpect(status().isCreated()).andReturn();
+  @BeforeEach
+  void setUp() {
+    testUtils.clearDatabase();
+    testUser = new User("nick@hotmail.co.uk", "Nick", "Bloggs");
+    testUser = userRepository.save(testUser);
+    Hub hub = new Hub(testUser, "Test Hub");
+    testHub = hubRepository.save(hub);
+  }
 
-        Hub storedHub = objectMapper.readValue(result.getResponse().getContentAsString(), Hub.class);
+  @Test
+  void testStoreHubSuccessful() throws Exception {
+    // When
+    MvcResult result = mockMvc.perform(post("/api/v1/hub")
+        .contentType(MediaType.APPLICATION_JSON)
+        .content(objectMapper.writeValueAsString(testHub)))
+        .andExpect(status().isCreated()).andReturn();
 
-        // Then
-        assertNotNull(storedHub.getId());
-        assertEquals(testHub.getName(), storedHub.getName());
-        assertEquals(testHub.getApiKey(), storedHub.getApiKey());
-        assertEquals(testUser.getEmail(), storedHub.getOwner().getEmail());
-        Hub fetchedHub = hubRepository.findById(storedHub.getId()).orElse(null);
-        assertNotNull(fetchedHub);
-        assertEquals(storedHub.getId(), fetchedHub.getId());
-        assertEquals(storedHub.getName(), fetchedHub.getName());
-        assertEquals(storedHub.getApiKey(), fetchedHub.getApiKey());
-        assertEquals(storedHub.getOwner().getEmail(), fetchedHub.getOwner().getEmail());
-    }
+    Hub storedHub = objectMapper.readValue(result.getResponse().getContentAsString(), Hub.class);
+
+    // Then
+    assertNotNull(storedHub.getId());
+    assertEquals(testHub.getName(), storedHub.getName());
+    assertEquals(testUser.getEmail(), storedHub.getOwner().getEmail());
+    Hub fetchedHub = hubRepository.findById(storedHub.getId()).orElse(null);
+    assertNotNull(fetchedHub);
+    assertEquals(storedHub.getId(), fetchedHub.getId());
+    assertEquals(storedHub.getName(), fetchedHub.getName());
+    assertEquals(storedHub.getOwner().getEmail(),
+        fetchedHub.getOwner().getEmail());
+  }
 }
