@@ -1,4 +1,7 @@
+"use client";
+
 import { useEffect } from "react";
+import { createPortal } from "react-dom";
 import { useTheme } from "@/app/providers/ThemeProvider";
 import { XIcon } from "lucide-react";
 
@@ -41,18 +44,28 @@ export default function Modal({ open, onClose, title, children }: Modal) {
 
   if (!open) return null;
 
-  return (
+  const modalContent = (
     <div
       className="fixed inset-0 z-50 flex items-center justify-center"
       role="dialog"
       aria-modal="true"
     >
+      {/* Blur the background of the modal; clicking it closes the modal */}
       <div
-        className={`"p-5 overflow-auto max-h-[calc(90vh-80px)] w-full sm:w-[650px] md:w-[550px]" ${
+        className="absolute inset-0 bg-black/40 backdrop-blur-sm"
+        onClick={onClose}
+      />
+
+      <div
+        className={`relative z-10 p-5 overflow-auto max-h-[calc(90vh-80px)] w-full sm:w-[650px] md:w-[550px] ${
           isDarkMode ? "bg-gray-800 text-gray-100" : "bg-white text-gray-900"
         } rounded-2xl shadow-lg`}
       >
-        <div className="flex items-center justify-between p-5 border-b">
+        <div
+          className={`flex items-center justify-between p-5 border-b ${
+            isDarkMode ? "border-gray-700" : "border-gray-200"
+          }`}
+        >
           <h3 className="text-xl font-semibold">{title}</h3>
           <button
             onClick={onClose}
@@ -71,4 +84,6 @@ export default function Modal({ open, onClose, title, children }: Modal) {
       </div>
     </div>
   );
+
+  return createPortal(modalContent, document.body);
 }
