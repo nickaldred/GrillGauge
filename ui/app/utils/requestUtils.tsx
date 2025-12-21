@@ -59,8 +59,14 @@ export async function putRequest(url: string, body: any) {
     throw new Error(`Failed to perform put request: ${res.status}`);
   }
 
-  const data = await res.json();
-  return data;
+  const text = await res.text();
+  if (!text) return null;
+
+  try {
+    return JSON.parse(text);
+  } catch (e) {
+    return text;
+  }
 }
 
 /**
@@ -82,6 +88,12 @@ export async function postRequest(url: string, body: any) {
     throw new Error(`Failed to perform post request: ${res.status}`);
   }
 
-  const data = await res.json();
-  return data;
+  const text = await res.text();
+  if (!text) return null;
+
+  try {
+    return JSON.parse(text);
+  } catch (e) {
+    return text;
+  }
 }
