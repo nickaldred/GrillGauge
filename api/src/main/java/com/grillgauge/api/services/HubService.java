@@ -29,7 +29,8 @@ public class HubService {
    *
    * @param hubId hubId to get the hub for.
    * @return Hub entity.
-   * @throws ResponseStatusException with status 404 if no hub is found for the given hubId.
+   * @throws ResponseStatusException with status 404 if no hub is found for the
+   *                                 given hubId.
    */
   public Hub getHub(final Long hubId) {
     LOG.info("Retrieving hub for hub ID: {}", hubId);
@@ -49,7 +50,8 @@ public class HubService {
    * @param hub the Hub entity to store.
    * @return the stored Hub entity.
    */
-  @NonNull @Transactional
+  @NonNull
+  @Transactional
   public Hub storeHub(final Hub hub) {
     LOG.info("Storing new Hub for owner: {}", hub.getId());
     Hub storedHub = hubRepository.save(hub);

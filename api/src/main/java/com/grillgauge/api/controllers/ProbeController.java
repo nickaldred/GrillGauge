@@ -19,7 +19,6 @@ import org.springframework.web.bind.annotation.RestController;
 
 /**
  * Controller for managing probe-related operations.
- *
  * Provides endpoints for retrieving readings for probes.
  */
 @RestController
@@ -29,7 +28,7 @@ public class ProbeController {
   private final ReadingService readingService;
   private final ProbeService probeService;
 
-  public ProbeController(ReadingService readingService, ProbeService probeService) {
+  public ProbeController(final ReadingService readingService, final ProbeService probeService) {
     this.readingService = readingService;
     this.probeService = probeService;
   }

@@ -9,7 +9,10 @@ import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.web.servlet.config.annotation.CorsRegistry;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 
-/** Security configuration for the API, setting up API key authentication and securing endpoints. */
+/**
+ * Security configuration for the API, setting up API key authentication and
+ * securing endpoints.
+ */
 @Configuration
 public class SecurityConfig {
   static {
@@ -18,7 +21,8 @@ public class SecurityConfig {
     }
   }
 
-  public SecurityConfig() {}
+  public SecurityConfig() {
+  }
 
   /**
    * Configure the security filter chain.
@@ -29,9 +33,9 @@ public class SecurityConfig {
    */
   @Bean
   SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
-    http.cors() // ✅ enable CORS support
+    http.cors()
         .and()
-        .csrf(csrf -> csrf.disable()); // disable CSRF for APIs
+        .csrf(csrf -> csrf.disable());
 
     return http.build();
   }

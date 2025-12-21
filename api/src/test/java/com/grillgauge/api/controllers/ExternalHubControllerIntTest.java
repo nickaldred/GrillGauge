@@ -57,28 +57,12 @@
 // private HubRepository hubRepository;
 
 // @Autowired
-// private ApiKeyRepository apiKeyRepository;
-
-// @Autowired
-// private ApiKeyGenerator apiKeyGenerator;
-
-// @Autowired
 // private UserRepository userRepository;
 
 // @Autowired
 // private ObjectMapper objectMapper;
 
 // private User testUser;
-
-// private String generateAndStoreApiKey(final Long hubId) {
-// String randomKey = apiKeyGenerator.generateRandomKey();
-// String fullApiKey = apiKeyGenerator.buildFullApiKey(randomKey, hubId);
-// String hashedKey = apiKeyGenerator.hashKey(randomKey, hubId);
-
-// ApiKey apiKey = new ApiKey(hashedKey, hubId, "apiKey1");
-// apiKeyRepository.save(apiKey);
-// return fullApiKey;
-// }
 
 // @BeforeEach
 // void setUp() {
