@@ -25,17 +25,23 @@ import org.springframework.transaction.annotation.Transactional;
 @Transactional
 class ProbeControllerIntTest {
 
-  @Autowired private MockMvc mockMvc;
+  @Autowired
+  private MockMvc mockMvc;
 
-  @Autowired private ReadingRepository readingRepository;
+  @Autowired
+  private ReadingRepository readingRepository;
 
-  @Autowired private ProbeRepository probeRepository;
+  @Autowired
+  private ProbeRepository probeRepository;
 
-  @Autowired private HubRepository hubRepository;
+  @Autowired
+  private HubRepository hubRepository;
 
-  @Autowired private UserRepository userRepository;
+  @Autowired
+  private UserRepository userRepository;
 
-  @Autowired private TestUtils testUtils;
+  @Autowired
+  private TestUtils testUtils;
 
   private List<Reading> readings;
   private User testUser;
@@ -46,7 +52,7 @@ class ProbeControllerIntTest {
   void setUp() {
     testUtils.clearDatabase();
     testUser = new User("nick@hotmail.co.uk", "Nick", "Bloggs");
-    userRepository.save(testUser);
+    testUser = userRepository.save(testUser);
     testHub = new Hub(testUser, "Test Hub");
     hubRepository.save(testHub);
     testProbe = new Probe(1, testHub, testUser, (float) 200, "probe 1");
@@ -66,26 +72,28 @@ class ProbeControllerIntTest {
     // Given
     String start = "2024-01-01T10:30:00Z";
     String end = "2024-01-01T12:00:00Z";
+    String probeKey = testProbe.getId().toString();
 
     // When / Then
     mockMvc
         .perform(
-            MockMvcRequestBuilders.get(
-                    "/api/v1/probe/{probeId}/readings/between", testProbe.getId())
+            MockMvcRequestBuilders.get("/api/v1/probe/readings/between")
+                .param("probeIds", probeKey)
                 .param("start", start)
                 .param("end", end))
         .andExpect(
             org.springframework.test.web.servlet.result.MockMvcResultMatchers.status().isOk())
         .andExpect(
-            org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath("$.length()")
+            org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath(
+                "$.['" + probeKey + "'].length()")
                 .value(2))
         .andExpect(
             org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath(
-                    "$[0].timeStamp")
+                "$.['" + probeKey + "'][0].timestamp")
                 .value("2024-01-01T11:00:00Z"))
         .andExpect(
             org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath(
-                    "$[1].timeStamp")
+                "$.['" + probeKey + "'][1].timestamp")
                 .value("2024-01-01T12:00:00Z"));
   }
 }

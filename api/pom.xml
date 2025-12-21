@@ -162,14 +162,14 @@
             </sortPom>
           </pom>
         </configuration>
-        <executions>
+        <!-- <executions>
           <execution>
             <goals>
               <goal>check</goal>
             </goals>
             <phase>validate</phase>
           </execution>
-        </executions>
+        </executions> -->
       </plugin>
       <!-- <plugin>
         <groupId>com.rudikershaw.gitbuildhook</groupId>

@@ -20,7 +20,7 @@ import org.springframework.web.bind.annotation.RestController;
 /**
  * Controller for managing probe-related operations.
  *
- * <p>Provides endpoints for retrieving readings for probes.
+ * Provides endpoints for retrieving readings for probes.
  */
 @RestController
 @RequestMapping("/api/v1/probe")
@@ -35,30 +35,30 @@ public class ProbeController {
   }
 
   /** Data Transfer Object for probe readings. */
-  public record ReadingDto(Instant timestamp, double temperature) {}
+  public record ReadingDto(Instant timestamp, double temperature) {
+  }
 
   /**
    * Get readings for multiple probes between the specified start and end times.
    *
    * @param probeIds array of probe IDs to get readings for.
-   * @param start start time in ISO-8601 format.
-   * @param end end time in ISO-8601 format.
+   * @param start    start time in ISO-8601 format.
+   * @param end      end time in ISO-8601 format.
    * @return map of probe IDs to their list of ReadingDTOs.
    */
   @GetMapping("/readings/between")
-  public Map<Long, List<ReadingDto>> getReadingsForProbeBetween(
-      @RequestParam("probeIds") Long[] probeIds,
-      @RequestParam("start") String start,
-      @RequestParam("end") String end) {
+  public Map<Long, List<ReadingDto>> getReadingsForProbesBetween(
+      @RequestParam() Long[] probeIds,
+      @RequestParam() String start,
+      @RequestParam() String end) {
 
     return Stream.of(probeIds)
         .collect(
             Collectors.toMap(
                 probeId -> probeId,
-                probeId ->
-                    readingService.getReadingsForProbeBetween(probeId, start, end).stream()
-                        .map(r -> new ReadingDto(r.getTimeStamp(), r.getCurrentTemp()))
-                        .toList()));
+                probeId -> readingService.getReadingsForProbeBetween(probeId, start, end).stream()
+                    .map(r -> new ReadingDto(r.getTimeStamp(), r.getCurrentTemp()))
+                    .toList()));
   }
 
   /**
@@ -76,7 +76,7 @@ public class ProbeController {
   /**
    * Update the target temperature of a probe.
    *
-   * @param probeId The ID of the probe to update.
+   * @param probeId    The ID of the probe to update.
    * @param targetTemp The new target temperature.
    * @return The updated target temperature.
    */
@@ -89,7 +89,7 @@ public class ProbeController {
    * Updates the name of a probe.
    *
    * @param probeId The ID of the probe to update.
-   * @param name The updated name of the probe.
+   * @param name    The updated name of the probe.
    * @return The updated name of the probe.
    */
   @PutMapping("name/{probeId}")
