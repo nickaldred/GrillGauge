@@ -20,12 +20,12 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 import org.hibernate.annotations.JdbcTypeCode;
 import org.hibernate.type.SqlTypes;
+import org.springframework.lang.NonNull;
 
 /**
  * Entity representing a Hub in the system.
- *
- * <p>Supports: - unauthenticated registration - OTP-based pairing - PKI-based device identity (CSR
- * → signed certificate)
+ * Supports: - unauthenticated registration - OTP-based pairing - PKI-based
+ * device identity (CSR signed certificate)
  */
 @Getter
 @Setter
@@ -34,6 +34,7 @@ import org.hibernate.type.SqlTypes;
 @Entity
 public class Hub {
 
+  @NonNull
   @Id
   @GeneratedValue(strategy = GenerationType.AUTO)
   private Long id;
@@ -48,7 +49,8 @@ public class Hub {
   // -------------------------------
 
   /**
-   * Raw pairing code (ONLY stored unhashed if you're debugging). Recommended: null this after
+   * Raw pairing code (ONLY stored un-hashed if you're debugging). Recommended:
+   * null this after
    * hashing.
    */
   @Column(nullable = true)
@@ -141,9 +143,9 @@ public class Hub {
   /**
    * Constructor for Hub with OTP and metadata.
    *
-   * @param otp The one-time password for pairing.
+   * @param otp          The one-time password for pairing.
    * @param otpExpiresAt The expiration time of the OTP.
-   * @param metaData Additional metadata for the Hub.
+   * @param metaData     Additional metadata for the Hub.
    */
   public Hub(final String otp, final Instant otpExpiresAt, final Map<String, String> metaData) {
     this.otp = otp;
