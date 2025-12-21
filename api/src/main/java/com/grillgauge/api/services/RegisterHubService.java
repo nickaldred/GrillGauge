@@ -21,8 +21,6 @@ import org.springframework.stereotype.Service;
 
 /**
  * Service for registering hubs.
- *
- * <p>
  * Handles the business logic for registering and confirming hubs.
  */
 @Service
@@ -114,7 +112,9 @@ public class RegisterHubService {
     hub.setOtp(null);
     hub.setOtpHash(null);
     hubRepository.save(hub);
-    LOG.info("Successfully Confirmed hub with ID: {}, User ID: {}", hubConfirmRequest.hubId(), userEmail);
+    LOG.info(
+        "Successfully Confirmed hub with ID: {}, User ID: {}",
+        hubConfirmRequest.hubId(), userEmail);
     return hub.getId();
   }
 
@@ -127,7 +127,8 @@ public class RegisterHubService {
    */
   public String signCsr(final String hubId, final String csrPem) {
     LOG.info("Signing CSR for hub ID: {}", hubId);
-    final X509Certificate signedCert = certificateService.sign(certificateService.loadCsrFromPem(csrPem));
+    final X509Certificate signedCert = certificateService.sign(
+        certificateService.loadCsrFromPem(csrPem));
     LOG.info("Successfully signed CSR for hub ID: {}", hubId);
     final String signedCertPem = certificateService.convertToPem(signedCert);
     Hub hub = hubRepository
