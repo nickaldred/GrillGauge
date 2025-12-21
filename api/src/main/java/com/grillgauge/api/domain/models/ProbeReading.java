@@ -6,13 +6,13 @@ import lombok.Setter;
 
 /**
  * Model representing a Probe's reading.
- * 
- * Contains the Probe's ID and its current temperature.
+ *
+ * <p>Contains the Probe's ID and its current temperature.
  */
 @Getter
 @Setter
 @AllArgsConstructor
 public class ProbeReading {
-    private Integer id;
-    private Float currentTemp;
+  private Integer id;
+  private Float currentTemp;
 }

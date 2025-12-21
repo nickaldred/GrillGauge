@@ -9,9 +9,7 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
-/**
- * Entity representing a User in the system.
- */
+/** Entity representing a User in the system. */
 @Entity
 @Getter
 @Setter
@@ -20,13 +18,13 @@ import lombok.Setter;
 @Table(name = "users")
 public class User {
 
-    @Id
-    @Column(nullable = false, unique = true)
-    private String email;
+  @Id
+  @Column(nullable = false, unique = true)
+  private String email;
 
-    @Column(nullable = false)
-    private String firstName;
+  @Column(nullable = false)
+  private String firstName;
 
-    @Column(nullable = false)
-    private String lastName;
+  @Column(nullable = false)
+  private String lastName;
 }
