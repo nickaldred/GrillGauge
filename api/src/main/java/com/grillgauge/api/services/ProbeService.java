@@ -35,14 +35,15 @@ public class ProbeService {
    *
    * @param hubId hubId to get probes for
    * @return List of Probe entities
-   * @throws ResponseStatusException with status 404 if no probes are found for the given hubId
+   * @throws ResponseStatusException with status 404 if no probes are found for
+   *                                 the given hubId
    */
   public List<Probe> getProbesByHubId(final Long hubId) {
     LOG.info("Retrieving probes for hub ID: {}", hubId);
     List<Probe> probes = probeRepository.findByHubId(hubId);
     if (probes.isEmpty()) {
-      throw new ResponseStatusException(
-          HttpStatus.NOT_FOUND, "No probes found for hub ID: %s".formatted(hubId));
+      final String message = "No probes found for hub ID: %s".formatted(hubId);
+      LOG.warn(message);
     }
     LOG.info("Successfully retrieved {} probes for hub ID: {}", probes.size(), hubId);
     return probes;
@@ -51,27 +52,27 @@ public class ProbeService {
   /**
    * Save a probe reading for the given hubId.
    *
-   * @param probeReading the ProbeReading containing the local probe ID and current temperature
-   * @param hubId the hubId to which the probe belongs
+   * @param probeReading the ProbeReading containing the local probe ID and
+   *                     current temperature
+   * @param hubId        the hubId to which the probe belongs
    * @return the saved Reading entity
-   * @throws ResponseStatusException with status 404 if the probe with the given local ID and hubId
-   *     is not found
+   * @throws ResponseStatusException with status 404 if the probe with the given
+   *                                 local ID and hubId
+   *                                 is not found
    */
   @Transactional
   public Reading saveProbeReading(final ProbeReading probeReading, final Long hubId) {
     LOG.debug(
         "Saving probe reading for probe ID: {} under hub ID: {}", probeReading.getId(), hubId);
     List<Probe> probes = getProbesByHubId(hubId);
-    Probe probe =
-        probes.stream()
-            .filter(x -> x.getLocalId().equals(probeReading.getId()))
-            .findFirst()
-            .orElseThrow(
-                () ->
-                    new ResponseStatusException(
-                        HttpStatus.NOT_FOUND,
-                        "Probe with ID: %s and HubId: %s not found"
-                            .formatted(probeReading.getId(), hubId)));
+    Probe probe = probes.stream()
+        .filter(x -> x.getLocalId().equals(probeReading.getId()))
+        .findFirst()
+        .orElseThrow(
+            () -> new ResponseStatusException(
+                HttpStatus.NOT_FOUND,
+                "Probe with ID: %s and HubId: %s not found"
+                    .formatted(probeReading.getId(), hubId)));
     Reading savedReading = readingService.saveCurrentReading(probe, probeReading.getCurrentTemp());
     LOG.debug(
         "Successfully saved reading for probe ID: {} under hub ID: {}",
@@ -85,7 +86,8 @@ public class ProbeService {
    *
    * @param hubId the hubId to delete probes for
    * @return the number of deleted probes
-   * @throws ResponseStatusException with status 404 if no probes are found for the given hubId
+   * @throws ResponseStatusException with status 404 if no probes are found for
+   *                                 the given hubId
    */
   @Transactional
   public int deleteAllProbesForHubId(final Long hubId) {
@@ -103,7 +105,8 @@ public class ProbeService {
    * Delete the probe with the given probeId.
    *
    * @param probeId the probeId to delete
-   * @throws ResponseStatusException with status 404 if no probe is found for the given probeId
+   * @throws ResponseStatusException with status 404 if no probe is found for the
+   *                                 given probeId
    */
   @Transactional
   public void deleteProbe(final Long probeId) {
@@ -116,7 +119,8 @@ public class ProbeService {
    *
    * @param probeId the probeId to get the current temperature for
    * @return the current temperature, or null if no recent reading is available
-   * @throws ResponseStatusException with status 404 if no readings are found for the given probeId
+   * @throws ResponseStatusException with status 404 if no readings are found for
+   *                                 the given probeId
    */
   public Float getCurrentTemperature(final Long probeId) {
     LOG.info("Getting current temp for probeID: {}", probeId);
@@ -147,14 +151,12 @@ public class ProbeService {
    */
   public void updateProbe(final FrontEndProbe frontEndProbe) {
     LOG.info("Updating probe with ID: {}", frontEndProbe.getId());
-    Probe probe =
-        probeRepository
-            .findById(frontEndProbe.getId())
-            .orElseThrow(
-                () ->
-                    new ResponseStatusException(
-                        HttpStatus.NOT_FOUND,
-                        "No probe found for probe ID: %s".formatted(frontEndProbe.getId())));
+    Probe probe = probeRepository
+        .findById(frontEndProbe.getId())
+        .orElseThrow(
+            () -> new ResponseStatusException(
+                HttpStatus.NOT_FOUND,
+                "No probe found for probe ID: %s".formatted(frontEndProbe.getId())));
 
     probe.setName(frontEndProbe.getName());
     probe.setTargetTemp(frontEndProbe.getTargetTemp());
@@ -166,20 +168,18 @@ public class ProbeService {
   /**
    * Update the target temperature of a probe.
    *
-   * @param probeId The ID of the probe to update.
+   * @param probeId    The ID of the probe to update.
    * @param targetTemp The new target temperature.
    * @return The updated target temperature.
    */
   public float updateTargetTemp(final long probeId, final float targetTemp) {
     LOG.info("Updating target temperature for probe ID: {} to {}", probeId, targetTemp);
-    Probe probe =
-        probeRepository
-            .findById(probeId)
-            .orElseThrow(
-                () ->
-                    new ResponseStatusException(
-                        HttpStatus.NOT_FOUND,
-                        "No probe found for probe ID: %s".formatted(probeId)));
+    Probe probe = probeRepository
+        .findById(probeId)
+        .orElseThrow(
+            () -> new ResponseStatusException(
+                HttpStatus.NOT_FOUND,
+                "No probe found for probe ID: %s".formatted(probeId)));
 
     probe.setTargetTemp(targetTemp);
     probeRepository.save(probe);
@@ -191,19 +191,17 @@ public class ProbeService {
    * Update the name of a probe.
    *
    * @param probeId The probe ID.
-   * @param name The name to update.
+   * @param name    The name to update.
    * @return The updated name of the probe.
    */
   public Map<String, Object> updateProbeName(final long probeId, final String name) {
     LOG.info("Updating name for probe ID: {} to {}", probeId, name);
-    Probe probe =
-        probeRepository
-            .findById(probeId)
-            .orElseThrow(
-                () ->
-                    new ResponseStatusException(
-                        HttpStatus.NOT_FOUND,
-                        "No probe found for probe ID: %s".formatted(probeId)));
+    Probe probe = probeRepository
+        .findById(probeId)
+        .orElseThrow(
+            () -> new ResponseStatusException(
+                HttpStatus.NOT_FOUND,
+                "No probe found for probe ID: %s".formatted(probeId)));
 
     probe.setName(name);
     probeRepository.save(probe);
