@@ -56,7 +56,8 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 /**
- * Service for handling certificate operations such as loading CA certificates/keys and signing
+ * Service for handling certificate operations such as loading CA
+ * certificates/keys and signing
  * CSRs.
  */
 @Service
@@ -76,6 +77,14 @@ public class CertificateService {
 
   private X509Certificate caCertificate;
   private PrivateKey caPrivateKey;
+
+  /**
+   * Expose the loaded CA certificate for runtime checks (e.g. additional
+   * verification in authentication flows).
+   */
+  public X509Certificate getCaCertificate() {
+    return caCertificate;
+  }
 
   @PostConstruct
   private void init() throws CertificateServiceException {
@@ -162,10 +171,11 @@ public class CertificateService {
       // Encrypted PEM key pair
       if (obj instanceof PEMEncryptedKeyPair) {
         if (caKeyPassphrase == null || caKeyPassphrase.isEmpty()) {
-          throw new CertificateServiceException("Encrypted private key found; passphrase required");
+          throw new CertificateServiceException(
+              "Encrypted private key found; passphrase required");
         }
-        PEMDecryptorProvider decProv =
-            new JcePEMDecryptorProviderBuilder().build(caKeyPassphrase.toCharArray());
+        PEMDecryptorProvider decProv = new JcePEMDecryptorProviderBuilder().build(
+            caKeyPassphrase.toCharArray());
         PEMKeyPair decrypted = ((PEMEncryptedKeyPair) obj).decryptKeyPair(decProv);
         return converter.getKeyPair(decrypted).getPrivate();
       }
@@ -177,8 +187,8 @@ public class CertificateService {
               "Encrypted PKCS#8 private key found; passphrase required");
         }
         PKCS8EncryptedPrivateKeyInfo encInfo = (PKCS8EncryptedPrivateKeyInfo) obj;
-        InputDecryptorProvider pkcs8Prov =
-            new JceOpenSSLPKCS8DecryptorProviderBuilder().build(caKeyPassphrase.toCharArray());
+        InputDecryptorProvider pkcs8Prov = new JceOpenSSLPKCS8DecryptorProviderBuilder()
+            .build(caKeyPassphrase.toCharArray());
         PrivateKeyInfo pki = encInfo.decryptPrivateKeyInfo(pkcs8Prov);
         return converter.getPrivateKey(pki);
       }
@@ -269,8 +279,8 @@ public class CertificateService {
     try (PemReader pemReader = new PemReader(new StringReader(certPem))) {
       byte[] content = pemReader.readPemObject().getContent();
       X509CertificateHolder holder = new X509CertificateHolder(content);
-      X509Certificate cert =
-          new JcaX509CertificateConverter().setProvider("BC").getCertificate(holder);
+      X509Certificate cert = new JcaX509CertificateConverter()
+          .setProvider("BC").getCertificate(holder);
       return convertPublicKeyToPem(cert.getPublicKey());
     } catch (final Exception e) {
       throw new CertificateServiceRuntimeException(
@@ -289,11 +299,10 @@ public class CertificateService {
     try {
       // --- Validate CSR ---
       JcaPKCS10CertificationRequest jcaRequest = new JcaPKCS10CertificationRequest(csr);
-      boolean csrValid =
-          jcaRequest.isSignatureValid(
-              new JcaContentVerifierProviderBuilder()
-                  .setProvider("BC")
-                  .build(jcaRequest.getPublicKey()));
+      boolean csrValid = jcaRequest.isSignatureValid(
+          new JcaContentVerifierProviderBuilder()
+              .setProvider("BC")
+              .build(jcaRequest.getPublicKey()));
 
       if (!csrValid) {
         throw new CertificateServiceRuntimeException("Invalid CSR signature");
@@ -313,8 +322,8 @@ public class CertificateService {
       SubjectPublicKeyInfo publicKeyInfo = csr.getSubjectPublicKeyInfo();
 
       // --- Build certificate ---
-      X509v3CertificateBuilder certBuilder =
-          new X509v3CertificateBuilder(issuer, serial, notBefore, notAfter, subject, publicKeyInfo);
+      X509v3CertificateBuilder certBuilder = new X509v3CertificateBuilder(
+          issuer, serial, notBefore, notAfter, subject, publicKeyInfo);
 
       // Extensions (Required for most browsers + TLS stacks)
       JcaX509ExtensionUtils extUtils = new JcaX509ExtensionUtils();
@@ -352,8 +361,8 @@ public class CertificateService {
 
       // --- Sign certificate ---
       AsymmetricKeyParameter caKeyParam = PrivateKeyFactory.createKey(caPrivateKey.getEncoded());
-      AlgorithmIdentifier sigAlgId =
-          new DefaultSignatureAlgorithmIdentifierFinder().find("SHA256withRSA");
+      AlgorithmIdentifier sigAlgId = new DefaultSignatureAlgorithmIdentifierFinder().find(
+          "SHA256withRSA");
       AlgorithmIdentifier digAlgId = new DefaultDigestAlgorithmIdentifierFinder().find(sigAlgId);
 
       ContentSigner signer = new BcRSAContentSignerBuilder(sigAlgId, digAlgId).build(caKeyParam);
@@ -368,22 +377,24 @@ public class CertificateService {
   }
 
   /**
-   * Revoke a signed certificate (convenience method). Uses the current time as revocation date and
+   * Revoke a signed certificate (convenience method). Uses the current time as
+   * revocation date and
    * `cessationOfOperation` as reason.
    *
    * @param certificate the issued certificate to revoke
    * @return the generated X509CRL containing the revoked certificate
    */
   public X509CRL revokeSignedCertificate(final X509Certificate certificate) {
-    return revokeBySerial(certificate.getSerialNumber(), new Date(), 5); // 5 = cessationOfOperation
+    return revokeBySerial(certificate.getSerialNumber(), new Date(), 5);
   }
 
   /**
-   * Revoke a certificate by serial number. Returns a signed CRL containing the revocation.
+   * Revoke a certificate by serial number. Returns a signed CRL containing the
+   * revocation.
    *
-   * @param serial serial number of the certificate to revoke
+   * @param serial         serial number of the certificate to revoke
    * @param revocationDate date of revocation
-   * @param reason numeric CRL reason code (see RFC5280)
+   * @param reason         numeric CRL reason code (see RFC5280)
    * @return signed X509CRL
    */
   public X509CRL revokeBySerial(
@@ -410,8 +421,8 @@ public class CertificateService {
 
       // Sign CRL with CA private key
       AsymmetricKeyParameter caKeyParam = PrivateKeyFactory.createKey(caPrivateKey.getEncoded());
-      AlgorithmIdentifier sigAlgId =
-          new DefaultSignatureAlgorithmIdentifierFinder().find("SHA256withRSA");
+      AlgorithmIdentifier sigAlgId = new DefaultSignatureAlgorithmIdentifierFinder()
+          .find("SHA256withRSA");
       AlgorithmIdentifier digAlgId = new DefaultDigestAlgorithmIdentifierFinder().find(sigAlgId);
 
       ContentSigner signer = new BcRSAContentSignerBuilder(sigAlgId, digAlgId).build(caKeyParam);
