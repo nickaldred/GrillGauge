@@ -15,9 +15,9 @@ import org.springframework.web.context.request.RequestContextHolder;
 import org.springframework.web.context.request.ServletRequestAttributes;
 
 /**
- * Translates an X.509 client certificate (from a PreAuthenticated token) into a
- * Spring Security UserDetails representing a Hub. Also performs an extra
- * verification step that the certificate was issued by the configured CA.
+ * Translates an X.509 client certificate (from a PreAuthenticated token) into a Spring Security
+ * UserDetails representing a Hub. Also performs an extra verification step that the certificate was
+ * issued by the configured CA.
  */
 @Service
 public class CertificateUserDetailsService
@@ -49,8 +49,8 @@ public class CertificateUserDetailsService
 
     if (cert == null) {
       try {
-        ServletRequestAttributes attrs = (ServletRequestAttributes) RequestContextHolder
-            .getRequestAttributes();
+        ServletRequestAttributes attrs =
+            (ServletRequestAttributes) RequestContextHolder.getRequestAttributes();
         if (attrs != null) {
           HttpServletRequest req = attrs.getRequest();
           Object attr = req.getAttribute("javax.servlet.request.X509Certificate");

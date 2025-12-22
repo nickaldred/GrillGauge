@@ -25,23 +25,17 @@ import org.springframework.transaction.annotation.Transactional;
 @Transactional
 class ProbeControllerIntTest {
 
-  @Autowired
-  private MockMvc mockMvc;
+  @Autowired private MockMvc mockMvc;
 
-  @Autowired
-  private ReadingRepository readingRepository;
+  @Autowired private ReadingRepository readingRepository;
 
-  @Autowired
-  private ProbeRepository probeRepository;
+  @Autowired private ProbeRepository probeRepository;
 
-  @Autowired
-  private HubRepository hubRepository;
+  @Autowired private HubRepository hubRepository;
 
-  @Autowired
-  private UserRepository userRepository;
+  @Autowired private UserRepository userRepository;
 
-  @Autowired
-  private TestUtils testUtils;
+  @Autowired private TestUtils testUtils;
 
   private List<Reading> readings;
   private User testUser;
@@ -85,15 +79,15 @@ class ProbeControllerIntTest {
             org.springframework.test.web.servlet.result.MockMvcResultMatchers.status().isOk())
         .andExpect(
             org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath(
-                "$.['" + probeKey + "'].length()")
+                    "$.['" + probeKey + "'].length()")
                 .value(2))
         .andExpect(
             org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath(
-                "$.['" + probeKey + "'][0].timestamp")
+                    "$.['" + probeKey + "'][0].timestamp")
                 .value("2024-01-01T11:00:00Z"))
         .andExpect(
             org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath(
-                "$.['" + probeKey + "'][1].timestamp")
+                    "$.['" + probeKey + "'][1].timestamp")
                 .value("2024-01-01T12:00:00Z"));
   }
 }

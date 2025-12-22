@@ -12,9 +12,7 @@ import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.web.servlet.config.annotation.CorsRegistry;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 
-/**
- * Security configuration enabling X.509 (mTLS) authentication and CORS.
- */
+/** Security configuration enabling X.509 (mTLS) authentication and CORS. */
 @Configuration
 @EnableWebSecurity
 @EnableMethodSecurity
@@ -25,24 +23,19 @@ public class SecurityConfig {
     }
   }
 
-  public SecurityConfig() {
-  }
+  public SecurityConfig() {}
 
-  /**
-   * Configure the security filter chain.
-   */
+  /** Configure the security filter chain. */
   @Bean
   SecurityFilterChain securityFilterChain(
       HttpSecurity http, CertificateUserDetailsService certificateUserDetailsService)
       throws Exception {
 
-    http.cors(cors -> {
-    });
+    http.cors(cors -> {});
 
     http.csrf(csrf -> csrf.disable());
 
-    http.authorizeHttpRequests(auth -> auth
-        .anyRequest().permitAll());
+    http.authorizeHttpRequests(auth -> auth.anyRequest().permitAll());
 
     http.x509(x509 -> x509.authenticationUserDetailsService(certificateUserDetailsService));
 

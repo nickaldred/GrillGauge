@@ -15,10 +15,9 @@ import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 
 /**
- * Controller for managing communication with the external hubs.
- * Provides endpoints for storing readings and retrieving the current state of a
- * hub, identified
- * by an API key provided in the request.
+ * Controller for managing communication with the external hubs. Provides endpoints for storing
+ * readings and retrieving the current state of a hub, identified by an API key provided in the
+ * request.
  */
 @RestController()
 @RequestMapping("/api/v1/externalHub")
@@ -35,13 +34,12 @@ public class ExternalHubController {
    * Store a new reading for the hub identified by the API key in the request.
    *
    * @param reading The reading to store.
-   * @return The stored reading, including any additional data added by the
-   *         service.
+   * @return The stored reading, including any additional data added by the service.
    */
   @PostMapping()
   @ResponseStatus(HttpStatus.CREATED)
-  public HubReading storeReading(@RequestBody HubReading reading,
-      @AuthenticationPrincipal HubUserDetails hubPrincipal) {
+  public HubReading storeReading(
+      @RequestBody HubReading reading, @AuthenticationPrincipal HubUserDetails hubPrincipal) {
     final Long hubId = hubPrincipal.getHubId();
     return externalHubService.saveHubReading(reading, hubId);
   }
@@ -52,8 +50,7 @@ public class ExternalHubController {
    * @return The current state of the hub, including latest readings and status.
    */
   @GetMapping()
-  public HubCurrentState getCurrentState(
-      @AuthenticationPrincipal HubUserDetails hubPrincipal) {
+  public HubCurrentState getCurrentState(@AuthenticationPrincipal HubUserDetails hubPrincipal) {
     final Long hubId = hubPrincipal.getHubId();
     return externalHubService.getHubCurrentState(hubId);
   }

@@ -5,6 +5,12 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.grillgauge.api.domain.entitys.Hub;
+import com.grillgauge.api.domain.entitys.User;
+import com.grillgauge.api.domain.repositorys.HubRepository;
+import com.grillgauge.api.domain.repositorys.UserRepository;
+import com.grillgauge.api.utils.TestUtils;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -15,32 +21,20 @@ import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
 import org.springframework.transaction.annotation.Transactional;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.grillgauge.api.domain.entitys.Hub;
-import com.grillgauge.api.domain.entitys.User;
-import com.grillgauge.api.domain.repositorys.HubRepository;
-import com.grillgauge.api.domain.repositorys.UserRepository;
-import com.grillgauge.api.utils.TestUtils;
-
 @SpringBootTest
 @AutoConfigureMockMvc
 @Transactional
 class HubControllerIntTest {
 
-  @Autowired
-  private MockMvc mockMvc;
+  @Autowired private MockMvc mockMvc;
 
-  @Autowired
-  private HubRepository hubRepository;
+  @Autowired private HubRepository hubRepository;
 
-  @Autowired
-  private UserRepository userRepository;
+  @Autowired private UserRepository userRepository;
 
-  @Autowired
-  private ObjectMapper objectMapper;
+  @Autowired private ObjectMapper objectMapper;
 
-  @Autowired
-  private TestUtils testUtils;
+  @Autowired private TestUtils testUtils;
 
   private User testUser;
   private Hub testHub;
@@ -57,10 +51,14 @@ class HubControllerIntTest {
   @Test
   void testStoreHubSuccessful() throws Exception {
     // When
-    MvcResult result = mockMvc.perform(post("/api/v1/hub")
-        .contentType(MediaType.APPLICATION_JSON)
-        .content(objectMapper.writeValueAsString(testHub)))
-        .andExpect(status().isCreated()).andReturn();
+    MvcResult result =
+        mockMvc
+            .perform(
+                post("/api/v1/hub")
+                    .contentType(MediaType.APPLICATION_JSON)
+                    .content(objectMapper.writeValueAsString(testHub)))
+            .andExpect(status().isCreated())
+            .andReturn();
 
     Hub storedHub = objectMapper.readValue(result.getResponse().getContentAsString(), Hub.class);
 
@@ -72,7 +70,6 @@ class HubControllerIntTest {
     assertNotNull(fetchedHub);
     assertEquals(storedHub.getId(), fetchedHub.getId());
     assertEquals(storedHub.getName(), fetchedHub.getName());
-    assertEquals(storedHub.getOwner().getEmail(),
-        fetchedHub.getOwner().getEmail());
+    assertEquals(storedHub.getOwner().getEmail(), fetchedHub.getOwner().getEmail());
   }
 }
