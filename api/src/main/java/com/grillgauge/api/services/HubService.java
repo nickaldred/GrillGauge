@@ -8,7 +8,6 @@ import java.util.Optional;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
-import org.springframework.lang.NonNull;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.server.ResponseStatusException;
@@ -29,8 +28,7 @@ public class HubService {
    *
    * @param hubId hubId to get the hub for.
    * @return Hub entity.
-   * @throws ResponseStatusException with status 404 if no hub is found for the
-   *                                 given hubId.
+   * @throws ResponseStatusException with status 404 if no hub is found for the given hubId.
    */
   public Hub getHub(final Long hubId) {
     LOG.info("Retrieving hub for hub ID: {}", hubId);
@@ -50,7 +48,6 @@ public class HubService {
    * @param hub the Hub entity to store.
    * @return the stored Hub entity.
    */
-  @NonNull
   @Transactional
   public Hub storeHub(final Hub hub) {
     LOG.info("Storing new Hub for owner: {}", hub.getId());

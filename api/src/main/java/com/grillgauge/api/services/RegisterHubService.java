@@ -19,10 +19,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
-/**
- * Service for registering hubs.
- * Handles the business logic for registering and confirming hubs.
- */
+/** Service for registering hubs. Handles the business logic for registering and confirming hubs. */
 @Service
 public class RegisterHubService {
   private static final Logger LOG = LoggerFactory.getLogger(RegisterHubService.class);
@@ -38,8 +35,8 @@ public class RegisterHubService {
   /**
    * Constructor for RegisterHubService.
    *
-   * @param hubRepository      The HubRepository to use.
-   * @param userRepository     The UserRepository to use.
+   * @param hubRepository The HubRepository to use.
+   * @param userRepository The UserRepository to use.
    * @param certificateService The CertificateService to use.
    */
   public RegisterHubService(
@@ -52,14 +49,12 @@ public class RegisterHubService {
   }
 
   /** DTO class for Hub registration responses. */
-  public record HubRegistrationResponse(Long hubId, String otp, Instant otpExpiresAt) {
-  }
+  public record HubRegistrationResponse(Long hubId, String otp, Instant otpExpiresAt) {}
 
   /**
    * Register a new Hub.
    *
-   * @param request The registration request containing model and firmware
-   *                version.
+   * @param request The registration request containing model and firmware version.
    * @return The registration response with hub ID, OTP, and OTP expiration time.
    */
   public HubRegistrationResponse registerHub(final HubRegistrationRequest request) {
@@ -75,8 +70,7 @@ public class RegisterHubService {
   /**
    * Confirm a Hub's registration using the provided OTP.
    *
-   * @param hubConfirmRequest The confirmation request containing hub ID, user ID
-   *                          and OTP.
+   * @param hubConfirmRequest The confirmation request containing hub ID, user ID and OTP.
    * @return The confirmed hub's ID.
    */
   public Long confirmHub(final HubConfirmRequest hubConfirmRequest) {
@@ -85,9 +79,10 @@ public class RegisterHubService {
     if (hubId == null) {
       throw new IllegalArgumentException("Invalid Hub ID");
     }
-    Hub hub = hubRepository
-        .findById(hubId)
-        .orElseThrow(() -> new IllegalArgumentException("Invalid Hub ID"));
+    Hub hub =
+        hubRepository
+            .findById(hubId)
+            .orElseThrow(() -> new IllegalArgumentException("Invalid Hub ID"));
     if (hub.getOtpExpiresAt().isBefore(Instant.now())) {
       throw new IllegalArgumentException("OTP has expired");
     }
@@ -98,9 +93,10 @@ public class RegisterHubService {
     if (userEmail == null || userEmail.isBlank()) {
       throw new IllegalArgumentException("Invalid User ID");
     }
-    User user = userRepository
-        .findById(userEmail)
-        .orElseThrow(() -> new IllegalArgumentException("Invalid User ID"));
+    User user =
+        userRepository
+            .findById(userEmail)
+            .orElseThrow(() -> new IllegalArgumentException("Invalid User ID"));
 
     StringBuilder hubNameBuilder = new StringBuilder();
     hubNameBuilder.append("hub-").append(hubId).append("-").append(userEmail);
@@ -114,26 +110,28 @@ public class RegisterHubService {
     hubRepository.save(hub);
     LOG.info(
         "Successfully Confirmed hub with ID: {}, User ID: {}",
-        hubConfirmRequest.hubId(), userEmail);
+        hubConfirmRequest.hubId(),
+        userEmail);
     return hub.getId();
   }
 
   /**
    * Sign a certificate signing request (CSR) for the specified hub.
    *
-   * @param hubId  The ID of the hub.
+   * @param hubId The ID of the hub.
    * @param csrPem The CSR in PEM format.
    * @return The signed certificate in PEM format.
    */
   public String signCsr(final String hubId, final String csrPem) {
     LOG.info("Signing CSR for hub ID: {}", hubId);
-    final X509Certificate signedCert = certificateService.sign(
-        certificateService.loadCsrFromPem(csrPem));
+    final X509Certificate signedCert =
+        certificateService.sign(certificateService.loadCsrFromPem(csrPem));
     LOG.info("Successfully signed CSR for hub ID: {}", hubId);
     final String signedCertPem = certificateService.convertToPem(signedCert);
-    Hub hub = hubRepository
-        .findById(Long.parseLong(hubId))
-        .orElseThrow(() -> new IllegalArgumentException("Invalid Hub ID"));
+    Hub hub =
+        hubRepository
+            .findById(Long.parseLong(hubId))
+            .orElseThrow(() -> new IllegalArgumentException("Invalid Hub ID"));
 
     // Validations
     if (hub.getStatus() != HubStatus.CONFIRMED) {
@@ -162,14 +160,15 @@ public class RegisterHubService {
   /**
    * Revoke the certificate associated with the specified hub.
    *
-   * @param hubId  The ID of the hub.
+   * @param hubId The ID of the hub.
    * @param reason The reason code for revocation.
    */
   public void revokeCertificate(final Long hubId, final int reason) {
     LOG.info("Revoking certificates for hub ID: {}", hubId);
-    Hub hub = hubRepository
-        .findById(hubId)
-        .orElseThrow(() -> new IllegalArgumentException("Invalid Hub ID"));
+    Hub hub =
+        hubRepository
+            .findById(hubId)
+            .orElseThrow(() -> new IllegalArgumentException("Invalid Hub ID"));
     Object certSerialObj = hub.getCertificateSerial();
     if (certSerialObj == null) {
       throw new IllegalStateException("Hub does not have a certificate serial");

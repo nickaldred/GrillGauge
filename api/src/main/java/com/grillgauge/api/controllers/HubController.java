@@ -16,9 +16,8 @@ import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 
 /**
- * Controller for managing hub-related operations.
- * Provides endpoints for storing readings and retrieving the current state of a
- * hub, identified by an API key provided in the request.
+ * Controller for managing hub-related operations. Provides endpoints for storing readings and
+ * retrieving the current state of a hub, identified by an API key provided in the request.
  */
 @RestController()
 @RequestMapping("/api/v1/hub")
