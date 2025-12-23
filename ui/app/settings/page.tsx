@@ -18,7 +18,7 @@ export default function Settings() {
     <div
       className={`${
         isDarkMode ? "bg-gray-900" : "bg-gray-100"
-      } w-full flex-1 flex flex-col`}
+      } w-full flex-1 flex flex-col p-6`}
     >
       <div className={`container mx-auto px-4 py-4`}>
         <PageHeader leftTitle="Settings" />
