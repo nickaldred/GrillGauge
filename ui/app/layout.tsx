@@ -14,7 +14,7 @@ export default function RootLayout({ children }: Readonly<RootLayoutProps>) {
       <body className="min-h-screen flex flex-col">
         <ThemeProvider>
           <Header />
-          <main className="flex-grow">{children}</main>
+          <main className="flex-grow flex flex-col">{children}</main>
           <Footer />
         </ThemeProvider>
       </body>

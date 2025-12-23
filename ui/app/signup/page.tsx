@@ -89,9 +89,9 @@ export default function Signup() {
 
   return (
     <div
-      className={`min-h-screen ${
+      className={`${
         isDarkMode ? "bg-gray-900" : "bg-gray-100"
-      } flex flex-col justify-center items-center p-4 transition-colors duration-500`}
+      } w-full flex-1 flex flex-col items-center justify-center p-4 py-10 transition-colors duration-500`}
     >
       <div className="w-full max-w-md">
         <div className="flex justify-center mb-8">
@@ -179,9 +179,9 @@ export default function Signup() {
               />
               <span className={isDarkMode ? "text-gray-300" : "text-gray-700"}>
                 I agree to the
-                <span className="font-semibold"> Terms &amp; Conditions</span>
+                <span className="font-semibold"> Terms &amp; Conditions </span>
                 and
-                <span className="font-semibold"> Privacy Policy</span>
+                <span className="font-semibold"> Privacy Policy </span>
                 of Grill Gauge.
               </span>
             </label>
