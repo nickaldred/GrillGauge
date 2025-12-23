@@ -25,9 +25,16 @@ export default function GoogleSignInButton() {
     router.push("/login");
   };
 
+  const handleProfileClick = () => {
+    router.push("/profile");
+  };
+
   return user ? (
     <>
-      <div className="flex items-center">
+      <div
+        className="flex items-center cursor-pointer "
+        onClick={handleProfileClick}
+      >
         <img
           src={user.image || "https://randomuser.me/api/portraits/lego/1.jpg"}
           alt="Profile"

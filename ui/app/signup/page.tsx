@@ -11,14 +11,17 @@ import { postRequest } from "../utils/requestUtils";
 
 /** Signup page component */
 export default function Signup() {
+  // ** Session and Router **
   const { data: session, status } = useSession();
   const router = useRouter();
   const searchParams = useSearchParams();
   const from = searchParams.get("from") || "/dashboard";
 
+  // ** Theme **
   const { theme } = useTheme();
   const isDarkMode = theme === "dark";
 
+  // ** State **
   const [acceptedTerms, setAcceptedTerms] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState("");

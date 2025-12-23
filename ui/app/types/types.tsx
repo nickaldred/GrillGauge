@@ -15,9 +15,11 @@ export type Probe = {
 
 /**
  * Represents a user of the application.
+ *
+ * Note: In the backend, the User entity uses `email` as the
+ * primary key identifier (no separate numeric id field).
  */
 export type User = {
-  id: number;
   firstName: string;
   lastName: string;
   email: string;

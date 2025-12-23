@@ -2,7 +2,7 @@
 import React from "react";
 import { usePathname } from "next/navigation";
 import Link from "next/link";
-import { FlameIcon, SettingsIcon, UserIcon } from "lucide-react";
+import { FlameIcon, SettingsIcon } from "lucide-react";
 import { useTheme } from "../providers/ThemeProvider";
 import GoogleSignInButton from "./googleSignIn";
 
