@@ -90,9 +90,9 @@ export default function Login() {
 
   return (
     <div
-      className={`min-h-screen ${
+      className={`${
         isDarkMode ? "bg-gray-900" : "bg-gray-100"
-      } flex flex-col justify-center items-center p-4 transition-colors duration-500`}
+      } w-full flex-1 flex flex-col justify-center items-center p-4 transition-colors duration-500`}
     >
       <div className="w-full max-w-md">
         <div className="flex justify-center mb-8">
