@@ -7,7 +7,7 @@ import { PageHeader } from "../components/pageHeader";
 import { useTheme } from "../providers/ThemeProvider";
 import { BASE_URL } from "../utils/envVars";
 import type { User } from "../types/types";
-import { MailIcon, IdCard, UserIcon, ImageIcon } from "lucide-react";
+import { MailIcon, UserIcon } from "lucide-react";
 
 /**
  * Profile page showing session info combined with user data
@@ -32,6 +32,7 @@ export default function Profile() {
   const [isLoadingUser, setIsLoadingUser] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
+  // ** Fetch user data from backend on mount **
   useEffect(() => {
     const fetchUser = async () => {
       if (status !== "authenticated") return;
@@ -94,7 +95,6 @@ export default function Profile() {
     session?.user?.name ||
     "User";
   const email = userData?.email ?? session?.user?.email ?? "Unknown";
-  const userId = userData?.email ?? session?.user?.email ?? "Unknown";
 
   const firstName = userData?.firstName
     ? userData.firstName.charAt(0).toUpperCase() +

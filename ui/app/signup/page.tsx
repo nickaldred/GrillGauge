@@ -32,6 +32,7 @@ export default function Signup() {
     }
   }, [status, router]);
 
+  /** Handle the creation of a new user account */
   const handleCreateAccount = async (
     e: React.MouseEvent<HTMLButtonElement>
   ) => {
@@ -82,13 +83,15 @@ export default function Signup() {
     }
   };
 
-  const fullName = session?.user?.name;
-  const email = session?.user?.email;
-
+  /** Handle cancelling the signup process */
   const handleCancelSignup = async (e: React.MouseEvent<HTMLAnchorElement>) => {
     e.preventDefault();
     await signOut({ callbackUrl: "/" });
   };
+
+  /** User's full name and email from session */
+  const fullName = session?.user?.name;
+  const email = session?.user?.email;
 
   return (
     <div
