@@ -15,15 +15,15 @@ export default function Settings() {
   const isDarkMode = theme === "dark";
 
   return (
-    <main
+    <div
       className={`${
         isDarkMode ? "bg-gray-900" : "bg-gray-100"
-      } min-h-screen flex flex-col`}
+      } w-full flex-1 flex flex-col`}
     >
       <div className={`container mx-auto px-4 py-4`}>
         <PageHeader leftTitle="Settings" />
         <HubManagement />
       </div>
-    </main>
+    </div>
   );
 }
