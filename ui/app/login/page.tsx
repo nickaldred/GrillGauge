@@ -1,11 +1,13 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import Link from "next/link";
 import { signIn, useSession } from "next-auth/react";
 import { AlertCircleIcon, FlameIcon } from "lucide-react";
 import { useTheme } from "../providers/ThemeProvider";
+import { BASE_URL } from "../utils/envVars";
+import { User } from "../types/types";
 
 /**
  * The Login page allows users to sign in using Google authentication.
@@ -14,15 +16,56 @@ import { useTheme } from "../providers/ThemeProvider";
  */
 export default function Login() {
   // ** Session and Router **
-  const { status } = useSession();
+  const { data: session, status } = useSession();
   const router = useRouter();
 
-  // Redirect if already signed in
   const searchParams = useSearchParams();
   const from = searchParams.get("from") || "/dashboard";
-  if (status === "authenticated") {
-    router.replace(from);
-  }
+
+  useEffect(() => {
+    const checkUserAndRedirect = async () => {
+      if (status !== "authenticated") return;
+
+      const email = session?.user?.email;
+      if (!email) {
+        console.error("No email present in session user");
+        setError("Unable to read email from session.");
+        return;
+      }
+
+      const url = `${BASE_URL}/user?email=` + encodeURIComponent(email);
+      try {
+        const res = await fetch(url, {
+          method: "GET",
+          headers: { "Content-Type": "application/json" },
+        });
+
+        if (res.status === 404) {
+          router.replace("/signup");
+          return;
+        }
+
+        if (!res.ok) {
+          throw new Error(`Failed to fetch user: ${res.status}`);
+        }
+
+        const data = await res.json();
+        const userExists = Array.isArray(data)
+          ? data.length > 0
+          : Boolean(data);
+        if (userExists) {
+          router.replace(from);
+        } else {
+          router.replace("/signup");
+        }
+      } catch (err) {
+        console.error("Error fetching user:", err);
+        setError("Error checking user existence.");
+      }
+    };
+
+    checkUserAndRedirect();
+  }, [status, session, from, router]);
 
   // ** Theme **
   const { theme } = useTheme();
@@ -36,7 +79,9 @@ export default function Login() {
     e.preventDefault();
     setError("");
     try {
-      await signIn("google", { callbackUrl: from });
+      await signIn("google", {
+        callbackUrl: `/login?from=${encodeURIComponent(from)}`,
+      });
     } catch (err) {
       console.error(err);
       setError("An error occurred during Google login.");
