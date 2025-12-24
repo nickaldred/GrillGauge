@@ -18,6 +18,8 @@ interface Modal {
   onClose: () => void;
   title: string;
   children?: React.ReactNode;
+  /** Optional flag to render a wider modal (useful for charts, tables, etc.) */
+  wide?: boolean;
 }
 
 /**
@@ -27,9 +29,10 @@ interface Modal {
  * @param {function} onClose - Function to call when closing the modal.
  * @param {string} title - Title of the modal.
  * @param {React.ReactNode} children - Content of the modal.
+ * @param {boolean} wide - If true, use a wider layout.
  * @returns The Modal component.
  */
-export default function Modal({ open, onClose, title, children }: Modal) {
+export default function Modal({ open, onClose, title, children, wide }: Modal) {
   useEffect(() => {
     if (!open) return;
     const onKey = (e: KeyboardEvent) => {
@@ -44,6 +47,8 @@ export default function Modal({ open, onClose, title, children }: Modal) {
 
   if (!open) return null;
 
+  const widthClass = wide ? "w-full max-w-5xl" : "w-full max-w-xl";
+
   const modalContent = (
     <div
       className="fixed inset-0 z-50 flex items-center justify-center"
@@ -57,7 +62,7 @@ export default function Modal({ open, onClose, title, children }: Modal) {
       />
 
       <div
-        className={`relative z-10 p-5 overflow-auto max-h-[calc(90vh-80px)] w-full sm:w-[650px] md:w-[550px] ${
+        className={`relative z-10 p-5 overflow-auto max-h-[calc(90vh-80px)] ${widthClass} ${
           isDarkMode ? "bg-gray-800 text-gray-100" : "bg-white text-gray-900"
         } rounded-2xl shadow-lg`}
       >
