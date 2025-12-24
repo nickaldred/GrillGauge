@@ -22,7 +22,9 @@
     "react-chartjs-2": "^5.3.0",
     "react-dom": "19.1.0",
     "react-icons": "^4.11.0",
-    "tailwindcss": "^4.1.14"
+    "recharts": "^2.15.4",
+    "tailwindcss": "^4.1.14",
+    "jsonwebtoken": "^9.0.2"
   },
   "devDependencies": {
     "@eslint/eslintrc": "^3",
@@ -31,6 +33,7 @@
     "@types/react-dom": "^19",
     "eslint": "^9",
     "eslint-config-next": "15.5.4",
-    "typescript": "^5"
+    "typescript": "^5",
+    "@types/jsonwebtoken": "^9.0.0"
   }
 }

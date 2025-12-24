@@ -8,6 +8,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -45,6 +46,8 @@ public class ProbeController {
    * @return map of probe IDs to their list of ReadingDTOs.
    */
   @GetMapping("/readings/between")
+  @PreAuthorize(
+      "@ownershipService.canAccessAllProbes(#probeIds, authentication.name) or hasRole('ADMIN')")
   public Map<Long, List<ReadingDto>> getReadingsForProbesBetween(
       @RequestParam() Long[] probeIds, @RequestParam() String start, @RequestParam() String end) {
 
@@ -65,6 +68,8 @@ public class ProbeController {
    * @return The updated probe.
    */
   @PutMapping()
+  @PreAuthorize(
+      "@ownershipService.canAccessProbe(#probe.id, authentication.name) or hasRole('ADMIN')")
   public FrontEndProbe updateProbe(@RequestBody FrontEndProbe probe) {
     probeService.updateProbe(probe);
     return probe;
@@ -78,6 +83,8 @@ public class ProbeController {
    * @return The updated target temperature.
    */
   @PutMapping("targetTemp/{probeId}")
+  @PreAuthorize(
+      "@ownershipService.canAccessProbe(#probeId, authentication.name) or hasRole('ADMIN')")
   public float updateTargetTemp(@PathVariable Long probeId, @RequestParam float targetTemp) {
     return probeService.updateTargetTemp(probeId, targetTemp);
   }
@@ -90,6 +97,8 @@ public class ProbeController {
    * @return The updated name of the probe.
    */
   @PutMapping("name/{probeId}")
+  @PreAuthorize(
+      "@ownershipService.canAccessProbe(#probeId, authentication.name) or hasRole('ADMIN')")
   public Map<String, Object> updateProbeName(
       @PathVariable Long probeId, @RequestParam String name) {
     return probeService.updateProbeName(probeId, name);
@@ -101,6 +110,8 @@ public class ProbeController {
    * @param probeId The ID of the probe to delete.
    */
   @DeleteMapping("/{probeId}")
+  @PreAuthorize(
+      "@ownershipService.canAccessProbe(#probeId, authentication.name) or hasRole('ADMIN')")
   public void deleteProbe(@PathVariable Long probeId) {
     probeService.deleteProbe(probeId);
   }

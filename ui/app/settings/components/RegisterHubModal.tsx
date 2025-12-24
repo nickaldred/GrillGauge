@@ -4,7 +4,7 @@ import React, { useState, useRef } from "react";
 import { useSession } from "next-auth/react";
 import Modal from "@/app/components/modal";
 import { useTheme } from "@/app/providers/ThemeProvider";
-import { postRequest } from "@/app/utils/requestUtils";
+import { getData, postRequest } from "@/app/utils/requestUtils";
 import { BASE_URL } from "@/app/utils/envVars";
 
 type Props = {
@@ -91,9 +91,9 @@ export default function RegisterHubModal({
     setPolling(true);
     pollingRef.current = window.setInterval(async () => {
       try {
-        const res = await fetch(`${BASE_URL}/hub?hubId=${hubId}`);
-        if (!res.ok) throw new Error(`Failed to fetch hub: ${res.status}`);
-        const hub = await res.json();
+        // @ts-expect-error apiToken is added in auth.ts session callback
+        const token = session?.apiToken as string | undefined;
+        const hub = await getData(`${BASE_URL}/hub?hubId=${hubId}`, token);
         if (hub?.status === "REGISTERED") {
           setPolling(false);
           if (pollingRef.current) {
@@ -118,11 +118,18 @@ export default function RegisterHubModal({
       return;
     }
     try {
-      await postRequest(`${BASE_URL}/register/confirm`, {
-        hubId: Number(hubIdInput),
-        otp: otpInput,
-        userId: userEmail,
-      });
+      // @ts-expect-error apiToken is added in auth.ts session callback
+      const token = session?.apiToken as string | undefined;
+
+      await postRequest(
+        `${BASE_URL}/register/confirm`,
+        {
+          hubId: Number(hubIdInput),
+          otp: otpInput,
+          userId: userEmail,
+        },
+        token
+      );
       setStep(1);
       startPollingForRegistration(hubIdInput);
     } catch (e) {

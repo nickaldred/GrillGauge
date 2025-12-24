@@ -44,7 +44,9 @@ export function DashboardPage() {
       const email = user.email!;
       const url = `${BASE_URL}/ui/hubs?email=` + encodeURIComponent(email);
 
-      getData(url)
+      // @ts-expect-error apiToken is added in auth.ts session callback
+      const token = session?.apiToken as string | undefined;
+      getData(url, token)
         .then((data) => {
           setHubs(data);
         })
@@ -56,7 +58,7 @@ export function DashboardPage() {
     fetchData();
     const intervalId = setInterval(fetchData, 30000);
     return () => clearInterval(intervalId);
-  }, [user?.email]);
+  }, [user?.email, session]);
 
   // ** Handlers **
 
@@ -66,9 +68,12 @@ export function DashboardPage() {
     updatedTargetTemp: number
   ) => {
     try {
+      // @ts-expect-error apiToken is added in auth.ts session callback
+      const token = session?.apiToken as string | undefined;
       await putRequest(
         `${BASE_URL}/probe/targetTemp/${probeId}?targetTemp=${updatedTargetTemp}`,
-        {}
+        {},
+        token
       );
 
       setHubs((prev) =>
@@ -89,11 +94,14 @@ export function DashboardPage() {
   // Update probe name
   const handleUpdateName = async (probeId: number, updatedName: string) => {
     try {
+      // @ts-expect-error apiToken is added in auth.ts session callback
+      const token = session?.apiToken as string | undefined;
       await putRequest(
         `${BASE_URL}/probe/name/${probeId}?name=${encodeURIComponent(
           updatedName
         )}`,
-        {}
+        {},
+        token
       );
 
       setHubs((prev) =>

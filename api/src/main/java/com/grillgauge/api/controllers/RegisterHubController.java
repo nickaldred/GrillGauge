@@ -4,6 +4,7 @@ import com.grillgauge.api.services.RegisterHubService;
 import com.grillgauge.api.services.RegisterHubService.HubRegistrationResponse;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -52,6 +53,7 @@ public class RegisterHubController {
    * @param hubConfirm The confirmation request containing hub ID and OTP.
    */
   @PostMapping("/confirm")
+  @PreAuthorize("#hubConfirm.userId == authentication.name or hasRole('ADMIN')")
   @ResponseStatus(HttpStatus.OK)
   public void confirmAuthenticated(final @RequestBody() HubConfirmRequest hubConfirm) {
     registerHubService.confirmHub(hubConfirm);
@@ -76,6 +78,7 @@ public class RegisterHubController {
    * @param hubId The ID of the hub.
    */
   @PostMapping("/{hubId}/revoke")
+  @PreAuthorize("@ownershipService.canAccessHub(#hubId, authentication.name) or hasRole('ADMIN')")
   @ResponseStatus(HttpStatus.OK)
   public void revokeCertificate(final @PathVariable Long hubId, @RequestParam int reason) {
     registerHubService.revokeCertificate(hubId, reason);
