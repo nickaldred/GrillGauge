@@ -52,9 +52,15 @@ export default function Profile() {
 
       try {
         const url = `${BASE_URL}/user?email=${encodeURIComponent(email)}`;
+        const apiToken = session?.apiToken as string | undefined;
+        const headers: HeadersInit = { "Content-Type": "application/json" };
+        if (apiToken) {
+          headers["Authorization"] = `Bearer ${apiToken}`;
+        }
+
         const res = await fetch(url, {
           method: "GET",
-          headers: { "Content-Type": "application/json" },
+          headers,
         });
 
         if (res.status === 404) {

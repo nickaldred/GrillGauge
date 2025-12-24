@@ -1,6 +1,7 @@
 package com.grillgauge.api.controllers;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.jwt;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
@@ -45,6 +46,13 @@ class UserControllerIntTest {
     mockMvc
         .perform(
             post("/api/v1/user")
+                .with(
+                    jwt()
+                        .jwt(
+                            jwt -> {
+                              jwt.subject(user.getEmail());
+                              jwt.claim("roles", List.of("USER"));
+                            }))
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(objectMapper.writeValueAsString(user)))
         .andExpect(status().isCreated());

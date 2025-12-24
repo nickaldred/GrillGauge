@@ -339,9 +339,9 @@ export function DashboardPage() {
         open={isHubModalOpen}
         onClose={closeHubModal}
         wide
-        title={`${
+        title={`Temperature History - ${
           selectedHub ? selectedHub.name : "Probe"
-        } Temperature History`}
+        }`}
       >
         {selectedHub ? (
           <div>

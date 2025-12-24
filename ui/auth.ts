@@ -19,9 +19,18 @@ async function fetchUserByEmail(email: string): Promise<GrillUser | null> {
   const url = `${BASE_URL}/user?email=` + encodeURIComponent(email);
 
   try {
+    const token = jwt.sign(
+      { sub: email, email, roles: ["USER"] },
+      JWT_SECRET,
+      { algorithm: "HS256", expiresIn: "5m" }
+    );
+
     const res = await fetch(url, {
       method: "GET",
-      headers: { "Content-Type": "application/json" },
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${token}`,
+      },
     });
 
     if (!res.ok) {
