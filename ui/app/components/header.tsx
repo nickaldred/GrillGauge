@@ -5,11 +5,15 @@ import Link from "next/link";
 import { FlameIcon, SettingsIcon } from "lucide-react";
 import { useTheme } from "../providers/ThemeProvider";
 import GoogleSignInButton from "./googleSignIn";
+import { useRouter } from "next/navigation";
 
 export function Header() {
   // ** Theme **
   const { theme, toggle } = useTheme();
   const isDarkMode = theme === "dark";
+
+  // ** Router **
+  const router = useRouter();
 
   // Do not render header on specific routes
   const pathname = usePathname();
@@ -17,6 +21,10 @@ export function Header() {
   if (pathname === "/login") return null;
   const isDashboardActive = pathname === "/dashboard";
   const isSettingsActive = pathname ? pathname.startsWith("/settings") : false;
+
+  const handleLogoClick = () => {
+    router.push("/dashboard");
+  };
 
   // ** Nav Link Classnames **
   const navClass = (isActive: boolean, withFlex = false) =>
@@ -38,11 +46,14 @@ export function Header() {
     >
       <div className="container mx-auto px-6 py-4">
         <div className="flex justify-between items-center">
-          <div className="flex items-center space-x-2">
+          <button
+            onClick={handleLogoClick}
+            className="group flex items-center space-x-2 cursor-pointer"
+          >
             <div
               className={`p-2 rounded-lg bg-gradient-to-br from-orange-400 to-red-500`}
             >
-              <FlameIcon size={20} className="text-white" />
+              <FlameIcon size={20} className="text-white flame-flicker" />
             </div>
             <span
               className={`text-xl font-bold ${
@@ -51,7 +62,7 @@ export function Header() {
             >
               Grill Gauge
             </span>
-          </div>
+          </button>
 
           <div className="flex items-center space-x-4">
             <Link href="/dashboard" className={navClass(isDashboardActive)}>
