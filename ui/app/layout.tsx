@@ -11,11 +11,13 @@ type RootLayoutProps = {
 export default function RootLayout({ children }: Readonly<RootLayoutProps>) {
   return (
     <html lang="en">
-      <body className="min-h-screen flex flex-col">
+      <body>
         <ThemeProvider>
-          <Header />
-          <main className="flex-grow flex flex-col">{children}</main>
-          <Footer />
+          <div className="min-h-screen flex flex-col">
+            <Header />
+            <main className="flex-1 flex flex-col">{children}</main>
+            <Footer />
+          </div>
         </ThemeProvider>
       </body>
     </html>
