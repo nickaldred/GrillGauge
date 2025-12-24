@@ -260,20 +260,62 @@ export function DashboardPage() {
       <Modal
         open={isProbeModalOpen}
         onClose={closeProbeModal}
-        title={`${
+        wide
+        title={`Temperature History - ${
           selectedProbe ? selectedProbe.name : "Probe"
-        } Temperature History`}
+        }`}
       >
         {selectedProbe ? (
           <div>
-            <p
-              className={`text-sm ${
-                isDarkMode ? "text-gray-300" : "text-gray-600"
-              } mb-4`}
-            >
-              Probe ID: {selectedProbe.id} | Current Temp:{" "}
-              {selectedProbe.currentTemp}°F
-            </p>
+            <div className="mb-4">
+              <p
+                className={`text-xs uppercase tracking-wide mb-2 ${
+                  isDarkMode ? "text-gray-400" : "text-gray-500"
+                }`}
+              >
+                Probe overview
+              </p>
+              <div
+                className={`flex items-center justify-between rounded-lg border px-3 py-2 ${
+                  isDarkMode
+                    ? "bg-gray-800/60 border-gray-700"
+                    : "bg-gray-50 border-gray-200"
+                }`}
+              >
+                <div>
+                  <p
+                    className={`text-sm font-medium ${
+                      isDarkMode ? "text-gray-100" : "text-gray-900"
+                    }`}
+                  >
+                    {selectedProbe.name || `Probe ${selectedProbe.id}`}
+                  </p>
+                  <p
+                    className={`text-xs ${
+                      isDarkMode ? "text-gray-400" : "text-gray-500"
+                    }`}
+                  >
+                    ID: {selectedProbe.id}
+                  </p>
+                </div>
+                <div className="text-right">
+                  <span
+                    className={`text-lg font-semibold ${
+                      isDarkMode ? "text-white" : "text-gray-900"
+                    }`}
+                  >
+                    {selectedProbe.currentTemp}
+                  </span>
+                  <span
+                    className={`ml-1 text-xs ${
+                      isDarkMode ? "text-gray-400" : "text-gray-500"
+                    }`}
+                  >
+                    °F
+                  </span>
+                </div>
+              </div>
+            </div>
 
             <div className="border rounded-lg p-4">
               <ProbeChart probeId={selectedProbe.id} />
@@ -288,26 +330,66 @@ export function DashboardPage() {
       <Modal
         open={isHubModalOpen}
         onClose={closeHubModal}
+        wide
         title={`${
           selectedHub ? selectedHub.name : "Probe"
         } Temperature History`}
       >
         {selectedHub ? (
           <div>
-            <div
-              className={`text-sm ${
-                isDarkMode ? "text-gray-300" : "text-gray-600"
-              } mb-4`}
-            >
-              <p className="font-medium mb-2">Probes temperatures:</p>
-              <ul className="list-disc list-inside">
+            <div className="mb-4">
+              <p
+                className={`text-xs uppercase tracking-wide mb-2 ${
+                  isDarkMode ? "text-gray-400" : "text-gray-500"
+                }`}
+              >
+                Probes overview
+              </p>
+              <div className="grid gap-2 sm:grid-cols-2">
                 {selectedHub.probes.map((p) => (
-                  <li key={p.id}>
-                    {p.name ? `${p.name} ` : ""}(ID: {p.id}): {p.currentTemp}
-                    °F
-                  </li>
+                  <div
+                    key={p.id}
+                    className={`flex items-center justify-between rounded-lg border px-3 py-2 ${
+                      isDarkMode
+                        ? "bg-gray-800/60 border-gray-700"
+                        : "bg-gray-50 border-gray-200"
+                    }`}
+                  >
+                    <div>
+                      <p
+                        className={`text-sm font-medium ${
+                          isDarkMode ? "text-gray-100" : "text-gray-900"
+                        }`}
+                      >
+                        {p.name || `Probe ${p.id}`}
+                      </p>
+                      <p
+                        className={`text-xs ${
+                          isDarkMode ? "text-gray-400" : "text-gray-500"
+                        }`}
+                      >
+                        ID: {p.id}
+                      </p>
+                    </div>
+                    <div className="text-right">
+                      <span
+                        className={`text-lg font-semibold ${
+                          isDarkMode ? "text-white" : "text-gray-900"
+                        }`}
+                      >
+                        {p.currentTemp}
+                      </span>
+                      <span
+                        className={`ml-1 text-xs ${
+                          isDarkMode ? "text-gray-400" : "text-gray-500"
+                        }`}
+                      >
+                        °F
+                      </span>
+                    </div>
+                  </div>
                 ))}
-              </ul>
+              </div>
             </div>
             <div className="border rounded-lg p-4">
               <HubChart hub={selectedHub} />
