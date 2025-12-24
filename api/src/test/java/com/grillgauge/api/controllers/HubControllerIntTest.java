@@ -12,7 +12,6 @@ import com.grillgauge.api.domain.entitys.User;
 import com.grillgauge.api.domain.repositorys.HubRepository;
 import com.grillgauge.api.domain.repositorys.UserRepository;
 import com.grillgauge.api.utils.TestUtils;
-import java.util.List;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -59,9 +58,9 @@ class HubControllerIntTest {
             .perform(
                 post("/api/v1/hub")
                     .with(
-                  jwt()
-                    .jwt(jwt -> jwt.subject(testUser.getEmail()))
-                    .authorities(new SimpleGrantedAuthority("ROLE_ADMIN")))
+                        jwt()
+                            .jwt(jwt -> jwt.subject(testUser.getEmail()))
+                            .authorities(new SimpleGrantedAuthority("ROLE_ADMIN")))
                     .contentType(MediaType.APPLICATION_JSON)
                     .content(objectMapper.writeValueAsString(testHub)))
             .andExpect(status().isCreated())
