@@ -7,6 +7,7 @@ declare module "next-auth" {
   interface Session {
     user?: DefaultSession["user"] &
       Pick<GrillUser, "firstName" | "lastName">;
+    apiToken?: string;
   }
 }
 

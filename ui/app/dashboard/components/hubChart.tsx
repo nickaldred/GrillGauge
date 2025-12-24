@@ -1,8 +1,10 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { useSession } from "next-auth/react";
 import { Hub, Reading } from "@/app/types/types";
 import { BASE_URL } from "@/app/utils/envVars";
+import { getData } from "@/app/utils/requestUtils";
 import TemperatureTimeSeriesChart, {
   type TemperatureSeries,
 } from "./TemperatureTimeSeriesChart";
@@ -20,6 +22,7 @@ interface HubChartProps {
  * @returns The HubChart component.
  */
 export default function HubChart({ hub }: HubChartProps) {
+  const { data: session } = useSession();
   // ** States **
   const [readings, setReadings] = useState<Record<string, Reading[]>>({});
   const [timeframe, setTimeframe] = useState<number>(60); // minutes, default = 1 hour
@@ -45,19 +48,19 @@ export default function HubChart({ hub }: HubChartProps) {
     const endISO = end.toISOString();
 
     setLoading(true);
-    fetch(
+    // @ts-expect-error apiToken is added in auth.ts session callback
+    const token = session?.apiToken as string | undefined;
+
+    getData(
       `${BASE_URL}/probe/readings/between?probeIds=${probeIds.join(
         ","
-      )}&start=${startISO}&end=${endISO}`
+      )}&start=${startISO}&end=${endISO}`,
+      token
     )
-      .then((res) => {
-        if (!res.ok) throw new Error("Failed to fetch readings");
-        return res.json();
-      })
       .then((data: Record<string, Reading[]>) => setReadings(data || {}))
       .catch((err) => console.error(err))
       .finally(() => setLoading(false));
-  }, [probeIds.join(","), timeframe]);
+  }, [probeIds.join(","), timeframe, session]);
 
   const series: TemperatureSeries[] = Object.entries(readings).map(
     ([probeId, probeReadings]) => ({

@@ -128,7 +128,7 @@ class ExternalHubControllerIntTest {
   }
 
   @Test
-  void testStoreReadingForbidden() throws Exception {
+  void testStoreReadingUnauthorised() throws Exception {
     // Given
     final List<ProbeReading> probeReadings = List.of();
     final HubReading hubReading = new HubReading((long) 1234, probeReadings);
@@ -139,7 +139,7 @@ class ExternalHubControllerIntTest {
             post("/api/v1/externalHub")
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(objectMapper.writeValueAsString(hubReading)))
-        .andExpect(status().isForbidden());
+        .andExpect(status().isUnauthorized());
   }
 
   @Test
@@ -194,12 +194,12 @@ class ExternalHubControllerIntTest {
   }
 
   @Test
-  void testGetHubCurrentStateForbidden() throws Exception {
+  void testGetHubCurrentStateUnauthorised() throws Exception {
     // Given
     Hub hub = new Hub(testUser, "Smoke Gauge");
     hub = hubRepository.save(hub);
 
     // When
-    mockMvc.perform(get("/api/v1/externalHub")).andExpect(status().isForbidden());
+    mockMvc.perform(get("/api/v1/externalHub")).andExpect(status().isUnauthorized());
   }
 }

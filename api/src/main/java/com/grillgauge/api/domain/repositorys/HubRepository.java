@@ -13,4 +13,6 @@ public interface HubRepository extends JpaRepository<Hub, Long> {
   List<Hub> findByOwnerEmail(String email);
 
   Optional<Hub> findByCertificateSerial(Long certificateSerial);
+
+  boolean existsByIdAndOwnerEmail(Long id, String email);
 }

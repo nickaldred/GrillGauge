@@ -8,12 +8,18 @@
  * @returns The fetched data as a JSON object.
  * @throws An error if the fetch fails.
  */
-export async function getData(url: string) {
+export async function getData(url: string, token?: string) {
+  const headers: Record<string, string> = {
+    "Content-Type": "application/json",
+  };
+
+  if (token) {
+    headers["Authorization"] = `Bearer ${token}`;
+  }
+
   const response = await fetch(url, {
     method: "GET",
-    headers: {
-      "Content-Type": "application/json",
-    },
+    headers,
   });
 
   if (!response.ok) {
@@ -30,9 +36,15 @@ export async function getData(url: string) {
  * @param url The URL to send the delete request to.
  * @throws An error if the deletion fails.
  */
-export async function deleteRequest(url: string) {
+export async function deleteRequest(url: string, token?: string) {
+  const headers: Record<string, string> = {};
+  if (token) {
+    headers["Authorization"] = `Bearer ${token}`;
+  }
+
   const res = await fetch(url, {
     method: "DELETE",
+    headers,
   });
 
   if (!res.ok) {
@@ -48,10 +60,17 @@ export async function deleteRequest(url: string) {
  * @returns The response data as a JSON object.
  * @throws An error if the put request fails.
  */
-export async function putRequest(url: string, body: any) {
+export async function putRequest(url: string, body: any, token?: string) {
+  const headers: Record<string, string> = {
+    "Content-Type": "application/json",
+  };
+  if (token) {
+    headers["Authorization"] = `Bearer ${token}`;
+  }
+
   const res = await fetch(url, {
     method: "PUT",
-    headers: { "Content-Type": "application/json" },
+    headers,
     body: JSON.stringify(body),
   });
 
@@ -77,10 +96,17 @@ export async function putRequest(url: string, body: any) {
  * @returns The response data as a JSON object.
  * @throws An error if the post request fails.
  */
-export async function postRequest(url: string, body: any) {
+export async function postRequest(url: string, body: any, token?: string) {
+  const headers: Record<string, string> = {
+    "Content-Type": "application/json",
+  };
+  if (token) {
+    headers["Authorization"] = `Bearer ${token}`;
+  }
+
   const res = await fetch(url, {
     method: "POST",
-    headers: { "Content-Type": "application/json" },
+    headers,
     body: JSON.stringify(body),
   });
 

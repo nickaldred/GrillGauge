@@ -4,7 +4,7 @@ import React, { useState, useEffect } from "react";
 import { useSession } from "next-auth/react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Hub } from "@/app/types/types";
-import { deleteRequest, getData } from "@/app/utils/requestUtils";
+import { deleteRequest, getData, putRequest } from "@/app/utils/requestUtils";
 import { useTheme } from "@/app/providers/ThemeProvider";
 import { PlusIcon, EditIcon, TrashIcon, ChevronDown } from "lucide-react";
 import Modal from "@/app/components/modal";
@@ -35,7 +35,9 @@ export function HubManagement() {
     if (!user?.email) return;
 
     const fetchData = () => {
-      getData(`${BASE_URL}/ui/hubs?email=${user.email}`)
+      // @ts-expect-error apiToken is added in auth.ts session callback
+      const token = session?.apiToken as string | undefined;
+      getData(`${BASE_URL}/ui/hubs?email=${user.email}`, token)
         .then(setHubs)
         .catch(console.error);
     };
@@ -55,7 +57,9 @@ export function HubManagement() {
   const handleDeleteHubConfirm = async () => {
     if (!hubToDelete) return;
     try {
-      await deleteRequest(`${BASE_URL}/hub/${hubToDelete.id}`);
+      // @ts-expect-error apiToken is added in auth.ts session callback
+      const token = session?.apiToken as string | undefined;
+      await deleteRequest(`${BASE_URL}/hub/${hubToDelete.id}`, token);
       setHubs((prev) => prev?.filter((h) => h.id !== hubToDelete.id) || null);
       setIsDeleteHubModalOpen(false);
       setHubToDelete(null);
@@ -74,16 +78,10 @@ export function HubManagement() {
 
     try {
       const hubToSend: Hub = { ...hubToEdit, ...updatedHubData };
+      // @ts-expect-error apiToken is added in auth.ts session callback
+      const token = session?.apiToken as string | undefined;
 
-      const res = await fetch(`${BASE_URL}/hub`, {
-        method: "PUT",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(hubToSend),
-      });
-
-      if (!res.ok) throw new Error("Failed to update hub");
-
-      const updatedHub = await res.json();
+      const updatedHub = await putRequest(`${BASE_URL}/hub`, hubToSend, token);
 
       setHubs((prev) =>
         prev ? prev.map((h) => (h.id === updatedHub.id ? updatedHub : h)) : prev

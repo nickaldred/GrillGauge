@@ -1,8 +1,10 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { useSession } from "next-auth/react";
 import { BASE_URL } from "@/app/utils/envVars";
 import { Reading } from "@/app/types/types";
+import { getData } from "@/app/utils/requestUtils";
 import TemperatureTimeSeriesChart, {
   type TemperatureSeries,
 } from "./TemperatureTimeSeriesChart";
@@ -13,6 +15,7 @@ interface ProbeChartProps {
 }
 
 export default function ProbeChart({ probeId }: ProbeChartProps) {
+  const { data: session } = useSession();
   // ** States **
   const [readings, setReadings] = useState<Reading[]>([]);
   const [timeframe, setTimeframe] = useState<number>(60); // minutes, default = 1 hour
@@ -27,19 +30,19 @@ export default function ProbeChart({ probeId }: ProbeChartProps) {
 
     setLoading(true);
     const probeIdsParam = [probeId].join(",");
-    fetch(
-      `${BASE_URL}/probe/readings/between?probeIds=${probeIdsParam}&start=${startISO}&end=${endISO}`
+    // @ts-expect-error apiToken is added in auth.ts session callback
+    const token = session?.apiToken as string | undefined;
+
+    getData(
+      `${BASE_URL}/probe/readings/between?probeIds=${probeIdsParam}&start=${startISO}&end=${endISO}`,
+      token
     )
-      .then((res) => {
-        if (!res.ok) throw new Error("Failed to fetch readings");
-        return res.json();
-      })
       .then((data: Record<number, Reading[]>) => {
         setReadings(data[probeId] || []);
       })
       .catch((err) => console.error(err))
       .finally(() => setLoading(false));
-  }, [probeId, timeframe]);
+  }, [probeId, timeframe, session]);
   const series: TemperatureSeries[] = [
     {
       id: `probe-${probeId}`,

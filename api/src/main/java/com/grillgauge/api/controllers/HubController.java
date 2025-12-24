@@ -4,6 +4,7 @@ import com.grillgauge.api.domain.entitys.Hub;
 import com.grillgauge.api.domain.models.FrontEndHub;
 import com.grillgauge.api.services.HubService;
 import org.springframework.http.HttpStatus;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -36,6 +37,7 @@ public class HubController {
    * @return Hub entity.
    */
   @GetMapping()
+  @PreAuthorize("@ownershipService.canAccessHub(#hubId, authentication.name) or hasRole('ADMIN')")
   public Hub getHub(@RequestParam long hubId) {
     return this.hubService.getHub(hubId);
   }
@@ -48,6 +50,7 @@ public class HubController {
    */
   @PostMapping()
   @ResponseStatus(HttpStatus.CREATED) // 201
+  @PreAuthorize("hasRole('ADMIN')")
   public Hub storeHub(@RequestBody Hub hub) {
     return this.hubService.storeHub(hub);
   }
@@ -58,6 +61,7 @@ public class HubController {
    * @param hubId the ID of the hub to delete.
    */
   @DeleteMapping("/{hubId}")
+  @PreAuthorize("@ownershipService.canAccessHub(#hubId, authentication.name) or hasRole('ADMIN')")
   public void deleteHub(@PathVariable long hubId) {
     hubService.deleteHub(hubId);
   }
@@ -69,6 +73,7 @@ public class HubController {
    * @return the updated hub.
    */
   @PutMapping()
+  @PreAuthorize("@ownershipService.canAccessHub(#hub.id, authentication.name) or hasRole('ADMIN')")
   public FrontEndHub updateHub(@RequestBody FrontEndHub hub) {
     return this.hubService.updateHub(hub);
   }
