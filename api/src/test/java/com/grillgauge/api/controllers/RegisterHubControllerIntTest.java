@@ -28,10 +28,14 @@ import java.security.cert.PKIXParameters;
 import java.security.cert.TrustAnchor;
 import java.security.cert.X509CRL;
 import java.security.cert.X509Certificate;
+import java.time.Instant;
+import java.util.Base64;
 import java.util.Date;
 import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
+import javax.crypto.Mac;
+import javax.crypto.spec.SecretKeySpec;
 import javax.naming.ldap.LdapName;
 import javax.naming.ldap.Rdn;
 import javax.security.auth.x500.X500Principal;
@@ -48,6 +52,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.web.client.TestRestTemplate;
+import org.springframework.http.HttpEntity;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.ResponseEntity;
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
@@ -55,6 +61,9 @@ public class RegisterHubControllerIntTest {
 
   private static final String REGISTER_URL = "/api/v1/register/register";
   private static final String CONFIRM_URL = "/api/v1/register/confirm";
+
+  // Must match the dev/test JWT secret configured in SecurityConfig
+  private static final String TEST_JWT_SECRET = "dev-test-jwt-secret-change-me-0123456789ABCDEF";
 
   @Value("${otp.expiry.seconds}")
   private int otpExpirySeconds;
@@ -77,6 +86,42 @@ public class RegisterHubControllerIntTest {
     testUtils.clearDatabase();
   }
 
+  private String base64UrlEncode(final byte[] bytes) {
+    return Base64.getUrlEncoder().withoutPadding().encodeToString(bytes);
+  }
+
+  private String generateJwtToken(final String subject, final String role) {
+    try {
+      long now = Instant.now().getEpochSecond();
+      long exp = now + 3600; // 1 hour
+
+      String headerJson = "{\"alg\":\"HS256\",\"typ\":\"JWT\"}";
+      String payloadJson =
+          String.format(
+              "{\"sub\":\"%s\",\"roles\":[\"%s\"],\"iat\":%d,\"exp\":%d}", subject, role, now, exp);
+
+      String header = base64UrlEncode(headerJson.getBytes(StandardCharsets.UTF_8));
+      String body = base64UrlEncode(payloadJson.getBytes(StandardCharsets.UTF_8));
+      String signingInput = header + "." + body;
+
+      Mac mac = Mac.getInstance("HmacSHA256");
+      mac.init(new SecretKeySpec(TEST_JWT_SECRET.getBytes(StandardCharsets.UTF_8), "HmacSHA256"));
+      byte[] sig = mac.doFinal(signingInput.getBytes(StandardCharsets.UTF_8));
+      String signature = base64UrlEncode(sig);
+
+      return signingInput + "." + signature;
+    } catch (Exception e) {
+      throw new RuntimeException("Failed to generate test JWT", e);
+    }
+  }
+
+  private HttpHeaders createAuthHeaders(final String subject, final String role) {
+    String jwt = generateJwtToken(subject, role);
+    HttpHeaders headers = new HttpHeaders();
+    headers.setBearerAuth(jwt);
+    return headers;
+  }
+
   private HubRegistrationResponse registerHub(final String model, final String fwVersion) {
     HubRegistrationRequest registerRequest = new HubRegistrationRequest(model, fwVersion);
     ResponseEntity<HubRegistrationResponse> hubRegistrationResponse =
@@ -95,8 +140,10 @@ public class RegisterHubControllerIntTest {
   private void confirmHub(final HubRegistrationResponse regResp, final String userEmail) {
     HubConfirmRequest confirmRequest =
         new HubConfirmRequest(regResp.hubId(), regResp.otp(), userEmail);
+    HttpHeaders headers = createAuthHeaders(userEmail, "USER");
+    HttpEntity<HubConfirmRequest> entity = new HttpEntity<>(confirmRequest, headers);
     ResponseEntity<Void> confirmResponse =
-        restTemplate.postForEntity(CONFIRM_URL, confirmRequest, Void.class);
+        restTemplate.postForEntity(CONFIRM_URL, entity, Void.class);
     assertTrue(confirmResponse.getStatusCode().is2xxSuccessful());
   }
 
@@ -192,8 +239,10 @@ public class RegisterHubControllerIntTest {
     HubConfirmRequest confirmRequest =
         new HubConfirmRequest(
             hubRegistrationResponse.hubId(), hubRegistrationResponse.otp(), testUser.getEmail());
+    HttpHeaders headers = createAuthHeaders(testUser.getEmail(), "USER");
+    HttpEntity<HubConfirmRequest> entity = new HttpEntity<>(confirmRequest, headers);
     ResponseEntity<Void> confirmResponse =
-        restTemplate.postForEntity(CONFIRM_URL, confirmRequest, Void.class);
+        restTemplate.postForEntity(CONFIRM_URL, entity, Void.class);
     // Then
     assertTrue(confirmResponse.getStatusCode().is2xxSuccessful());
     Long hubId = hubRegistrationResponse.hubId();
@@ -233,8 +282,10 @@ public class RegisterHubControllerIntTest {
     HubConfirmRequest confirmRequest =
         new HubConfirmRequest(
             hubRegistrationResponse.hubId(), hubRegistrationResponse.otp(), testUser.getEmail());
+    HttpHeaders headers = createAuthHeaders(testUser.getEmail(), "USER");
+    HttpEntity<HubConfirmRequest> entity = new HttpEntity<>(confirmRequest, headers);
     ResponseEntity<Void> confirmResponse =
-        restTemplate.postForEntity(CONFIRM_URL, confirmRequest, Void.class);
+        restTemplate.postForEntity(CONFIRM_URL, entity, Void.class);
 
     // Then
     assertTrue(confirmResponse.getStatusCode().is5xxServerError());
@@ -256,8 +307,10 @@ public class RegisterHubControllerIntTest {
     // When
     HubConfirmRequest confirmRequest =
         new HubConfirmRequest(hubRegistrationResponse.hubId(), "bad-otp", testUser.getEmail());
+    HttpHeaders headers = createAuthHeaders(testUser.getEmail(), "USER");
+    HttpEntity<HubConfirmRequest> entity = new HttpEntity<>(confirmRequest, headers);
     ResponseEntity<Void> confirmResponse =
-        restTemplate.postForEntity(CONFIRM_URL, confirmRequest, Void.class);
+        restTemplate.postForEntity(CONFIRM_URL, entity, Void.class);
     // Then
     assertTrue(confirmResponse.getStatusCode().is5xxServerError());
     Long hubId = hubRegistrationResponse.hubId();
@@ -392,7 +445,9 @@ public class RegisterHubControllerIntTest {
 
     // When - revoke
     String revokeUrl = "/api/v1/register/" + hubId + "/revoke?reason=5";
-    ResponseEntity<Void> revokeResponse = restTemplate.postForEntity(revokeUrl, null, Void.class);
+    HttpHeaders headers = createAuthHeaders(testUser.getEmail(), "USER");
+    HttpEntity<Void> entity = new HttpEntity<>(null, headers);
+    ResponseEntity<Void> revokeResponse = restTemplate.postForEntity(revokeUrl, entity, Void.class);
 
     // Then
     assertTrue(revokeResponse.getStatusCode().is2xxSuccessful());
@@ -411,10 +466,13 @@ public class RegisterHubControllerIntTest {
   @Test
   public void testRevokeCertificateForNonexistentHub() {
     // When
+    String userEmail = "nickaldred@hotmail.co.uk";
     String revokeUrl = "/api/v1/register/99999/revoke?reason=5";
-    ResponseEntity<Void> revokeResponse = restTemplate.postForEntity(revokeUrl, null, Void.class);
-    // Then
-    assertEquals(500, revokeResponse.getStatusCode().value());
+    HttpHeaders headers = createAuthHeaders(userEmail, "USER");
+    HttpEntity<Void> entity = new HttpEntity<>(null, headers);
+    ResponseEntity<Void> revokeResponse = restTemplate.postForEntity(revokeUrl, entity, Void.class);
+    // Then - access should be forbidden since the hub does not exist / is not owned
+    assertEquals(403, revokeResponse.getStatusCode().value());
   }
 
   @Test
@@ -424,9 +482,12 @@ public class RegisterHubControllerIntTest {
     Long hubId = hubRegistrationResponse.hubId();
     assertNotNull(hubId);
     // When
+    String userEmail = "nickaldred@hotmail.co.uk";
     String revokeUrl = "/api/v1/register/" + hubId + "/revoke?reason=5";
-    ResponseEntity<Void> revokeResponse = restTemplate.postForEntity(revokeUrl, null, Void.class);
-    // Then
-    assertEquals(500, revokeResponse.getStatusCode().value());
+    HttpHeaders headers = createAuthHeaders(userEmail, "USER");
+    HttpEntity<Void> entity = new HttpEntity<>(null, headers);
+    ResponseEntity<Void> revokeResponse = restTemplate.postForEntity(revokeUrl, entity, Void.class);
+    // Then - access should be forbidden because the hub is not yet owned by the user
+    assertEquals(403, revokeResponse.getStatusCode().value());
   }
 }

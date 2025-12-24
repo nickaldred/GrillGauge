@@ -68,11 +68,15 @@ export default function Signup() {
     try {
       setIsSubmitting(true);
 
-      await postRequest(`${BASE_URL}/user`, {
-        email,
-        firstName,
-        lastName,
-      });
+      await postRequest(
+        `${BASE_URL}/user`,
+        {
+          email,
+          firstName,
+          lastName,
+        },
+        session?.apiToken
+      );
 
       router.replace(from);
     } catch (err) {

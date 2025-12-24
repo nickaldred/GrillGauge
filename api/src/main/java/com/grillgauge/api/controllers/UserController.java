@@ -3,6 +3,7 @@ package com.grillgauge.api.controllers;
 import com.grillgauge.api.domain.entitys.User;
 import com.grillgauge.api.services.UserService;
 import org.springframework.http.HttpStatus;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -31,6 +32,7 @@ public class UserController {
    */
   @PostMapping()
   @ResponseStatus(HttpStatus.CREATED)
+  @PreAuthorize("#user.email == authentication.name or hasRole('ADMIN')")
   public User storeUser(@RequestBody final User user) {
     return userService.storeUser(user);
   }
@@ -42,7 +44,8 @@ public class UserController {
    * @return the deleted User entity.
    */
   @DeleteMapping
-  public User deleteUser(final User user) {
+  @PreAuthorize("#user.email == authentication.name or hasRole('ADMIN')")
+  public User deleteUser(@RequestBody final User user) {
     return userService.deleteUser(user);
   }
 
@@ -53,6 +56,7 @@ public class UserController {
    * @return the User entity.
    */
   @GetMapping
+  @PreAuthorize("#email == authentication.name or hasRole('ADMIN')")
   public User getUserByEmail(@RequestParam final String email) {
     return userService.getUserByEmail(email);
   }

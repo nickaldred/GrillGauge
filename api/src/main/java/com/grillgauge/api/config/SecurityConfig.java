@@ -61,6 +61,9 @@ public class SecurityConfig {
                     "/api/v1/register/confirm",
                     "/api/v1/register/*/revoke")
                 .authenticated()
+                // User management endpoints
+                .requestMatchers("/api/v1/user/**")
+                .authenticated()
                 // Everything else (including /api/v1/user and hub device
                 // registration/CSR) remains open for now.
                 .anyRequest()
