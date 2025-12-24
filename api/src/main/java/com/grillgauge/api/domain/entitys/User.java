@@ -4,6 +4,7 @@ import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.Id;
 import jakarta.persistence.Table;
+import java.util.List;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -18,6 +19,12 @@ import lombok.Setter;
 @Table(name = "users")
 public class User {
 
+  /** User roles within the system. */
+  public enum UserRole {
+    ADMIN,
+    USER
+  }
+
   @Id
   @Column(nullable = false, unique = true)
   private String email;
@@ -27,4 +34,21 @@ public class User {
 
   @Column(nullable = false)
   private String lastName;
+
+  @Column(nullable = false)
+  private List<UserRole> roles;
+
+  /**
+   * Constructor for User with default role USER.
+   *
+   * @param email The email of the user.
+   * @param firstName The first name of the user.
+   * @param lastName The last name of the user.
+   */
+  public User(String email, String firstName, String lastName) {
+    this.email = email;
+    this.firstName = firstName;
+    this.lastName = lastName;
+    this.roles = List.of(UserRole.USER);
+  }
 }
