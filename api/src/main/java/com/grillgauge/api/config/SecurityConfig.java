@@ -35,7 +35,9 @@ public class SecurityConfig {
 
     http.csrf(csrf -> csrf.disable());
 
-    http.authorizeHttpRequests(auth -> auth.anyRequest().permitAll());
+    http.authorizeHttpRequests(
+        auth ->
+            auth.requestMatchers("/api/v1/externalHub/**").hasRole("HUB").anyRequest().permitAll());
 
     http.x509(x509 -> x509.authenticationUserDetailsService(certificateUserDetailsService));
 
