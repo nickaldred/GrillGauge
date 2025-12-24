@@ -80,7 +80,7 @@ public class Hub {
   private String certificatePem;
 
   /** Unique certificate serial number. */
-  @Column(nullable = true)
+  @Column(nullable = true, unique = true)
   private Long certificateSerial;
 
   /** Certificate validity. */
