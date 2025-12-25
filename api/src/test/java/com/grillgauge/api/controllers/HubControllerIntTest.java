@@ -1,6 +1,7 @@
 package com.grillgauge.api.controllers;
 
 import static com.grillgauge.api.utils.TestUtils.jwtWithRole;
+import static java.util.Objects.requireNonNull;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
@@ -59,8 +60,8 @@ class HubControllerIntTest {
             .perform(
                 post("/api/v1/hub")
                     .with(jwtWithRole(testUser.getEmail(), "ROLE_ADMIN"))
-                    .contentType(MediaType.APPLICATION_JSON)
-                    .content(objectMapper.writeValueAsString(testHub)))
+                    .contentType(requireNonNull(MediaType.APPLICATION_JSON))
+                    .content(requireNonNull(objectMapper.writeValueAsString(testHub))))
             .andExpect(status().isCreated())
             .andReturn();
 
