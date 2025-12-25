@@ -63,25 +63,24 @@ export const authConfig: NextAuthConfig = {
       if (dbUser && session.user) {
         session.user.firstName = dbUser.firstName;
         session.user.lastName = dbUser.lastName;
+        // @ts-expect-error Custom property added to session user.
+        session.user.roles = dbUser.roles;
       }
 
       if (session.user) {
-        // Simple example: treat a hard-coded list of emails as admins.
-        const adminEmails = (process.env.ADMIN_EMAILS || "").split(",").map((e) => e.trim());
-        const isAdmin = adminEmails.includes(email ?? "");
+        const roles = dbUser?.roles && dbUser.roles.length > 0 ? dbUser.roles : ["USER"];
 
         const payload = {
           sub: email,
           email,
           name: `${session.user.firstName ?? ""} ${session.user.lastName ?? ""}`.trim(),
-          roles: isAdmin ? ["ADMIN"] : ["USER"],
+          roles,
         };
 
         const signed = jwt.sign(payload, JWT_SECRET, {
           algorithm: "HS256",
           expiresIn: "1h",
         });
-        // @ts-expect-error augment session with apiToken
         session.apiToken = signed;
       }
 
