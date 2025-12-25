@@ -70,6 +70,8 @@ public class SecurityConfig {
                 .authenticated()
                 // Everything else (including /api/v1/user and hub device
                 // registration/CSR) remains open for now.
+                .requestMatchers("/api/v1/register/confirm", "/api/v1/register/revoke")
+                .authenticated()
                 .anyRequest()
                 .permitAll());
 

@@ -49,7 +49,7 @@ public class HubController {
    * @return the stored Hub entity.
    */
   @PostMapping()
-  @ResponseStatus(HttpStatus.CREATED) // 201
+  @ResponseStatus(HttpStatus.CREATED)
   @PreAuthorize("hasRole('ADMIN')")
   public Hub storeHub(@RequestBody Hub hub) {
     return this.hubService.storeHub(hub);

@@ -55,6 +55,7 @@ import org.springframework.boot.test.web.client.TestRestTemplate;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.ResponseEntity;
+import org.springframework.lang.NonNull;
 import org.springframework.test.context.ActiveProfiles;
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
@@ -92,7 +93,7 @@ public class RegisterHubControllerIntTest {
     return Base64.getUrlEncoder().withoutPadding().encodeToString(bytes);
   }
 
-  private String generateJwtToken(final String subject, final String role) {
+  @NonNull private String generateJwtToken(final String subject, final String role) {
     try {
       long now = Instant.now().getEpochSecond();
       long exp = now + 3600; // 1 hour
@@ -134,7 +135,10 @@ public class RegisterHubControllerIntTest {
     return registrationBody;
   }
 
-  private User createUser(final String email, final String firstName, final String lastName) {
+  private User createUser(
+      @NonNull final String email,
+      @NonNull final String firstName,
+      @NonNull final String lastName) {
     User testUser = new User(email, firstName, lastName);
     return userRepository.save(testUser);
   }
@@ -180,7 +184,8 @@ public class RegisterHubControllerIntTest {
     }
   }
 
-  private void setHubCertificateSerialFromCert(final Long hubId, final X509Certificate cert) {
+  private void setHubCertificateSerialFromCert(
+      @NonNull final Long hubId, final X509Certificate cert) {
     Hub hub = hubRepository.findById(hubId).orElseThrow();
     hub.setCertificateSerial(cert.getSerialNumber().longValue());
     hubRepository.save(hub);

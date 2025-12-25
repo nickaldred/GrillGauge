@@ -124,9 +124,9 @@ class ExternalHubControllerIntTest {
     mockMvc
         .perform(
             post("/api/v1/externalHub")
-                .with(x509(cert))
-                .contentType(MediaType.APPLICATION_JSON)
-                .content(objectMapper.writeValueAsString(hubReading)))
+                .with(requireNonNull(x509(cert)))
+                .contentType(requireNonNull(MediaType.APPLICATION_JSON))
+                .content(requireNonNull(objectMapper.writeValueAsString(hubReading))))
         .andExpect(status().isNotFound());
   }
 
@@ -140,8 +140,8 @@ class ExternalHubControllerIntTest {
     mockMvc
         .perform(
             post("/api/v1/externalHub")
-                .contentType(MediaType.APPLICATION_JSON)
-                .content(objectMapper.writeValueAsString(hubReading)))
+                .contentType(requireNonNull(MediaType.APPLICATION_JSON))
+                .content(requireNonNull(objectMapper.writeValueAsString(hubReading))))
         .andExpect(status().isUnauthorized());
   }
 
@@ -162,7 +162,7 @@ class ExternalHubControllerIntTest {
     // When
     MvcResult result =
         mockMvc
-            .perform(get("/api/v1/externalHub").with(x509(cert)))
+            .perform(get("/api/v1/externalHub").with(requireNonNull(x509(cert))))
             .andExpect(status().isOk())
             .andReturn();
 
@@ -179,7 +179,9 @@ class ExternalHubControllerIntTest {
   @Test
   void testGetHubCurrentStateUnsuccessfulNoHub() throws Exception {
     // When
-    mockMvc.perform(get("/api/v1/externalHub").with(x509(cert))).andExpect(status().isNotFound());
+    mockMvc
+        .perform(get("/api/v1/externalHub").with(requireNonNull(x509(cert))))
+        .andExpect(status().isNotFound());
   }
 
   @Test
@@ -193,7 +195,9 @@ class ExternalHubControllerIntTest {
     hubRepository.save(hub);
 
     // When & then
-    mockMvc.perform(get("/api/v1/externalHub").with(x509(cert))).andExpect(status().isOk());
+    mockMvc
+        .perform(get("/api/v1/externalHub").with(requireNonNull(x509(cert))))
+        .andExpect(status().isOk());
   }
 
   @Test
