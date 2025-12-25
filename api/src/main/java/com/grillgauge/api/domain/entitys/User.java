@@ -9,6 +9,7 @@ import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+import org.springframework.lang.NonNull;
 
 /** Entity representing a User in the system. */
 @Entity
@@ -21,12 +22,12 @@ public class User {
 
   /** User roles within the system. */
   public enum UserRole {
-    ADMIN,
-    USER
+    ADMIN, USER
   }
 
   @Id
   @Column(nullable = false, unique = true)
+  @NonNull
   private String email;
 
   @Column(nullable = false)
@@ -45,7 +46,7 @@ public class User {
    * @param firstName The first name of the user.
    * @param lastName The last name of the user.
    */
-  public User(String email, String firstName, String lastName) {
+  public User(@NonNull String email, @NonNull String firstName, @NonNull String lastName) {
     this.email = email;
     this.firstName = firstName;
     this.lastName = lastName;

@@ -1,7 +1,8 @@
 package com.grillgauge.api.controllers;
 
+import static com.grillgauge.api.utils.TestUtils.jwtWithRole;
+import static java.util.Objects.requireNonNull;
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.jwt;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
@@ -48,15 +49,9 @@ class UserControllerIntTest {
     mockMvc
         .perform(
             post("/api/v1/user")
-                .with(
-                    jwt()
-                        .jwt(
-                            jwt -> {
-                              jwt.subject(user.getEmail());
-                              jwt.claim("roles", List.of("USER"));
-                            }))
-                .contentType(MediaType.APPLICATION_JSON)
-                .content(objectMapper.writeValueAsString(user)))
+                .with(jwtWithRole(user.getEmail(), "ROLE_USER"))
+                .contentType(requireNonNull(MediaType.APPLICATION_JSON))
+                .content(requireNonNull(objectMapper.writeValueAsString(user))))
         .andExpect(status().isCreated());
 
     // Then
