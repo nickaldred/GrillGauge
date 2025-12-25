@@ -55,21 +55,23 @@ import org.springframework.boot.test.web.client.TestRestTemplate;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.ResponseEntity;
+import org.springframework.test.context.ActiveProfiles;
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
+@ActiveProfiles("dev")
 public class RegisterHubControllerIntTest {
 
   private static final String REGISTER_URL = "/api/v1/register/register";
   private static final String CONFIRM_URL = "/api/v1/register/confirm";
-
-  // Must match the dev/test JWT secret configured in SecurityConfig
-  private static final String TEST_JWT_SECRET = "dev-test-jwt-secret-change-me-0123456789ABCDEF";
 
   @Value("${otp.expiry.seconds}")
   private int otpExpirySeconds;
 
   @Value("${certificate.ca-cert}")
   private String caCertPath;
+
+  @Value("${security.jwt.secret:}")
+  private String jwtSecret;
 
   @Autowired private TestRestTemplate restTemplate;
 
@@ -105,7 +107,7 @@ public class RegisterHubControllerIntTest {
       String signingInput = header + "." + body;
 
       Mac mac = Mac.getInstance("HmacSHA256");
-      mac.init(new SecretKeySpec(TEST_JWT_SECRET.getBytes(StandardCharsets.UTF_8), "HmacSHA256"));
+      mac.init(new SecretKeySpec(jwtSecret.getBytes(StandardCharsets.UTF_8), "HmacSHA256"));
       byte[] sig = mac.doFinal(signingInput.getBytes(StandardCharsets.UTF_8));
       String signature = base64UrlEncode(sig);
 

@@ -7,8 +7,13 @@ import type { User as GrillUser } from "./app/types/types";
 // Shared secret for signing JWTs towards the Spring API.
 // In production, override via process.env.JWT_SECRET.
 // Must be at least 256 bits (32 bytes) for HS256 to be valid.
-const JWT_SECRET =
-  process.env.JWT_SECRET ?? "dev-test-jwt-secret-change-me-0123456789ABCDEF";
+const JWT_SECRET = (() => {
+  const secret = process.env.JWT_SECRET;
+  if (!secret) {
+    throw new Error("JWT_SECRET environment variable is required");
+  }
+  return secret;
+})();
 
 async function fetchUserByEmail(email: string): Promise<GrillUser | null> {
   if (!BASE_URL) {

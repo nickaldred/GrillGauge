@@ -3,6 +3,7 @@ package com.grillgauge.api.config;
 import com.grillgauge.api.security.CertificateUserDetailsService;
 import java.security.Security;
 import org.bouncycastle.jce.provider.BouncyCastleProvider;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.core.convert.converter.Converter;
@@ -30,6 +31,9 @@ public class SecurityConfig {
       Security.addProvider(new BouncyCastleProvider());
     }
   }
+
+  @Value("${security.jwt.secret:}")
+  private String jwtSecret;
 
   public SecurityConfig() {}
 
@@ -85,15 +89,14 @@ public class SecurityConfig {
    */
   @Bean
   JwtDecoder jwtDecoder() {
-    String secret = System.getenv("JWT_SECRET");
-    if (secret == null || secret.isEmpty()) {
+    if (jwtSecret == null || jwtSecret.isEmpty()) {
       // Fallback for local dev/tests; override in production via environment.
       // Must be at least 256 bits (32 bytes) for HS256.
-      secret = "dev-test-jwt-secret-change-me-0123456789ABCDEF";
+      jwtSecret = "dev-test-jwt-secret-change-me-0123456789ABCDEF";
     }
     return NimbusJwtDecoder.withSecretKey(
             new javax.crypto.spec.SecretKeySpec(
-                secret.getBytes(java.nio.charset.StandardCharsets.UTF_8), "HmacSHA256"))
+                jwtSecret.getBytes(java.nio.charset.StandardCharsets.UTF_8), "HmacSHA256"))
         .build();
   }
 
