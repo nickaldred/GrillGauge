@@ -32,87 +32,117 @@ public class CertificateUserDetailsService
     this.certificateService = certificateService;
   }
 
+  /**
+   * Loads UserDetails from a PreAuthenticatedAuthenticationToken containing an X.509 certificate
+   *
+   * @param token the pre-authenticated token
+   * @return the UserDetails representing the hub
+   * @throws UsernameNotFoundException if the certificate is invalid or no hub is found
+   */
   @Override
-  public UserDetails loadUserDetails(PreAuthenticatedAuthenticationToken token)
+  public UserDetails loadUserDetails(final PreAuthenticatedAuthenticationToken token)
       throws UsernameNotFoundException {
+    X509Certificate cert =
+        extractCertificateFromToken(token)
+            .or(this::extractCertificateFromRequestContext)
+            .orElseThrow(() -> new UsernameNotFoundException("No client certificate presented"));
+
+    verifyCertificateSignedByTrustedCa(cert);
+
+    long serial = cert.getSerialNumber().longValue();
+
+    return hubRepository
+        .findByCertificateSerial(serial)
+        .map(this::toRegisteredHubUserDetails)
+        .orElseGet(
+            () ->
+                createUserDetailsFromSubject(cert)
+                    .orElseThrow(
+                        () ->
+                            new UsernameNotFoundException("No hub found for certificate serial")));
+  }
+
+  private Optional<X509Certificate> extractCertificateFromToken(
+      final PreAuthenticatedAuthenticationToken token) {
     Object creds = token.getCredentials();
-    X509Certificate cert = null;
 
-    if (creds instanceof X509Certificate[]) {
-      X509Certificate[] certs = (X509Certificate[]) creds;
-      if (certs.length > 0) {
-        cert = certs[0];
-      }
-    } else if (creds instanceof X509Certificate) {
-      cert = (X509Certificate) creds;
+    if (creds instanceof X509Certificate) {
+      return Optional.of((X509Certificate) creds);
     }
 
-    if (cert == null) {
-      try {
-        ServletRequestAttributes attrs =
-            (ServletRequestAttributes) RequestContextHolder.getRequestAttributes();
-        if (attrs != null) {
-          HttpServletRequest req = attrs.getRequest();
-          Object attr = req.getAttribute("javax.servlet.request.X509Certificate");
-          if (attr instanceof X509Certificate[]) {
-            X509Certificate[] certs = (X509Certificate[]) attr;
-            if (certs.length > 0) {
-              cert = certs[0];
-            }
-          }
-        }
-      } catch (Exception ignored) {
-        // continue to throw below
-      }
+    if (creds instanceof X509Certificate[] certs && certs.length > 0) {
+      return Optional.of(certs[0]);
     }
 
-    if (cert == null) {
-      throw new UsernameNotFoundException("No client certificate presented");
+    return Optional.empty();
+  }
+
+  private Optional<X509Certificate> extractCertificateFromRequestContext() {
+    ServletRequestAttributes attrs =
+        (ServletRequestAttributes) RequestContextHolder.getRequestAttributes();
+    if (attrs == null) {
+      return Optional.empty();
     }
 
+    HttpServletRequest req = attrs.getRequest();
+    Object attr = req.getAttribute("javax.servlet.request.X509Certificate");
+    if (attr instanceof X509Certificate[] certs && certs.length > 0) {
+      return Optional.of(certs[0]);
+    }
+
+    return Optional.empty();
+  }
+
+  private void verifyCertificateSignedByTrustedCa(final X509Certificate cert) {
     try {
       X509Certificate ca = certificateService.getCaCertificate();
       cert.verify(ca.getPublicKey());
     } catch (Exception e) {
       throw new UsernameNotFoundException("Client certificate not signed by trusted CA", e);
     }
+  }
 
-    Long serial = cert.getSerialNumber().longValue();
+  private UserDetails toRegisteredHubUserDetails(final Hub hub) {
+    if (hub.getStatus() != Hub.HubStatus.REGISTERED) {
+      throw new UsernameNotFoundException("Hub not in REGISTERED status");
+    }
+    return new HubUserDetails(hub.getId(), hub.getName());
+  }
 
-    Optional<Hub> hubOpt = hubRepository.findByCertificateSerial(serial);
-    if (hubOpt.isPresent()) {
-      Hub hub = hubOpt.get();
-      if (hub.getStatus() != Hub.HubStatus.REGISTERED) {
-        throw new UsernameNotFoundException("Hub not in REGISTERED status");
-      }
-      return new HubUserDetails(hub.getId(), hub.getName());
+  private Optional<UserDetails> createUserDetailsFromSubject(final X509Certificate cert) {
+    if (cert.getSubjectX500Principal() == null) {
+      return Optional.empty();
     }
 
-    // No DB entry for this certificate serial. Try to extract a hub id from
-    // the certificate subject CN (e.g. CN=Hub-6) so controller/service can
-    // return a 404 when appropriate instead of a 403.
+    String dn = cert.getSubjectX500Principal().getName();
+    String[] parts = dn.split(",");
+
+    for (String part : parts) {
+      String p = part.trim();
+      if (!p.startsWith("CN=")) {
+        continue;
+      }
+
+      String cn = p.substring(3);
+      if (!cn.startsWith("Hub-")) {
+        continue;
+      }
+
+      String idStr = cn.substring(4);
+      Optional<Long> hubId = parseHubId(idStr);
+      if (hubId.isPresent()) {
+        return Optional.of(new HubUserDetails(hubId.get(), cn));
+      }
+    }
+
+    return Optional.empty();
+  }
+
+  private Optional<Long> parseHubId(final String idStr) {
     try {
-      String dn = cert.getSubjectX500Principal().getName();
-      String[] parts = dn.split(",");
-      for (String p : parts) {
-        p = p.trim();
-        if (p.startsWith("CN=")) {
-          String cn = p.substring(3);
-          if (cn.startsWith("Hub-")) {
-            String idStr = cn.substring(4);
-            try {
-              Long parsedId = Long.parseLong(idStr);
-              return new HubUserDetails(parsedId, cn);
-            } catch (NumberFormatException ignored) {
-              // fall through
-            }
-          }
-        }
-      }
-    } catch (Exception ignored) {
-      // ignore and throw below
+      return Optional.of(Long.parseLong(idStr));
+    } catch (NumberFormatException e) {
+      return Optional.empty();
     }
-
-    throw new UsernameNotFoundException("No hub found for certificate serial");
   }
 }

@@ -1,5 +1,6 @@
 package com.grillgauge.api.controllers;
 
+import static java.util.Objects.requireNonNull;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.x509;
@@ -94,9 +95,9 @@ class ExternalHubControllerIntTest {
     mockMvc
         .perform(
             post("/api/v1/externalHub")
-                .with(x509(cert))
-                .contentType(MediaType.APPLICATION_JSON)
-                .content(objectMapper.writeValueAsString(hubReading)))
+                .with(requireNonNull(x509(cert)))
+                .contentType(requireNonNull(MediaType.APPLICATION_JSON))
+                .content(requireNonNull(objectMapper.writeValueAsString(hubReading))))
         .andExpect(status().isCreated());
 
     // Then

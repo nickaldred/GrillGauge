@@ -1,6 +1,6 @@
 package com.grillgauge.api.controllers;
 
-import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.jwt;
+import static com.grillgauge.api.utils.TestUtils.jwtWithRole;
 
 import com.grillgauge.api.domain.entitys.Hub;
 import com.grillgauge.api.domain.entitys.Probe;
@@ -76,13 +76,7 @@ class ProbeControllerIntTest {
     mockMvc
         .perform(
             MockMvcRequestBuilders.get("/api/v1/probe/readings/between")
-                .with(
-                    jwt()
-                        .jwt(
-                            jwt -> {
-                              jwt.subject(testUser.getEmail());
-                              jwt.claim("roles", List.of("USER"));
-                            }))
+                .with(jwtWithRole(testUser.getEmail(), "ROLE_USER"))
                 .param("probeIds", probeKey)
                 .param("start", start)
                 .param("end", end))
