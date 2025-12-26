@@ -158,6 +158,7 @@ public class ProbeService {
 
     probe.setName(frontEndProbe.getName());
     probe.setTargetTemp(frontEndProbe.getTargetTemp());
+    probe.setColour(frontEndProbe.getColour());
 
     probeRepository.save(probe);
     LOG.info("Successfully updated probe with ID: {}", frontEndProbe.getId());

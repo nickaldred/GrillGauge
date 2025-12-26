@@ -16,6 +16,7 @@ import java.util.List;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+import org.springframework.lang.NonNull;
 
 /**
  * Entity representing a Probe in the system. A Probe is associated with a Hub and a User (owner),
@@ -45,24 +46,24 @@ public class Probe {
           "#FFC107", // amber
           "#FF9800", // orange
           "#FF5722" // deep orange
-      );
+          );
 
   private static int nextColourIndex = 0;
 
   @Id
   @GeneratedValue(strategy = GenerationType.AUTO)
-  private Long id;
+  @NonNull private Long id;
 
   @Column(name = "local_id", nullable = false)
-  private Integer localId;
+  @NonNull private Integer localId;
 
   @ManyToOne(fetch = FetchType.LAZY)
   @JoinColumn(name = "hub_id", nullable = false)
-  private Hub hub;
+  @NonNull private Hub hub;
 
   @ManyToOne(fetch = FetchType.LAZY)
   @JoinColumn(name = "email", nullable = false)
-  private User owner;
+  @NonNull private User owner;
 
   @Column(nullable = true)
   private Float targetTemp;
@@ -71,10 +72,20 @@ public class Probe {
   private String name;
 
   @Column(nullable = false)
-  private String colour;
+  @NonNull private String colour;
 
   @OneToMany(mappedBy = "probe", cascade = CascadeType.ALL, orphanRemoval = true)
   private List<Reading> readings = new ArrayList<>();
+
+  /**
+   * Exposes the list of default probe colours for use by other layers (e.g. services or controller
+   * DTOs) without allowing modification of the internal list.
+   *
+   * @return an unmodifiable list of default hex colour strings
+   */
+  public static List<String> getDefaultColours() {
+    return List.copyOf(DEFAULT_COLOURS);
+  }
 
   public Probe(Integer localId, Hub hub, User owner) {
     this(localId, hub, owner, null, null);
