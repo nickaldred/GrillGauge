@@ -214,24 +214,16 @@ export function DashboardPage() {
         ) : (
           hubs.map((hub) => (
             <div key={hub.id} className="mb-10">
-              <div className="flex items-center mb-4">
-                {/* Hub name (clickable to open hub modal) */}
-                <h2 className="mb-4 cursor-pointer">
-                  <button
-                    type="button"
-                    onClick={() => openHubModal(hub)}
-                    onKeyDown={(e) => {
-                      if (e.key === "Enter" || e.key === " ") openHubModal(hub);
-                    }}
-                    className={`text-2xl font-bold ${
-                      isDarkMode ? "text-white" : "text-gray-800"
-                    } cursor-pointer`}
-                  >
-                    {hub.name}
-                  </button>
+              <div className="mb-4 flex flex-wrap items-center gap-3">
+                <h2
+                  className={`text-2xl font-bold ${
+                    isDarkMode ? "text-white" : "text-gray-800"
+                  }`}
+                >
+                  {hub.name}
                 </h2>
                 <span
-                  className={`ml-3 px-3 py-1 text-sm rounded-full ${
+                  className={`px-3 py-1 text-sm rounded-full ${
                     hub.connected
                       ? isDarkMode
                         ? "bg-green-500/20 text-green-400"
@@ -243,6 +235,23 @@ export function DashboardPage() {
                 >
                   {hub.connected ? "Connected" : "Disconnected"}
                 </span>
+                <button
+                  type="button"
+                  onClick={() => hub.connected && openHubModal(hub)}
+                  disabled={!hub.connected}
+                  className={`inline-flex items-center px-3 py-1.5 rounded-md text-sm font-medium focus:outline-none focus:ring-2 focus:ring-offset-2 transition-colors ${
+                    hub.connected
+                      ? isDarkMode
+                        ? "bg-amber-500/10 text-amber-300 border border-amber-400/60 hover:bg-amber-500/20 hover:border-amber-300 focus:ring-amber-400 cursor-pointer"
+                        : "bg-amber-50 text-amber-800 border border-amber-200 hover:bg-amber-100 hover:border-amber-300 focus:ring-amber-400 cursor-pointer"
+                      : isDarkMode
+                      ? "bg-gray-800 text-gray-500 border border-gray-700 opacity-60 cursor-not-allowed focus:ring-transparent"
+                      : "bg-gray-200 text-gray-500 border border-gray-300 opacity-60 cursor-not-allowed focus:ring-transparent"
+                  }`}
+                  aria-disabled={!hub.connected}
+                >
+                  View hub graph
+                </button>
               </div>
 
               {/* Probe cards in a 2-per-row layout */}
