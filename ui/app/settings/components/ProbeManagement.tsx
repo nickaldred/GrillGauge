@@ -146,112 +146,148 @@ export function ProbeManagement({ hub }: ProbeManagementProps) {
 
   return (
     <div
-      className={`space-y-5 p-6 rounded-xl border shadow-sm backdrop-blur ${
-        isDarkMode ? "bg-gray-800 border-gray-700" : "bg-white border-gray-200"
+      className={`space-y-4 text-sm ${
+        isDarkMode ? "text-gray-200" : "text-gray-800"
       }`}
     >
       <h3
-        className={`text-lg font-semibold tracking-tight ${
+        className={`text-base font-semibold tracking-tight ${
           isDarkMode ? "text-gray-100" : "text-gray-900"
         }`}
       >
         Probe Management
       </h3>
-
-      <div className="grid grid-cols-5 gap-4 text-xs font-semibold uppercase tracking-wide text-gray-500 dark:text-gray-400 pb-2 border-b border-gray-200 dark:border-gray-700">
-        <span>Name</span>
-        <span>Target Temp</span>
-        <span>Status</span>
-        <span>Visible</span>
-        <span>Actions</span>
-      </div>
-
-      <div className="space-y-3">
-        {probes.map((probe) => (
-          <div
-            key={probe.id}
-            className={`grid grid-cols-5 gap-4 items-center p-4 rounded-lg border shadow-sm hover:shadow transition duration-200 ${
+      <div className="overflow-x-auto">
+        <table className="w-full table-auto border-collapse">
+          <thead
+            className={`${
               isDarkMode
-                ? "bg-gray-700 border-gray-600"
-                : "bg-gray-50 border-gray-200"
+                ? "text-gray-400 border-b border-gray-700"
+                : "text-gray-500 border-b border-gray-200"
             }`}
           >
-            <span
-              className={`font-medium ${
-                isDarkMode ? "text-gray-100" : "text-gray-900"
-              }`}
-            >
-              {probe.name}
-            </span>
-            <span
-              className={`${isDarkMode ? "text-gray-300" : "text-gray-800"}`}
-            >
-              {probe.targetTemp}°F
-            </span>
-            <span
-              className={`px-3 py-1 rounded-full text-xs font-medium w-fit ${
-                probe.connected
-                  ? isDarkMode
-                    ? "bg-green-900 text-green-300"
-                    : "bg-green-100 text-green-800"
-                  : isDarkMode
-                  ? "bg-gray-700 text-gray-300"
-                  : "bg-gray-100 text-gray-800"
-              }`}
-            >
-              {probe.connected ? "Connected" : "Disconnected"}
-            </span>
-            <button
-              type="button"
-              onClick={() => handleToggleVisibility(probe)}
-              className={`flex items-center justify-center p-2 rounded-lg border text-xs font-medium w-fit cursor-pointer transition ${
-                probe.visible
-                  ? isDarkMode
-                    ? "border-green-400 text-green-300 bg-green-900/20 hover:bg-green-900/30"
-                    : "border-green-500 text-green-700 bg-green-50 hover:bg-green-100"
-                  : isDarkMode
-                  ? "border-gray-600 text-gray-500 bg-gray-800/60 hover:bg-gray-700/80"
-                  : "border-gray-300 text-gray-400 bg-gray-100 hover:bg-gray-200"
-              }`}
-              title={probe.visible ? "Hide probe" : "Show probe"}
-            >
-              {probe.visible ? (
-                <Eye className="w-4 h-4 mr-1" />
-              ) : (
-                <EyeOff className="w-4 h-4 mr-1" />
-              )}
-              <span>{probe.visible ? "Visible" : "Hidden"}</span>
-            </button>
-            <div className="flex space-x-2">
-              <button
-                onClick={() => handleOpenEdit(probe)}
-                className={`p-2 rounded-lg transition cursor-pointer ${
-                  isDarkMode ? "hover:bg-gray-600" : "hover:bg-gray-100"
-                }`}
-                title="Edit"
+            <tr>
+              <th className="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wide">
+                Name
+              </th>
+              <th className="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wide">
+                Status
+              </th>
+              <th className="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wide">
+                Target Temp
+              </th>
+              <th className="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wide">
+                Visible
+              </th>
+              <th className="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wide">
+                Actions
+              </th>
+            </tr>
+          </thead>
+
+          <tbody
+            className={`${
+              isDarkMode ? "divide-gray-700" : "divide-gray-200"
+            } divide-y`}
+          >
+            {probes.map((probe) => (
+              <tr
+                key={probe.id}
+                className={
+                  isDarkMode ? "hover:bg-gray-800" : "hover:bg-gray-100"
+                }
               >
-                <EditIcon
-                  className={`${
-                    isDarkMode ? "text-blue-400" : "text-blue-600"
-                  }`}
-                  size={18}
-                />
-              </button>
-              <button
-                onClick={() => handleOpenDelete(probe)}
-                className={`p-2 rounded-lg transition cursor-pointer ${
-                  isDarkMode ? "hover:bg-gray-600" : "hover:bg-gray-100"
-                }`}
-                title="Delete"
-              >
-                <TrashIcon
-                  className={`${isDarkMode ? "text-red-400" : "text-red-600"}`}
-                  size={18}
-                />
-              </button>
-            </div>
-          </div>
-        ))}
+                <td className="px-4 py-3 font-medium">
+                  <span
+                    className={isDarkMode ? "text-gray-100" : "text-gray-900"}
+                  >
+                    {probe.name}
+                  </span>
+                </td>
+
+                <td className="px-4 py-3">
+                  <span
+                    className={`px-2 py-1 rounded-full text-xs ${
+                      probe.connected
+                        ? isDarkMode
+                          ? "bg-green-900 text-green-300"
+                          : "bg-green-100 text-green-800"
+                        : isDarkMode
+                        ? "bg-gray-700 text-gray-300"
+                        : "bg-gray-100 text-gray-800"
+                    }`}
+                  >
+                    {probe.connected ? "Connected" : "Disconnected"}
+                  </span>
+                </td>
+
+                <td className="px-4 py-3">
+                  <span
+                    className={isDarkMode ? "text-gray-300" : "text-gray-800"}
+                  >
+                    {probe.targetTemp}°F
+                  </span>
+                </td>
+
+                <td className="px-4 py-3">
+                  <button
+                    type="button"
+                    onClick={() => handleToggleVisibility(probe)}
+                    className={`inline-flex items-center px-2 py-1 rounded-lg text-xs font-medium border cursor-pointer transition-colors ${
+                      probe.visible
+                        ? isDarkMode
+                          ? "border-green-400 text-green-300 bg-green-900/20 hover:bg-green-900/30"
+                          : "border-green-500 text-green-700 bg-green-50 hover:bg-green-100"
+                        : isDarkMode
+                        ? "border-gray-600 text-gray-500 bg-gray-800/60 hover:bg-gray-700/80"
+                        : "border-gray-300 text-gray-400 bg-gray-100 hover:bg-gray-200"
+                    }`}
+                    title={probe.visible ? "Hide probe" : "Show probe"}
+                  >
+                    {probe.visible ? (
+                      <Eye className="w-4 h-4 mr-1" />
+                    ) : (
+                      <EyeOff className="w-4 h-4 mr-1" />
+                    )}
+                    <span>{probe.visible ? "Visible" : "Hidden"}</span>
+                  </button>
+                </td>
+
+                <td className="px-4 py-3">
+                  <div className="flex space-x-2">
+                    <button
+                      onClick={() => handleOpenEdit(probe)}
+                      className={`p-1 rounded cursor-pointer ${
+                        isDarkMode ? "hover:bg-gray-600" : "hover:bg-gray-100"
+                      }`}
+                      title="Edit"
+                    >
+                      <EditIcon
+                        size={18}
+                        className={
+                          isDarkMode ? "text-blue-400" : "text-blue-600"
+                        }
+                      />
+                    </button>
+
+                    <button
+                      onClick={() => handleOpenDelete(probe)}
+                      className={`p-1 rounded cursor-pointer ${
+                        isDarkMode ? "hover:bg-gray-600" : "hover:bg-gray-100"
+                      }`}
+                      title="Delete"
+                    >
+                      <TrashIcon
+                        size={18}
+                        className={isDarkMode ? "text-red-400" : "text-red-600"}
+                      />
+                    </button>
+                  </div>
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
       </div>
 
       <Modal
