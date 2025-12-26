@@ -318,7 +318,7 @@ export function HubManagement() {
                           isDarkMode ? "bg-gray-900" : "bg-gray-50"
                         }`}
                       >
-                        <td colSpan={4} className="p-4">
+                        <td colSpan={5} className="p-4">
                           <ProbeManagement hub={hub} />
                         </td>
                       </motion.tr>
