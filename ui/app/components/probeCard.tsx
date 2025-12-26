@@ -130,7 +130,7 @@ export function ProbeCard({
           ? `cursor-pointer ${
               isDarkMode ? "hover:border-gray-200" : "hover:shadow-xl"
             }`
-          : "opacity-75"
+          : "opacity-75 cursor-not-allowed"
       }`}
       onClick={probe.connected ? handleClick : undefined}
     >
