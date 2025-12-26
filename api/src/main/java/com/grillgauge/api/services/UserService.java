@@ -2,6 +2,7 @@ package com.grillgauge.api.services;
 
 import com.grillgauge.api.domain.entitys.User;
 import com.grillgauge.api.domain.repositorys.UserRepository;
+import java.util.List;
 import java.util.Optional;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
@@ -26,6 +27,9 @@ public class UserService {
    */
   @Transactional
   public User storeUser(final User user) {
+    if (user.getRoles() == null || user.getRoles().isEmpty()) {
+      user.setRoles(List.of(User.UserRole.USER));
+    }
     userRepository.save(user);
     return user;
   }

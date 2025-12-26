@@ -5,6 +5,7 @@ import { PageHeader } from "../components/pageHeader";
 import { DashboardPage } from "./components/dashboardPage";
 import { useRouter } from "next/navigation";
 import { useTheme } from "../providers/ThemeProvider";
+import { useRequireAuth } from "../utils/useRequireAuth";
 
 /**
  * The Dashboard page is the main page for authenticated users,
@@ -14,17 +15,9 @@ import { useTheme } from "../providers/ThemeProvider";
  */
 export default function Dashboard() {
   // ** Router & Theme **
-  const router = useRouter();
   const { theme } = useTheme();
   const isDarkMode = theme === "dark";
-
-  // Unauthenticated users are redirected immediately.
-  const { status } = useSession({
-    required: true,
-    onUnauthenticated() {
-      router.replace("/");
-    },
-  });
+  const { status } = useRequireAuth("/");
 
   // While session isn't authenticated, don't render the dashboard UI to avoid
   // a flash of protected content before the redirect.

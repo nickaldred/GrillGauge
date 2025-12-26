@@ -2,6 +2,7 @@
 
 import { PageHeader } from "../components/pageHeader";
 import { useTheme } from "../providers/ThemeProvider";
+import { useRequireAuth } from "../utils/useRequireAuth";
 import { HubManagement } from "./components/HubManagement";
 
 /**
@@ -13,6 +14,7 @@ export default function Settings() {
   // ** Theme **
   const { theme } = useTheme();
   const isDarkMode = theme === "dark";
+  useRequireAuth("/");
 
   return (
     <div
