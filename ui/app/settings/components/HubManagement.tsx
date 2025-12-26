@@ -6,7 +6,14 @@ import { motion, AnimatePresence } from "framer-motion";
 import { Hub } from "@/app/types/types";
 import { deleteRequest, getData, putRequest } from "@/app/utils/requestUtils";
 import { useTheme } from "@/app/providers/ThemeProvider";
-import { PlusIcon, EditIcon, TrashIcon, ChevronDown } from "lucide-react";
+import {
+  PlusIcon,
+  EditIcon,
+  TrashIcon,
+  ChevronDown,
+  Eye,
+  EyeOff,
+} from "lucide-react";
 import Modal from "@/app/components/modal";
 import RegisterHubModal from "./RegisterHubModal";
 import { HubForm } from "./HubForm";
@@ -35,7 +42,6 @@ export function HubManagement() {
     if (!user?.email) return;
 
     const fetchData = () => {
-      // @ts-expect-error apiToken is added in auth.ts session callback
       const token = session?.apiToken as string | undefined;
       getData(`${BASE_URL}/ui/hubs?email=${user.email}`, token)
         .then(setHubs)
@@ -57,7 +63,6 @@ export function HubManagement() {
   const handleDeleteHubConfirm = async () => {
     if (!hubToDelete) return;
     try {
-      // @ts-expect-error apiToken is added in auth.ts session callback
       const token = session?.apiToken as string | undefined;
       await deleteRequest(`${BASE_URL}/hub/${hubToDelete.id}`, token);
       setHubs((prev) => prev?.filter((h) => h.id !== hubToDelete.id) || null);
@@ -78,16 +83,45 @@ export function HubManagement() {
 
     try {
       const hubToSend: Hub = { ...hubToEdit, ...updatedHubData };
-      // @ts-expect-error apiToken is added in auth.ts session callback
-      const token = session?.apiToken as string | undefined;
-
-      const updatedHub = await putRequest(`${BASE_URL}/hub`, hubToSend, token);
-
-      setHubs((prev) =>
-        prev ? prev.map((h) => (h.id === updatedHub.id ? updatedHub : h)) : prev
-      );
+      await updateHubOnServer(hubToSend);
       setIsEditHubModalOpen(false);
       setHubToEdit(null);
+    } catch (error) {
+      console.error(error);
+    }
+  };
+
+  /**
+   * Updates a hub on the server and updates the local state.
+   *
+   * @param hubToSend The hub data to send to the server.
+   * @returns The updated hub from the server.
+   */
+  const updateHubOnServer = async (hubToSend: Hub) => {
+    const token = session?.apiToken as string | undefined;
+
+    const updatedHub = (await putRequest(
+      `${BASE_URL}/hub`,
+      hubToSend,
+      token
+    )) as Hub;
+
+    setHubs((prev) =>
+      prev ? prev.map((h) => (h.id === updatedHub.id ? updatedHub : h)) : prev
+    );
+
+    return updatedHub;
+  };
+
+  /**
+   * Handles toggling the visibility of a hub.
+   *
+   * @param hub The hub to toggle visibility for.
+   */
+  const handleToggleHubVisibility = async (hub: Hub) => {
+    try {
+      const hubToSend: Hub = { ...hub, visible: !hub.visible };
+      await updateHubOnServer(hubToSend);
     } catch (error) {
       console.error(error);
     }
@@ -138,6 +172,7 @@ export function HubManagement() {
               <tr>
                 <th className="px-4 py-3 text-left">Hub Name</th>
                 <th className="px-4 py-3 text-left">Status</th>
+                <th className="px-4 py-3 text-left">Visible</th>
                 <th className="px-4 py-3 text-left">Probes</th>
                 <th className="px-4 py-3 text-left">Actions</th>
               </tr>
@@ -195,6 +230,33 @@ export function HubManagement() {
                       >
                         {hub.connected ? "Connected" : "Disconnected"}
                       </span>
+                    </td>
+
+                    <td className="px-4 py-3">
+                      <button
+                        type="button"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          handleToggleHubVisibility(hub);
+                        }}
+                        className={`inline-flex items-center px-2 py-1 rounded-lg text-xs font-medium border cursor-pointer transition-colors ${
+                          hub.visible
+                            ? isDarkMode
+                              ? "border-green-400 text-green-300 bg-green-900/20 hover:bg-green-900/30"
+                              : "border-green-500 text-green-700 bg-green-50 hover:bg-green-100"
+                            : isDarkMode
+                            ? "border-gray-600 text-gray-500 bg-gray-800/60 hover:bg-gray-700/80"
+                            : "border-gray-300 text-gray-400 bg-gray-100 hover:bg-gray-200"
+                        }`}
+                        title={hub.visible ? "Hide hub" : "Show hub"}
+                      >
+                        {hub.visible ? (
+                          <Eye className="w-4 h-4 mr-1" />
+                        ) : (
+                          <EyeOff className="w-4 h-4 mr-1" />
+                        )}
+                        <span>{hub.visible ? "Visible" : "Hidden"}</span>
+                      </button>
                     </td>
 
                     <td className="px-4 py-3">{hub.probes.length}</td>

@@ -33,7 +33,8 @@ import org.springframework.lang.NonNull;
 @Entity
 public class Hub {
 
-  @NonNull @Id
+  @NonNull
+  @Id
   @GeneratedValue(strategy = GenerationType.AUTO)
   private Long id;
 
@@ -96,6 +97,10 @@ public class Hub {
 
   @Column(nullable = true)
   private String name;
+
+  @Column(nullable = false)
+  @NonNull
+  private Boolean visible = true;
 
   @OneToMany(mappedBy = "hub", cascade = CascadeType.ALL, orphanRemoval = true)
   private List<Probe> probes = new ArrayList<>();

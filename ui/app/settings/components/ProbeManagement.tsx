@@ -1,8 +1,8 @@
 import { Hub, Probe } from "@/app/types/types";
-import { EditIcon, TrashIcon } from "lucide-react";
+import { EditIcon, TrashIcon, Eye, EyeOff } from "lucide-react";
 import { useTheme } from "@/app/providers/ThemeProvider";
 import Modal from "@/app/components/modal";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useSession } from "next-auth/react";
 import { deleteRequest, putRequest } from "@/app/utils/requestUtils";
 import { BASE_URL } from "@/app/utils/envVars";
@@ -31,6 +31,11 @@ export function ProbeManagement({ hub }: ProbeManagementProps) {
   const [probeToEdit, setProbeToEdit] = useState<Probe | null>(null);
   const [isDeleteProbeModalOpen, setIsDeleteProbeModalOpen] = useState(false);
   const [probeToDelete, setProbeToDelete] = useState<Probe | null>(null);
+  const [probes, setProbes] = useState<Probe[]>(hub.probes);
+
+  useEffect(() => {
+    setProbes(hub.probes);
+  }, [hub.probes]);
 
   // *** Handle Modals ***
 
@@ -64,6 +69,7 @@ export function ProbeManagement({ hub }: ProbeManagementProps) {
       const token = session?.apiToken as string | undefined;
       await deleteRequest(`${BASE_URL}/probe/${probeToDelete.id}`, token);
       hub.probes = hub.probes.filter((p) => p.id !== probeToDelete.id);
+      setProbes((prev) => prev.filter((p) => p.id !== probeToDelete.id));
       setIsDeleteProbeModalOpen(false);
       setProbeToDelete(null);
     } catch (e) {
@@ -71,19 +77,16 @@ export function ProbeManagement({ hub }: ProbeManagementProps) {
     }
   };
 
+  /**
+   * Handles submitting the edited probe data.
+   *
+   * @param updatedProbeData The updated probe data.
+   */
   const handleSubmitEditProbe = async (updatedProbeData: Omit<Probe, "id">) => {
     if (!probeToEdit) return;
     try {
       const probeToSend: Probe = { ...probeToEdit, ...updatedProbeData };
-      const token = session?.apiToken as string | undefined;
-      const updatedProbe = (await putRequest(
-        `${BASE_URL}/probe`,
-        probeToSend,
-        token
-      )) as Probe;
-      hub.probes = hub.probes.map((p) =>
-        p.id === updatedProbe.id ? updatedProbe : p
-      );
+      await updateProbeOnServer(probeToSend);
       setIsEditProbeModalOpen(false);
       setProbeToEdit(null);
     } catch (error) {
@@ -91,8 +94,45 @@ export function ProbeManagement({ hub }: ProbeManagementProps) {
     }
   };
 
+  /**
+   * Updates a probe on the server and updates the local hub state.
+   *
+   * @param probeToSend The probe data to send to the server.
+   * @returns The updated probe from the server.
+   */
+  const updateProbeOnServer = async (probeToSend: Probe) => {
+    const token = session?.apiToken as string | undefined;
+    const updatedProbe = (await putRequest(
+      `${BASE_URL}/probe`,
+      probeToSend,
+      token
+    )) as Probe;
+
+    hub.probes = hub.probes.map((p) =>
+      p.id === updatedProbe.id ? updatedProbe : p
+    );
+    setProbes((prev) =>
+      prev.map((p) => (p.id === updatedProbe.id ? updatedProbe : p))
+    );
+    return updatedProbe;
+  };
+
+  /**
+   * Handles toggling the visibility of a probe.
+   *
+   * @param probe The probe to toggle visibility for.
+   */
+  const handleToggleVisibility = async (probe: Probe) => {
+    try {
+      const updatedProbe: Probe = { ...probe, visible: !probe.visible };
+      await updateProbeOnServer(updatedProbe);
+    } catch (error) {
+      console.error(error);
+    }
+  };
+
   // *** Render ***
-  if (hub.probes.length === 0) {
+  if (probes.length === 0) {
     return (
       <div
         className={`text-center py-4 ${
@@ -118,18 +158,19 @@ export function ProbeManagement({ hub }: ProbeManagementProps) {
         Probe Management
       </h3>
 
-      <div className="grid grid-cols-4 gap-4 text-xs font-semibold uppercase tracking-wide text-gray-500 dark:text-gray-400 pb-2 border-b border-gray-200 dark:border-gray-700">
+      <div className="grid grid-cols-5 gap-4 text-xs font-semibold uppercase tracking-wide text-gray-500 dark:text-gray-400 pb-2 border-b border-gray-200 dark:border-gray-700">
         <span>Name</span>
         <span>Target Temp</span>
         <span>Status</span>
+        <span>Visible</span>
         <span>Actions</span>
       </div>
 
       <div className="space-y-3">
-        {hub.probes.map((probe) => (
+        {probes.map((probe) => (
           <div
             key={probe.id}
-            className={`grid grid-cols-4 gap-4 items-center p-4 rounded-lg border shadow-sm hover:shadow transition duration-200 ${
+            className={`grid grid-cols-5 gap-4 items-center p-4 rounded-lg border shadow-sm hover:shadow transition duration-200 ${
               isDarkMode
                 ? "bg-gray-700 border-gray-600"
                 : "bg-gray-50 border-gray-200"
@@ -160,6 +201,27 @@ export function ProbeManagement({ hub }: ProbeManagementProps) {
             >
               {probe.connected ? "Connected" : "Disconnected"}
             </span>
+            <button
+              type="button"
+              onClick={() => handleToggleVisibility(probe)}
+              className={`flex items-center justify-center p-2 rounded-lg border text-xs font-medium w-fit cursor-pointer transition ${
+                probe.visible
+                  ? isDarkMode
+                    ? "border-green-400 text-green-300 bg-green-900/20 hover:bg-green-900/30"
+                    : "border-green-500 text-green-700 bg-green-50 hover:bg-green-100"
+                  : isDarkMode
+                  ? "border-gray-600 text-gray-500 bg-gray-800/60 hover:bg-gray-700/80"
+                  : "border-gray-300 text-gray-400 bg-gray-100 hover:bg-gray-200"
+              }`}
+              title={probe.visible ? "Hide probe" : "Show probe"}
+            >
+              {probe.visible ? (
+                <Eye className="w-4 h-4 mr-1" />
+              ) : (
+                <EyeOff className="w-4 h-4 mr-1" />
+              )}
+              <span>{probe.visible ? "Visible" : "Hidden"}</span>
+            </button>
             <div className="flex space-x-2">
               <button
                 onClick={() => handleOpenEdit(probe)}

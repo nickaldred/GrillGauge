@@ -11,6 +11,7 @@ export type Probe = {
   name: string;
   colour: string;
   connected: boolean;
+  visible: boolean;
 };
 
 /**
@@ -34,6 +35,7 @@ export interface Hub {
   name: string;
   probes: Probe[];
   connected: boolean;
+  visible: boolean;
 }
 
 /**

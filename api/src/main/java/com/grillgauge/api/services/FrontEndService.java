@@ -11,8 +11,6 @@ import org.springframework.stereotype.Service;
 
 /**
  * Service class for managing front-end related operations.
- *
- * <p>Provides methods for retrieving hubs and their associated probes for a user.
  */
 @Service
 public class FrontEndService {
@@ -53,12 +51,14 @@ public class FrontEndService {
                                     currentTemp,
                                     probe.getName(),
                                     probe.getColour(),
-                                    (currentTemp == null || currentTemp.isNaN() ? false : true));
+                                    (currentTemp == null || currentTemp.isNaN() ? false : true),
+                                    probe.getVisible());
                               })
                           .toList();
 
                   final boolean connected = probes.stream().anyMatch(p -> p.getConnected());
-                  return new FrontEndHub(hub.getId(), hub.getName(), probes, connected);
+                  return new FrontEndHub(
+                      hub.getId(), hub.getName(), probes, connected, hub.getVisible());
                 })
             .toList();
 
@@ -69,7 +69,8 @@ public class FrontEndService {
   /**
    * Get the list of default probe colours defined on the Probe entity.
    *
-   * <p>This allows the UI to stay in sync with backend defaults without duplicating the list of hex
+   * <p>
+   * This allows the UI to stay in sync with backend defaults without duplicating the list of hex
    * values on the front-end.
    *
    * @return immutable list of hex colour strings.

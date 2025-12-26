@@ -212,64 +212,68 @@ export function DashboardPage() {
             </div>
           </div>
         ) : (
-          hubs.map((hub) => (
-            <div key={hub.id} className="mb-10">
-              <div className="mb-4 flex flex-wrap items-center gap-3">
-                <h2
-                  className={`text-2xl font-bold ${
-                    isDarkMode ? "text-white" : "text-gray-800"
-                  }`}
-                >
-                  {hub.name}
-                </h2>
-                <span
-                  className={`px-3 py-1 text-sm rounded-full ${
-                    hub.connected
-                      ? isDarkMode
-                        ? "bg-green-500/20 text-green-400"
-                        : "bg-green-100 text-green-800"
-                      : isDarkMode
-                      ? "bg-red-700 text-red-100"
-                      : "bg-red-100 text-red-800"
-                  }`}
-                >
-                  {hub.connected ? "Connected" : "Disconnected"}
-                </span>
-                <button
-                  type="button"
-                  onClick={() => hub.connected && openHubModal(hub)}
-                  disabled={!hub.connected}
-                  className={`inline-flex items-center px-3 py-1.5 rounded-md text-sm font-medium focus:outline-none focus:ring-2 focus:ring-offset-2 transition-colors ${
-                    hub.connected
-                      ? isDarkMode
-                        ? "bg-amber-500/10 text-amber-300 border border-amber-400/60 hover:bg-amber-500/20 hover:border-amber-300 focus:ring-amber-400 cursor-pointer"
-                        : "bg-amber-50 text-amber-800 border border-amber-200 hover:bg-amber-100 hover:border-amber-300 focus:ring-amber-400 cursor-pointer"
-                      : isDarkMode
-                      ? "bg-gray-800 text-gray-500 border border-gray-700 opacity-60 cursor-not-allowed focus:ring-transparent"
-                      : "bg-gray-200 text-gray-500 border border-gray-300 opacity-60 cursor-not-allowed focus:ring-transparent"
-                  }`}
-                  aria-disabled={!hub.connected}
-                >
-                  View hub graph
-                </button>
-              </div>
+          hubs
+            .filter((hub) => hub.visible)
+            .map((hub) => (
+              <div key={hub.id} className="mb-10">
+                <div className="mb-4 flex flex-wrap items-center gap-3">
+                  <h2
+                    className={`text-2xl font-bold ${
+                      isDarkMode ? "text-white" : "text-gray-800"
+                    }`}
+                  >
+                    {hub.name}
+                  </h2>
+                  <span
+                    className={`px-3 py-1 text-sm rounded-full ${
+                      hub.connected
+                        ? isDarkMode
+                          ? "bg-green-500/20 text-green-400"
+                          : "bg-green-100 text-green-800"
+                        : isDarkMode
+                        ? "bg-red-700 text-red-100"
+                        : "bg-red-100 text-red-800"
+                    }`}
+                  >
+                    {hub.connected ? "Connected" : "Disconnected"}
+                  </span>
+                  <button
+                    type="button"
+                    onClick={() => hub.connected && openHubModal(hub)}
+                    disabled={!hub.connected}
+                    className={`inline-flex items-center px-3 py-1.5 rounded-md text-sm font-medium focus:outline-none focus:ring-2 focus:ring-offset-2 transition-colors ${
+                      hub.connected
+                        ? isDarkMode
+                          ? "bg-amber-500/10 text-amber-300 border border-amber-400/60 hover:bg-amber-500/20 hover:border-amber-300 focus:ring-amber-400 cursor-pointer"
+                          : "bg-amber-50 text-amber-800 border border-amber-200 hover:bg-amber-100 hover:border-amber-300 focus:ring-amber-400 cursor-pointer"
+                        : isDarkMode
+                        ? "bg-gray-800 text-gray-500 border border-gray-700 opacity-60 cursor-not-allowed focus:ring-transparent"
+                        : "bg-gray-200 text-gray-500 border border-gray-300 opacity-60 cursor-not-allowed focus:ring-transparent"
+                    }`}
+                    aria-disabled={!hub.connected}
+                  >
+                    View hub graph
+                  </button>
+                </div>
 
-              {/* Probe cards in a 2-per-row layout */}
-              <div className="flex flex-wrap -mx-2">
-                {hub.probes.map((probe) => (
-                  <div key={probe.id} className="w-full sm:w-1/2 px-2 mb-4">
-                    <ProbeCard
-                      probe={probe}
-                      hubName={hub.name}
-                      onUpdateTargetTemp={handleUpdateTargetTemp}
-                      onUpdateName={handleUpdateName}
-                      onClick={openProbeModal}
-                    />
-                  </div>
-                ))}
+                {/* Probe cards in a 2-per-row layout */}
+                <div className="flex flex-wrap -mx-2">
+                  {hub.probes
+                    .filter((probe) => probe.visible)
+                    .map((probe) => (
+                      <div key={probe.id} className="w-full sm:w-1/2 px-2 mb-4">
+                        <ProbeCard
+                          probe={probe}
+                          hubName={hub.name}
+                          onUpdateTargetTemp={handleUpdateTargetTemp}
+                          onUpdateName={handleUpdateName}
+                          onClick={openProbeModal}
+                        />
+                      </div>
+                    ))}
+                </div>
               </div>
-            </div>
-          ))
+            ))
         )}
       </div>
 
@@ -363,49 +367,51 @@ export function DashboardPage() {
                 Probes overview
               </p>
               <div className="grid gap-2 sm:grid-cols-2">
-                {selectedHub.probes.map((p) => (
-                  <div
-                    key={p.id}
-                    className={`flex items-center justify-between rounded-lg border px-3 py-2 ${
-                      isDarkMode
-                        ? "bg-gray-800/60 border-gray-700"
-                        : "bg-gray-50 border-gray-200"
-                    }`}
-                  >
-                    <div>
-                      <p
-                        className={`text-sm font-medium ${
-                          isDarkMode ? "text-gray-100" : "text-gray-900"
-                        }`}
-                      >
-                        {p.name || `Probe ${p.id}`}
-                      </p>
-                      <p
-                        className={`text-xs ${
-                          isDarkMode ? "text-gray-400" : "text-gray-500"
-                        }`}
-                      >
-                        ID: {p.id}
-                      </p>
+                {selectedHub.probes
+                  .filter((p) => p.visible)
+                  .map((p) => (
+                    <div
+                      key={p.id}
+                      className={`flex items-center justify-between rounded-lg border px-3 py-2 ${
+                        isDarkMode
+                          ? "bg-gray-800/60 border-gray-700"
+                          : "bg-gray-50 border-gray-200"
+                      }`}
+                    >
+                      <div>
+                        <p
+                          className={`text-sm font-medium ${
+                            isDarkMode ? "text-gray-100" : "text-gray-900"
+                          }`}
+                        >
+                          {p.name || `Probe ${p.id}`}
+                        </p>
+                        <p
+                          className={`text-xs ${
+                            isDarkMode ? "text-gray-400" : "text-gray-500"
+                          }`}
+                        >
+                          ID: {p.id}
+                        </p>
+                      </div>
+                      <div className="text-right">
+                        <span
+                          className={`text-lg font-semibold ${
+                            isDarkMode ? "text-white" : "text-gray-900"
+                          }`}
+                        >
+                          {p.currentTemp}
+                        </span>
+                        <span
+                          className={`ml-1 text-xs ${
+                            isDarkMode ? "text-gray-400" : "text-gray-500"
+                          }`}
+                        >
+                          °F
+                        </span>
+                      </div>
                     </div>
-                    <div className="text-right">
-                      <span
-                        className={`text-lg font-semibold ${
-                          isDarkMode ? "text-white" : "text-gray-900"
-                        }`}
-                      >
-                        {p.currentTemp}
-                      </span>
-                      <span
-                        className={`ml-1 text-xs ${
-                          isDarkMode ? "text-gray-400" : "text-gray-500"
-                        }`}
-                      >
-                        °F
-                      </span>
-                    </div>
-                  </div>
-                ))}
+                  ))}
               </div>
             </div>
             <div className="border rounded-lg p-4">

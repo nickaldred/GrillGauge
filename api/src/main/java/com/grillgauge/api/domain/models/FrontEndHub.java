@@ -8,8 +8,6 @@ import lombok.Setter;
 
 /**
  * Model representing a Hub for front-end consumption.
- *
- * <p>Contains the Hub's ID, name, associated probes, and connection status.
  */
 @Getter
 @Setter
@@ -21,4 +19,5 @@ public class FrontEndHub {
   private String name;
   private List<FrontEndProbe> probes;
   private boolean connected;
+  private boolean visible;
 }
