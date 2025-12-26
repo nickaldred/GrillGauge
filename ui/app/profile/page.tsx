@@ -8,6 +8,7 @@ import { useTheme } from "../providers/ThemeProvider";
 import { BASE_URL } from "../utils/envVars";
 import type { User } from "../types/types";
 import { MailIcon, UserIcon } from "lucide-react";
+import { useRequireAuth } from "../utils/useRequireAuth";
 
 /**
  * Profile page showing session info combined with user data
@@ -20,12 +21,7 @@ export default function Profile() {
   const isDarkMode = theme === "dark";
 
   // ** Auth Session **
-  const { data: session, status } = useSession({
-    required: true,
-    onUnauthenticated() {
-      router.replace("/");
-    },
-  });
+  const { session, status } = useRequireAuth("/");
 
   // ** State **
   const [userData, setUserData] = useState<User | null>(null);

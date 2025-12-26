@@ -22,13 +22,13 @@ public class User {
 
   /** User roles within the system. */
   public enum UserRole {
-    ADMIN,
-    USER
+    ADMIN, USER
   }
 
   @Id
   @Column(nullable = false, unique = true)
-  @NonNull private String email;
+  @NonNull
+  private String email;
 
   @Column(nullable = false)
   private String firstName;
