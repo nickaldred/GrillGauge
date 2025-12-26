@@ -3,7 +3,8 @@ import { EditIcon, TrashIcon } from "lucide-react";
 import { useTheme } from "@/app/providers/ThemeProvider";
 import Modal from "@/app/components/modal";
 import { useState } from "react";
-import { deleteRequest } from "@/app/utils/requestUtils";
+import { useSession } from "next-auth/react";
+import { deleteRequest, putRequest } from "@/app/utils/requestUtils";
 import { BASE_URL } from "@/app/utils/envVars";
 import { ProbeForm } from "./ProbeForm";
 
@@ -18,9 +19,14 @@ interface ProbeManagementProps {
  * @returns The ProbeManagement component.
  */
 export function ProbeManagement({ hub }: ProbeManagementProps) {
+  // ** Theme **
   const { theme } = useTheme();
   const isDarkMode = theme === "dark";
 
+  // ** Auth **
+  const { data: session } = useSession();
+
+  // ** States **
   const [isEditProbeModalOpen, setIsEditProbeModalOpen] = useState(false);
   const [probeToEdit, setProbeToEdit] = useState<Probe | null>(null);
   const [isDeleteProbeModalOpen, setIsDeleteProbeModalOpen] = useState(false);
@@ -55,7 +61,8 @@ export function ProbeManagement({ hub }: ProbeManagementProps) {
   const handleDeleteConfirm = async () => {
     if (!probeToDelete) return;
     try {
-      await deleteRequest(`${BASE_URL}/probe/${probeToDelete.id}`);
+      const token = session?.apiToken as string | undefined;
+      await deleteRequest(`${BASE_URL}/probe/${probeToDelete.id}`, token);
       hub.probes = hub.probes.filter((p) => p.id !== probeToDelete.id);
       setIsDeleteProbeModalOpen(false);
       setProbeToDelete(null);
@@ -68,13 +75,12 @@ export function ProbeManagement({ hub }: ProbeManagementProps) {
     if (!probeToEdit) return;
     try {
       const probeToSend: Probe = { ...probeToEdit, ...updatedProbeData };
-      const res = await fetch(`${BASE_URL}/probe`, {
-        method: "PUT",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(probeToSend),
-      });
-      if (!res.ok) throw new Error("Failed to update probe");
-      const updatedProbe = await res.json();
+      const token = session?.apiToken as string | undefined;
+      const updatedProbe = (await putRequest(
+        `${BASE_URL}/probe`,
+        probeToSend,
+        token
+      )) as Probe;
       hub.probes = hub.probes.map((p) =>
         p.id === updatedProbe.id ? updatedProbe : p
       );

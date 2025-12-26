@@ -10,9 +10,8 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 /**
- * Controller for managing front-end related operations.
- *
- * <p>Provides endpoints for retrieving hubs associated with a user.
+ * Controller for managing front-end related operations. Provides endpoints for retrieving hubs
+ * associated with a user.
  */
 @RestController
 @RequestMapping("/api/v1/ui")
@@ -34,5 +33,16 @@ public class FrontEndController {
   @PreAuthorize("#email == authentication.name or hasRole('ADMIN')")
   public List<FrontEndHub> getHubs(@RequestParam String email) {
     return frontEndService.getHubs(email);
+  }
+
+  /**
+   * Get the list of default probe colours as defined on the Probe entity.
+   *
+   * @return list of hex colour strings.
+   */
+  @GetMapping("/probe-colours")
+  @PreAuthorize("isAuthenticated()")
+  public List<String> getDefaultProbeColours() {
+    return frontEndService.getDefaultProbeColours();
   }
 }

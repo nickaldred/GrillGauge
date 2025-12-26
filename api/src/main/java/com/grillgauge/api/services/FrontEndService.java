@@ -1,6 +1,7 @@
 package com.grillgauge.api.services;
 
 import com.grillgauge.api.domain.entitys.Hub;
+import com.grillgauge.api.domain.entitys.Probe;
 import com.grillgauge.api.domain.models.FrontEndHub;
 import com.grillgauge.api.domain.models.FrontEndProbe;
 import java.util.List;
@@ -63,5 +64,17 @@ public class FrontEndService {
 
     LOG.info("Successfully got {} hubs for user ID: {}", dashboardHubs.size(), email);
     return dashboardHubs;
+  }
+
+  /**
+   * Get the list of default probe colours defined on the Probe entity.
+   *
+   * <p>This allows the UI to stay in sync with backend defaults without duplicating the list of hex
+   * values on the front-end.
+   *
+   * @return immutable list of hex colour strings.
+   */
+  public List<String> getDefaultProbeColours() {
+    return Probe.getDefaultColours();
   }
 }
