@@ -25,32 +25,6 @@ public class FrontEndService {
     this.probeService = probeService;
   }
 
-  private String getProbeColour(Float targetTemp, Float currentTemp) {
-    if (currentTemp == null) {
-      return "gray"; // No reading
-    }
-
-    if (targetTemp == null) {
-      return "blue"; // No target set, just showing current
-    }
-
-    float difference = currentTemp - targetTemp;
-
-    if (difference >= 10.0f) {
-      return "red";
-    } else if (difference >= 5.0f) {
-      return "darkgreen";
-    } else if (difference >= 0f) {
-      return "green";
-    } else if (difference >= -10.0f) {
-      return "yellow";
-    } else if (difference >= -20.0f) {
-      return "orange";
-    } else {
-      return "lightblue";
-    }
-  }
-
   /**
    * Get all hubs and their probes for the given user email.
    *
@@ -77,7 +51,7 @@ public class FrontEndService {
                                     probe.getTargetTemp(),
                                     currentTemp,
                                     probe.getName(),
-                                    getProbeColour(probe.getTargetTemp(), currentTemp),
+                                    probe.getColour(),
                                     (currentTemp == null || currentTemp.isNaN() ? false : true));
                               })
                           .toList();

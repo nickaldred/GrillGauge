@@ -10,6 +10,7 @@ import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.OneToMany;
+import jakarta.persistence.PrePersist;
 import java.util.ArrayList;
 import java.util.List;
 import lombok.Getter;
@@ -17,15 +18,36 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 /**
- * Entity representing a Probe in the system.
- *
- * <p>A Probe is associated with a Hub and a User (owner), and can have multiple Readings.
+ * Entity representing a Probe in the system. A Probe is associated with a Hub and a User (owner),
+ * and can have multiple Readings.
  */
 @Getter
 @Setter
 @NoArgsConstructor
 @Entity
 public class Probe {
+
+  /** Default probe colours for the probe card in the dashboard. */
+  private static final List<String> DEFAULT_COLOURS =
+      List.of(
+          "#E91E63", // pink
+          "#9C27B0", // purple
+          "#673AB7", // deep purple
+          "#3F51B5", // indigo
+          "#2196F3", // blue
+          "#03A9F4", // light blue
+          "#00BCD4", // cyan
+          "#009688", // teal
+          "#4CAF50", // green
+          "#8BC34A", // light green
+          "#CDDC39", // lime
+          "#FFEB3B", // yellow
+          "#FFC107", // amber
+          "#FF9800", // orange
+          "#FF5722" // deep orange
+      );
+
+  private static int nextColourIndex = 0;
 
   @Id
   @GeneratedValue(strategy = GenerationType.AUTO)
@@ -47,6 +69,9 @@ public class Probe {
 
   @Column(nullable = true)
   private String name;
+
+  @Column(nullable = false)
+  private String colour;
 
   @OneToMany(mappedBy = "probe", cascade = CascadeType.ALL, orphanRemoval = true)
   private List<Reading> readings = new ArrayList<>();
@@ -74,5 +99,17 @@ public class Probe {
     this.owner = owner;
     this.targetTemp = targetTemp;
     this.name = name;
+  }
+
+  @PrePersist
+  private void assignDefaultColour() {
+    if (this.colour == null || this.colour.isEmpty()) {
+      this.colour =
+          DEFAULT_COLOURS.stream()
+              .skip(nextColourIndex % DEFAULT_COLOURS.size())
+              .findFirst()
+              .orElse("#2196F3");
+      nextColourIndex++;
+    }
   }
 }
