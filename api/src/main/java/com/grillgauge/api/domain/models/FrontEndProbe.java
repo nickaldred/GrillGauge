@@ -29,4 +29,6 @@ public class FrontEndProbe {
   private String colour;
   @NonNull
   private Boolean connected;
+  @NonNull
+  private Boolean visible;
 }

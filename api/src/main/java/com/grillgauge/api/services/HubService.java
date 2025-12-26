@@ -91,6 +91,7 @@ public class HubService {
     LOG.info("Updating Hub with ID: {}", hubToUpdate.getId());
     Hub existingHub = this.getHub(hubToUpdate.getId());
     existingHub.setName(hubToUpdate.getName());
+    existingHub.setVisible(hubToUpdate.isVisible());
     this.storeHub(existingHub);
     LOG.info("Successfully updated Hub with ID: {}", hubToUpdate.getId());
     return hubToUpdate;

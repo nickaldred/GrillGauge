@@ -46,33 +46,43 @@ public class Probe {
           "#FFC107", // amber
           "#FF9800", // orange
           "#FF5722" // deep orange
-          );
+      );
 
   private static int nextColourIndex = 0;
 
   @Id
   @GeneratedValue(strategy = GenerationType.AUTO)
-  @NonNull private Long id;
+  @NonNull
+  private Long id;
 
   @Column(name = "local_id", nullable = false)
-  @NonNull private Integer localId;
+  @NonNull
+  private Integer localId;
 
   @ManyToOne(fetch = FetchType.LAZY)
   @JoinColumn(name = "hub_id", nullable = false)
-  @NonNull private Hub hub;
+  @NonNull
+  private Hub hub;
 
   @ManyToOne(fetch = FetchType.LAZY)
   @JoinColumn(name = "email", nullable = false)
-  @NonNull private User owner;
+  @NonNull
+  private User owner;
 
   @Column(nullable = true)
   private Float targetTemp;
 
-  @Column(nullable = true)
+  @Column(nullable = false)
+  @NonNull
   private String name;
 
   @Column(nullable = false)
-  @NonNull private String colour;
+  @NonNull
+  private String colour;
+
+  @Column(nullable = false)
+  @NonNull
+  private Boolean visible = true;
 
   @OneToMany(mappedBy = "probe", cascade = CascadeType.ALL, orphanRemoval = true)
   private List<Reading> readings = new ArrayList<>();
