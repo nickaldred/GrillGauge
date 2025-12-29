@@ -22,6 +22,7 @@ export interface TemperaturePoint {
 export interface TemperatureSeries {
   id: string;
   name: string;
+  colour?: string;
   points: TemperaturePoint[];
 }
 
@@ -223,18 +224,20 @@ export default function TemperatureTimeSeriesChart({
               margin={{ top: 16, right: 24, left: 0, bottom: 8 }}
             >
               <defs>
-                {series.map((_, index) => {
-                  const color = palette[index % palette.length];
+                {series.map((s, index) => {
+                  const colour =
+                    s.colour?.trim() || palette[index % palette.length];
+                  const gradientId = `tempGradient-${s.id}`;
                   return (
                     <linearGradient
-                      key={index}
-                      id={`tempGradient-${index}`}
+                      key={gradientId}
+                      id={gradientId}
                       x1="0"
                       y1="0"
                       x2="0"
                       y2="1"
                     >
-                      <stop offset="0%" stopColor={color} stopOpacity={0.3} />
+                      <stop offset="0%" stopColor={colour} stopOpacity={0.3} />
                       <stop
                         offset="95%"
                         stopColor={isDarkMode ? "#0f172a" : "#ffffff"}
@@ -292,16 +295,18 @@ export default function TemperatureTimeSeriesChart({
               />
 
               {series.map((s, index) => {
-                const color = palette[index % palette.length];
+                const colour =
+                  s.colour?.trim() || palette[index % palette.length];
+                const gradientId = `tempGradient-${s.id}`;
                 return (
                   <Area
                     key={s.id}
                     type="monotone"
                     dataKey={s.id}
                     name={s.name}
-                    stroke={color}
+                    stroke={colour}
                     strokeWidth={2.4}
-                    fill={`url(#tempGradient-${index})`}
+                    fill={`url(#${gradientId})`}
                     isAnimationActive
                     animationDuration={700}
                     dot={false}
@@ -309,7 +314,7 @@ export default function TemperatureTimeSeriesChart({
                       r: 5,
                       strokeWidth: 2,
                       stroke: isDarkMode ? "#0f172a" : "#ffffff",
-                      fill: color,
+                      fill: colour,
                     }}
                   />
                 );

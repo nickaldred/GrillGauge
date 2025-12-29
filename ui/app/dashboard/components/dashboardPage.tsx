@@ -36,6 +36,43 @@ export function DashboardPage() {
   const [selectedProbe, setSelectedProbe] = useState<Probe | null>(null);
   const [selectedHub, setSelectedHub] = useState<Hub | null>(null);
 
+  // ** Helpers **
+
+  // Function to add alpha transparency to a hex colour
+  const addAlpha = (hex: string, alpha: number) => {
+    const normalized = hex.trim();
+    const match = /^#?([a-fA-F0-9]{3}|[a-fA-F0-9]{6})$/.exec(normalized);
+    if (!match) return normalized;
+
+    const value = match[1];
+    const expand = value.length === 3;
+    const r = Number.parseInt(
+      expand ? value[0] + value[0] : value.slice(0, 2),
+      16
+    );
+    const g = Number.parseInt(
+      expand ? value[1] + value[1] : value.slice(2, 4),
+      16
+    );
+    const b = Number.parseInt(
+      expand ? value[2] + value[2] : value.slice(4, 6),
+      16
+    );
+    const clampedAlpha = Math.min(Math.max(alpha, 0), 1);
+    return `rgba(${r}, ${g}, ${b}, ${clampedAlpha})`;
+  };
+
+  // Generate tint styles for a probe colour
+  const probeTint = (colour?: string) => {
+    if (!colour) return undefined;
+    const bgAlpha = isDarkMode ? 0.18 : 0.14;
+    const borderAlpha = isDarkMode ? 0.35 : 0.25;
+    return {
+      backgroundColor: addAlpha(colour, bgAlpha),
+      borderColor: addAlpha(colour, borderAlpha),
+    } as const;
+  };
+
   // ** Fetch Hubs & Probes **
   useEffect(() => {
     if (!user?.email) return;
@@ -43,8 +80,6 @@ export function DashboardPage() {
     const fetchData = () => {
       const email = user.email!;
       const url = `${BASE_URL}/ui/hubs?email=` + encodeURIComponent(email);
-
-      // @ts-expect-error apiToken is added in auth.ts session callback
       const token = session?.apiToken as string | undefined;
       getData(url, token)
         .then((data) => {
@@ -68,7 +103,6 @@ export function DashboardPage() {
     updatedTargetTemp: number
   ) => {
     try {
-      // @ts-expect-error apiToken is added in auth.ts session callback
       const token = session?.apiToken as string | undefined;
       await putRequest(
         `${BASE_URL}/probe/targetTemp/${probeId}?targetTemp=${updatedTargetTemp}`,
@@ -94,7 +128,6 @@ export function DashboardPage() {
   // Update probe name
   const handleUpdateName = async (probeId: number, updatedName: string) => {
     try {
-      // @ts-expect-error apiToken is added in auth.ts session callback
       const token = session?.apiToken as string | undefined;
       await putRequest(
         `${BASE_URL}/probe/name/${probeId}?name=${encodeURIComponent(
@@ -302,6 +335,7 @@ export function DashboardPage() {
                     ? "bg-gray-800/60 border-gray-700"
                     : "bg-gray-50 border-gray-200"
                 }`}
+                style={probeTint(selectedProbe.colour)}
               >
                 <div>
                   <p
@@ -339,7 +373,7 @@ export function DashboardPage() {
             </div>
 
             <div className="border rounded-lg p-4">
-              <ProbeChart probeId={selectedProbe.id} />
+              <ProbeChart probe={selectedProbe} />
             </div>
           </div>
         ) : (
@@ -377,6 +411,7 @@ export function DashboardPage() {
                           ? "bg-gray-800/60 border-gray-700"
                           : "bg-gray-50 border-gray-200"
                       }`}
+                      style={probeTint(p.colour)}
                     >
                       <div>
                         <p

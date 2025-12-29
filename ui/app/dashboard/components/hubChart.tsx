@@ -31,8 +31,10 @@ export default function HubChart({ hub }: HubChartProps) {
   const probeIds = hub.probes.map((probe) => probe.id);
 
   const probeIdToNameMap: Record<number, string> = {};
+  const probeIdToColourMap: Record<number, string | undefined> = {};
   hub.probes.forEach((probe) => {
     probeIdToNameMap[probe.id] = probe.name;
+    probeIdToColourMap[probe.id] = probe.colour;
   });
 
   // ** Fetch Readings **
@@ -48,7 +50,6 @@ export default function HubChart({ hub }: HubChartProps) {
     const endISO = end.toISOString();
 
     setLoading(true);
-    // @ts-expect-error apiToken is added in auth.ts session callback
     const token = session?.apiToken as string | undefined;
 
     getData(
@@ -63,14 +64,19 @@ export default function HubChart({ hub }: HubChartProps) {
   }, [probeIds.join(","), timeframe, session]);
 
   const series: TemperatureSeries[] = Object.entries(readings).map(
-    ([probeId, probeReadings]) => ({
-      id: `probe-${probeId}`,
-      name: `${probeIdToNameMap[Number(probeId)]} - Temperature (°F)`,
-      points: probeReadings.map((r) => ({
-        time: new Date(r.timestamp).getTime(),
-        temperature: r.temperature,
-      })),
-    })
+    ([probeId, probeReadings]) => {
+      const numericId = Number(probeId);
+      const displayName = probeIdToNameMap[numericId] || `Probe ${probeId}`;
+      return {
+        id: `probe-${probeId}`,
+        name: `${displayName} - Temperature (°F)`,
+        colour: probeIdToColourMap[numericId],
+        points: probeReadings.map((r) => ({
+          time: new Date(r.timestamp).getTime(),
+          temperature: r.temperature,
+        })),
+      };
+    }
   );
 
   return (
