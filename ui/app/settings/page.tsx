@@ -4,6 +4,7 @@ import { PageHeader } from "../components/pageHeader";
 import { useTheme } from "../providers/ThemeProvider";
 import { useRequireAuth } from "../utils/useRequireAuth";
 import { HubManagement } from "./components/HubManagement";
+import { renderAuthLoading } from "../utils/renderAuthLoading";
 
 /**
  * The Settings page component.
@@ -14,7 +15,11 @@ export default function Settings() {
   // ** Theme **
   const { theme } = useTheme();
   const isDarkMode = theme === "dark";
-  useRequireAuth("/");
+  const { status } = useRequireAuth("/");
+
+  if (status !== "authenticated") {
+    return renderAuthLoading(isDarkMode, "Loading settings");
+  }
 
   return (
     <div

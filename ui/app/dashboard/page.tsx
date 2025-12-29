@@ -1,9 +1,7 @@
 "use client";
 
-import { useSession } from "next-auth/react";
 import { PageHeader } from "../components/pageHeader";
 import { DashboardPage } from "./components/dashboardPage";
-import { useRouter } from "next/navigation";
 import { useTheme } from "../providers/ThemeProvider";
 import { useRequireAuth } from "../utils/useRequireAuth";
 
@@ -19,12 +17,6 @@ export default function Dashboard() {
   const isDarkMode = theme === "dark";
   const { status } = useRequireAuth("/");
 
-  // While session isn't authenticated, don't render the dashboard UI to avoid
-  // a flash of protected content before the redirect.
-  if (status !== "authenticated") {
-    return null;
-  }
-
   return (
     <div
       className={`${
@@ -36,7 +28,7 @@ export default function Dashboard() {
           leftTitle="Dashboard"
           rightTitle="All temperatures shown in °F"
         />
-        <DashboardPage />
+        <DashboardPage authStatus={status} />
       </div>
     </div>
   );

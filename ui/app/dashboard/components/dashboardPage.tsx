@@ -9,9 +9,14 @@ import HubChart from "./hubChart";
 import { useSession } from "next-auth/react";
 import { useRouter } from "next/navigation";
 import { useTheme } from "@/app/providers/ThemeProvider";
-import { MdOutlineOutdoorGrill } from "react-icons/md";
 import { getData, putRequest } from "@/app/utils/requestUtils";
 import { BASE_URL } from "@/app/utils/envVars";
+import { LoadingState } from "../../components/LoadingState";
+
+// ** Props **
+type DashboardPageProps = {
+  authStatus: "loading" | "authenticated" | "unauthenticated";
+};
 
 /**
  * The DashboardPage component displays the user's hubs and probes,
@@ -19,7 +24,7 @@ import { BASE_URL } from "@/app/utils/envVars";
  *
  * @returns The DashboardPage component.
  */
-export function DashboardPage() {
+export function DashboardPage({ authStatus }: DashboardPageProps) {
   // ** Session & Router **
   const { data: session } = useSession();
   const router = useRouter();
@@ -173,33 +178,9 @@ export function DashboardPage() {
     setSelectedHub(null);
   };
 
-  // If can't fetch hubs for any reason show loading screen.
-  if (!hubs)
-    return (
-      <div className="flex items-center justify-center min-h-screen">
-        <div
-          role="status"
-          aria-live="polite"
-          className="flex flex-col items-center"
-        >
-          <div className="flex flex-col items-center gap-1 animate-pulse opacity-90">
-            <MdOutlineOutdoorGrill
-              className={`w-20 h-20 ${
-                isDarkMode ? "text-white" : "text-gray-800"
-              }`}
-              aria-hidden
-            />
-            <div
-              className={`font-medium ${
-                isDarkMode ? "text-gray-200" : "text-gray-700"
-              }`}
-            >
-              Loading dashboard
-            </div>
-          </div>
-        </div>
-      </div>
-    );
+  // Single loading state covers both auth resolving and hubs fetch.
+  if (authStatus !== "authenticated" || !hubs)
+    return <LoadingState message="Loading dashboard" />;
 
   return (
     <main className="p-6">

@@ -2,13 +2,13 @@
 
 import React, { useEffect, useState } from "react";
 import { useSession } from "next-auth/react";
-import { useRouter } from "next/navigation";
 import { PageHeader } from "../components/pageHeader";
 import { useTheme } from "../providers/ThemeProvider";
 import { BASE_URL } from "../utils/envVars";
 import type { User } from "../types/types";
 import { MailIcon, UserIcon } from "lucide-react";
 import { useRequireAuth } from "../utils/useRequireAuth";
+import { renderAuthLoading } from "../utils/renderAuthLoading";
 
 /**
  * Profile page showing session info combined with user data
@@ -16,7 +16,6 @@ import { useRequireAuth } from "../utils/useRequireAuth";
  */
 export default function Profile() {
   // ** Router & Theme **
-  const router = useRouter();
   const { theme } = useTheme();
   const isDarkMode = theme === "dark";
 
@@ -88,7 +87,7 @@ export default function Profile() {
 
   // Avoid flash of content while auth is resolving.
   if (status !== "authenticated") {
-    return null;
+    return renderAuthLoading(isDarkMode, "Loading profile");
   }
 
   const profileImage = session?.user?.image ?? undefined;
