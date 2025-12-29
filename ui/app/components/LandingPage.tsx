@@ -336,7 +336,7 @@ export default function LandingPage() {
                 isDarkMode ? "text-gray-300" : "text-gray-600"
               }`}
             >
-              Join thousands of pitmasters achieving perfect results every time
+              Join a single pitmaster achieving perfect results every time
             </p>
             <button
               onClick={() => router.push("/login")}
