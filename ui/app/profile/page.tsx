@@ -90,7 +90,9 @@ export default function Profile() {
     return renderAuthLoading(isDarkMode, "Loading profile");
   }
 
-  const profileImage = session?.user?.image ?? undefined;
+  const profileImage =
+    // @ts-expect-error Custom session field from auth callback
+    session?.user?.imageData ?? session?.user?.image ?? undefined;
   const displayName =
     (userData && `${userData.firstName} ${userData.lastName}`) ||
     session?.user?.name ||

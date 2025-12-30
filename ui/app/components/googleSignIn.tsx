@@ -29,6 +29,10 @@ export default function GoogleSignInButton() {
     router.push("/profile");
   };
 
+  const profileImage =
+    // @ts-expect-error Custom session field from auth callback
+    user?.imageData ?? user?.image ?? undefined;
+
   return user ? (
     <>
       <div
@@ -36,7 +40,7 @@ export default function GoogleSignInButton() {
         onClick={handleProfileClick}
       >
         <img
-          src={user.image || "https://randomuser.me/api/portraits/lego/1.jpg"}
+          src={profileImage}
           alt="Profile"
           className="w-8 h-8 rounded-full mr-2"
         />
