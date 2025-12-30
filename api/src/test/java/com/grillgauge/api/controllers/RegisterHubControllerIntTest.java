@@ -93,7 +93,8 @@ public class RegisterHubControllerIntTest {
     return Base64.getUrlEncoder().withoutPadding().encodeToString(bytes);
   }
 
-  @NonNull private String generateJwtToken(final String subject, final String role) {
+  @NonNull
+  private String generateJwtToken(final String subject, final String role) {
     try {
       long now = Instant.now().getEpochSecond();
       long exp = now + 3600; // 1 hour

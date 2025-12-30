@@ -38,7 +38,8 @@ public class TestUtils {
    * @param role The role to assign to the JWT.
    * @return A JwtRequestPostProcessor with the given subject and role.
    */
-  @NonNull public static JwtRequestPostProcessor jwtWithRole(
+  @NonNull
+  public static JwtRequestPostProcessor jwtWithRole(
       final @NonNull String subject, final @NonNull String role) {
     JwtRequestPostProcessor jwtRequestPostProcessor =
         jwt().jwt(jwt -> jwt.subject(subject)).authorities(new SimpleGrantedAuthority(role));

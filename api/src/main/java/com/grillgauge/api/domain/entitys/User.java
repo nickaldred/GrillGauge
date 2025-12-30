@@ -28,7 +28,8 @@ public class User {
 
   @Id
   @Column(nullable = false, unique = true)
-  @NonNull private String email;
+  @NonNull
+  private String email;
 
   @Column(nullable = false)
   private String firstName;
