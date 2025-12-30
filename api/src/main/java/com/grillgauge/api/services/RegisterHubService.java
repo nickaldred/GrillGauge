@@ -17,6 +17,7 @@ import java.util.Map;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 
 /** Service for registering hubs. Handles the business logic for registering and confirming hubs. */
@@ -28,6 +29,7 @@ public class RegisterHubService {
   private final UserRepository userRepository;
   private final SecureRandom secureRandom = new SecureRandom();
   private final CertificateService certificateService;
+  private final BCryptPasswordEncoder otpEncoder = new BCryptPasswordEncoder();
 
   @Value("${otp.expiry.seconds}")
   private int otpExpirySeconds;
@@ -58,10 +60,12 @@ public class RegisterHubService {
    * @return The registration response with hub ID, OTP, and OTP expiration time.
    */
   public HubRegistrationResponse registerHub(final HubRegistrationRequest request) {
-    LOG.info("Registering Hub with model: {}, fwVersion: {}");
+    LOG.info("Registering Hub with model: {}, fwVersion: {}", request.model(), request.fwVersion());
     String otp = generateOtp();
+    String otpHash = hashOtp(otp);
     Instant expiresAt = Instant.now().plusSeconds(otpExpirySeconds);
-    Hub hub = new Hub(otp, expiresAt, buildMetadata(request)); // Save Hub as PENDING
+    Hub hub = new Hub(null, expiresAt, buildMetadata(request)); // Save Hub as PENDING
+    hub.setOtpHash(otpHash);
     Hub savedHub = hubRepository.save(hub);
     LOG.info("Successfully registered hub with ID: {}", savedHub.getId());
     return new HubRegistrationResponse(savedHub.getId(), otp, expiresAt);
@@ -86,7 +90,16 @@ public class RegisterHubService {
     if (hub.getOtpExpiresAt().isBefore(Instant.now())) {
       throw new IllegalArgumentException("OTP has expired");
     }
-    if (!hub.getOtp().equals(hubConfirmRequest.otp())) {
+    String providedOtp = hubConfirmRequest.otp();
+    if (providedOtp == null || providedOtp.isBlank()) {
+      throw new IllegalArgumentException("Invalid OTP");
+    }
+
+    boolean otpMatches =
+        hub.getOtpHash() != null
+            ? otpEncoder.matches(providedOtp, hub.getOtpHash())
+            : providedOtp.equals(hub.getOtp());
+    if (!otpMatches) {
       throw new IllegalArgumentException("Invalid OTP");
     }
     String userEmail = hubConfirmRequest.userId();
@@ -215,8 +228,7 @@ public class RegisterHubService {
   }
 
   private String hashOtp(String otp) {
-    // use BCrypt or Argon2 ideally
-    return otp; // placeholder
+    return otpEncoder.encode(otp);
   }
 
   private Map<String, String> buildMetadata(HubRegistrationRequest req) {

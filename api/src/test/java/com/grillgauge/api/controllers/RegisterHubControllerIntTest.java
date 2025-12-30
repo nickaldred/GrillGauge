@@ -301,7 +301,8 @@ public class RegisterHubControllerIntTest {
     assertNotNull(confirmedHub);
     assertNull(confirmedHub.getOwner());
     assertEquals(Hub.HubStatus.PENDING, confirmedHub.getStatus());
-    assertNotNull(confirmedHub.getOtp());
+    assertNull(confirmedHub.getOtp());
+    assertNotNull(confirmedHub.getOtpHash());
     assertNotNull(confirmedHub.getOtpExpiresAt());
   }
 
@@ -326,7 +327,8 @@ public class RegisterHubControllerIntTest {
     assertNotNull(confirmedHub);
     assertNull(confirmedHub.getOwner());
     assertEquals(Hub.HubStatus.PENDING, confirmedHub.getStatus());
-    assertNotNull(confirmedHub.getOtp());
+    assertNull(confirmedHub.getOtp());
+    assertNotNull(confirmedHub.getOtpHash());
     assertNotNull(confirmedHub.getOtpExpiresAt());
   }
 

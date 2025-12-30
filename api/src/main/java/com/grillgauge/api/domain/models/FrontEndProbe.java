@@ -7,9 +7,8 @@ import lombok.Setter;
 import org.springframework.lang.NonNull;
 
 /**
- * Model representing a Probe for front-end consumption.
- * Contains the Probe's ID, local ID, target temperature, current temperature, name, colour, and
- * connection status.
+ * Model representing a Probe for front-end consumption. Contains the Probe's ID, local ID, target
+ * temperature, current temperature, name, colour, and connection status.
  */
 @Getter
 @Setter
@@ -17,18 +16,12 @@ import org.springframework.lang.NonNull;
 @NoArgsConstructor
 public class FrontEndProbe {
 
-  @NonNull
-  private Long id;
-  @NonNull
-  private Integer localId;
+  @NonNull private Long id;
+  @NonNull private Integer localId;
   private Float targetTemp;
   private Float currentTemp;
-  @NonNull
-  private String name;
-  @NonNull
-  private String colour;
-  @NonNull
-  private Boolean connected;
-  @NonNull
-  private Boolean visible;
+  @NonNull private String name;
+  @NonNull private String colour;
+  @NonNull private Boolean connected;
+  @NonNull private Boolean visible;
 }

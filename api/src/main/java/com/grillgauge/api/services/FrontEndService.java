@@ -9,9 +9,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
-/**
- * Service class for managing front-end related operations.
- */
+/** Service class for managing front-end related operations. */
 @Service
 public class FrontEndService {
   private static final Logger LOG = LoggerFactory.getLogger(FrontEndService.class);
@@ -69,8 +67,7 @@ public class FrontEndService {
   /**
    * Get the list of default probe colours defined on the Probe entity.
    *
-   * <p>
-   * This allows the UI to stay in sync with backend defaults without duplicating the list of hex
+   * <p>This allows the UI to stay in sync with backend defaults without duplicating the list of hex
    * values on the front-end.
    *
    * @return immutable list of hex colour strings.

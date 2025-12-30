@@ -6,9 +6,7 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
-/**
- * Model representing a Hub for front-end consumption.
- */
+/** Model representing a Hub for front-end consumption. */
 @Getter
 @Setter
 @AllArgsConstructor

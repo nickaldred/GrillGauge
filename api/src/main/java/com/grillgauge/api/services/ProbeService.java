@@ -55,7 +55,7 @@ public class ProbeService {
    * @param hubId the hubId to which the probe belongs
    * @return the saved Reading entity
    * @throws ResponseStatusException with status 404 if the probe with the given local ID and hubId
-   *         is not found
+   *     is not found
    */
   @Transactional
   public Reading saveProbeReading(final ProbeReading probeReading, final Long hubId) {
@@ -67,10 +67,11 @@ public class ProbeService {
             .filter(x -> x.getLocalId().equals(probeReading.getId()))
             .findFirst()
             .orElseThrow(
-                () -> new ResponseStatusException(
-                    HttpStatus.NOT_FOUND,
-                    "Probe with ID: %s and HubId: %s not found"
-                        .formatted(probeReading.getId(), hubId)));
+                () ->
+                    new ResponseStatusException(
+                        HttpStatus.NOT_FOUND,
+                        "Probe with ID: %s and HubId: %s not found"
+                            .formatted(probeReading.getId(), hubId)));
     Reading savedReading = readingService.saveCurrentReading(probe, probeReading.getCurrentTemp());
     LOG.debug(
         "Successfully saved reading for probe ID: {} under hub ID: {}",
@@ -150,9 +151,10 @@ public class ProbeService {
         probeRepository
             .findById(frontEndProbe.getId())
             .orElseThrow(
-                () -> new ResponseStatusException(
-                    HttpStatus.NOT_FOUND,
-                    "No probe found for probe ID: %s".formatted(frontEndProbe.getId())));
+                () ->
+                    new ResponseStatusException(
+                        HttpStatus.NOT_FOUND,
+                        "No probe found for probe ID: %s".formatted(frontEndProbe.getId())));
 
     probe.setName(frontEndProbe.getName());
     probe.setTargetTemp(frontEndProbe.getTargetTemp());
@@ -176,9 +178,10 @@ public class ProbeService {
         probeRepository
             .findById(probeId)
             .orElseThrow(
-                () -> new ResponseStatusException(
-                    HttpStatus.NOT_FOUND,
-                    "No probe found for probe ID: %s".formatted(probeId)));
+                () ->
+                    new ResponseStatusException(
+                        HttpStatus.NOT_FOUND,
+                        "No probe found for probe ID: %s".formatted(probeId)));
 
     probe.setTargetTemp(targetTemp);
     probeRepository.save(probe);
@@ -199,9 +202,10 @@ public class ProbeService {
         probeRepository
             .findById(probeId)
             .orElseThrow(
-                () -> new ResponseStatusException(
-                    HttpStatus.NOT_FOUND,
-                    "No probe found for probe ID: %s".formatted(probeId)));
+                () ->
+                    new ResponseStatusException(
+                        HttpStatus.NOT_FOUND,
+                        "No probe found for probe ID: %s".formatted(probeId)));
 
     probe.setName(name);
     probeRepository.save(probe);
