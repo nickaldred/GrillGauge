@@ -22,7 +22,7 @@ services:
       - "3000:3000"
     environment:
       # Public URL used by the browser
-      - NEXT_PUBLIC_BASE_URL=http://localhost:8080/api/v1
+      - NEXT_PUBLIC_API_BASE_URL=http://localhost:8080/api/v1
       # Internal URL used by the Next.js server inside the container to reach the API
       - API_BASE_URL=http://grill-gauge-api:8080/api/v1
       - AUTH_SECRET=${AUTH_SECRET}
