@@ -7,7 +7,6 @@ import { signIn, useSession } from "next-auth/react";
 import { AlertCircleIcon, FlameIcon } from "lucide-react";
 import { useTheme } from "../providers/ThemeProvider";
 import { BASE_URL } from "../utils/envVars";
-import { User } from "../types/types";
 
 /**
  * The Login page allows users to sign in using Google authentication.

@@ -50,8 +50,18 @@ export default function RegisterHubModal({
       : "border text-gray-700 hover:bg-gray-100 cursor-pointer";
     const classes = `${base} ${variant === "primary" ? primary : secondary}`;
 
+    const handleClick: React.MouseEventHandler<HTMLButtonElement> = (event) => {
+      if (!onClick) return;
+
+      if (onClick.length === 0) {
+        (onClick as () => void)();
+      } else {
+        (onClick as React.MouseEventHandler<HTMLButtonElement>)(event);
+      }
+    };
+
     return (
-      <button onClick={onClick as any} disabled={disabled} className={classes}>
+      <button onClick={handleClick} disabled={disabled} className={classes}>
         {children}
       </button>
     );
@@ -61,7 +71,6 @@ export default function RegisterHubModal({
   const [step, setStep] = useState<number>(0);
   const [hubIdInput, setHubIdInput] = useState("");
   const [otpInput, setOtpInput] = useState("");
-  const [polling, setPolling] = useState(false);
   const pollingRef = useRef<number | null>(null);
 
   const reset = () => {
@@ -69,7 +78,6 @@ export default function RegisterHubModal({
       clearInterval(pollingRef.current);
       pollingRef.current = null;
     }
-    setPolling(false);
     setStep(0);
     setHubIdInput("");
     setOtpInput("");
@@ -88,14 +96,14 @@ export default function RegisterHubModal({
   const startPollingForRegistration = (hubId: string) => {
     if (!hubId) return;
     if (pollingRef.current) return;
-    setPolling(true);
     pollingRef.current = window.setInterval(async () => {
       try {
-        // @ts-expect-error apiToken is added in auth.ts session callback
         const token = session?.apiToken as string | undefined;
-        const hub = await getData(`${BASE_URL}/hub?hubId=${hubId}`, token);
+        const hub = await getData<{ status?: string }>(
+          `${BASE_URL}/hub?hubId=${hubId}`,
+          token
+        );
         if (hub?.status === "REGISTERED") {
-          setPolling(false);
           if (pollingRef.current) {
             clearInterval(pollingRef.current);
             pollingRef.current = null;
@@ -118,7 +126,6 @@ export default function RegisterHubModal({
       return;
     }
     try {
-      // @ts-expect-error apiToken is added in auth.ts session callback
       const token = session?.apiToken as string | undefined;
 
       await postRequest(

@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState } from "react";
-import { CheckIcon, EditIcon, ThermometerIcon, XIcon } from "lucide-react";
+import { CheckIcon, EditIcon, ThermometerIcon } from "lucide-react";
 import { Probe } from "../types/types";
 import { useTheme } from "../providers/ThemeProvider";
 
@@ -33,46 +33,6 @@ export function ProbeCard({
   const progress = probe.connected
     ? Math.max(Math.round((probe.currentTemp / probe.targetTemp) * 100), 0)
     : 0;
-
-  const getTemperatureStatus = () => {
-    if (!probe.connected)
-      return {
-        text: "Disconnected",
-        class: isDarkMode
-          ? "bg-red-700 text-red-100"
-          : "bg-red-100 text-red-800",
-      };
-    if (progress >= 115)
-      return {
-        text: "Over target temp",
-        class: isDarkMode ? "text-red-400 font-bold" : "text-red-600 font-bold",
-      };
-    if (progress >= 100)
-      return {
-        text: "At target",
-        class: isDarkMode
-          ? "text-green-400 font-bold"
-          : "text-green-600 font-bold",
-      };
-    if (progress >= 90)
-      return {
-        text: "Almost at target",
-        class: isDarkMode
-          ? "text-yellow-400 font-bold"
-          : "text-yellow-600 font-bold",
-      };
-    if (progress >= 50)
-      return {
-        text: "Half way to target",
-        class: isDarkMode ? "text-orange-400" : "text-orange-500",
-      };
-    return {
-      text: "Heating",
-      class: isDarkMode ? "text-blue-400" : "text-blue-500",
-    };
-  };
-
-  const status = getTemperatureStatus();
 
   const handleSaveName = () => {
     onUpdateName(probe.id, tempName);

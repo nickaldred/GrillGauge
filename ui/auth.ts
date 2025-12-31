@@ -2,7 +2,7 @@ import NextAuth, { type NextAuthConfig } from "next-auth";
 import Google from "next-auth/providers/google";
 import jwt from "jsonwebtoken";
 import { Buffer } from "node:buffer";
-import { BASE_URL } from "./app/utils/envVars";
+import { API_BASE_URL } from "./app/utils/envVars";
 import type { User as GrillUser } from "./app/types/types";
 
 /**
@@ -61,12 +61,12 @@ async function fetchImageDataUrl(imageUrl: string): Promise<string | null> {
  * @returns A promise that resolves to the GrillUser object or null if not found/error.
  */
 async function fetchUserByEmail(email: string): Promise<GrillUser | null> {
-  if (!BASE_URL) {
-    console.error("BASE_URL is not defined; cannot fetch user by email.");
+  if (!API_BASE_URL) {
+    console.error("API_BASE_URL is not defined; cannot fetch user by email.");
     return null;
   }
 
-  const url = `${BASE_URL}/user?email=` + encodeURIComponent(email);
+  const url = `${API_BASE_URL}/user?email=` + encodeURIComponent(email);
 
   try {
     const token = jwt.sign(

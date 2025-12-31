@@ -53,11 +53,10 @@ export function HubForm({ hub = null, onSubmit, onCancel }: HubFormProps) {
     e.preventDefault();
     if (validate()) {
       onSubmit({
-        ...(hub || {
-          probes: [],
-        }),
-        name,
+        probes: hub?.probes ?? [],
+        visible: hub?.visible ?? true,
         connected,
+        name,
       });
     }
   };

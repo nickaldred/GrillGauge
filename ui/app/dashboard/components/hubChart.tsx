@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { useSession } from "next-auth/react";
 import { Hub, Reading } from "@/app/types/types";
 import { BASE_URL } from "@/app/utils/envVars";
@@ -28,7 +28,11 @@ export default function HubChart({ hub }: HubChartProps) {
   const [timeframe, setTimeframe] = useState<number>(60); // minutes, default = 1 hour
   const [loading, setLoading] = useState(false);
 
-  const probeIds = hub.probes.map((probe) => probe.id);
+  const probeIds = useMemo(
+    () => hub.probes.map((probe) => probe.id),
+    [hub.probes]
+  );
+  const probeIdsKey = useMemo(() => probeIds.join(","), [probeIds]);
 
   const probeIdToNameMap: Record<number, string> = {};
   const probeIdToColourMap: Record<number, string | undefined> = {};
@@ -52,16 +56,14 @@ export default function HubChart({ hub }: HubChartProps) {
     setLoading(true);
     const token = session?.apiToken as string | undefined;
 
-    getData(
-      `${BASE_URL}/probe/readings/between?probeIds=${probeIds.join(
-        ","
-      )}&start=${startISO}&end=${endISO}`,
+    getData<Record<string, Reading[]>>(
+      `${BASE_URL}/probe/readings/between?probeIds=${probeIdsKey}&start=${startISO}&end=${endISO}`,
       token
     )
-      .then((data: Record<string, Reading[]>) => setReadings(data || {}))
+      .then((data) => setReadings(data || {}))
       .catch((err) => console.error(err))
       .finally(() => setLoading(false));
-  }, [probeIds.join(","), timeframe, session]);
+  }, [probeIdsKey, probeIds.length, timeframe, session?.apiToken]);
 
   const series: TemperatureSeries[] = Object.entries(readings).map(
     ([probeId, probeReadings]) => {

@@ -12,6 +12,29 @@ services:
       - ~/intermediateCA:/app/CA:ro
     depends_on:
       - grill-gauge-db
+    networks:
+      - grill-gauge-network
+
+  grill-gauge-ui:
+    image: grill-gauge-ui:latest
+    container_name: grill-gauge-ui
+    ports:
+      - "3000:3000"
+    environment:
+      # Public URL used by the browser
+      - NEXT_PUBLIC_BASE_URL=http://localhost:8080/api/v1
+      # Internal URL used by the Next.js server inside the container to reach the API
+      - API_BASE_URL=http://grill-gauge-api:8080/api/v1
+      - AUTH_SECRET=${AUTH_SECRET}
+      - AUTH_GOOGLE_ID=${AUTH_GOOGLE_ID}
+      - AUTH_GOOGLE_SECRET=${AUTH_GOOGLE_SECRET}
+      - JWT_SECRET=${JWT_SECRET}
+      - AUTH_TRUE_HOST=true
+      - AUTH_URL=http://localhost:3000
+    depends_on:
+      - grill-gauge-api
+    networks:
+      - grill-gauge-network
 
   grill-gauge-db:
     image: postgres:18
@@ -24,3 +47,10 @@ services:
       - "5432:5432"
     volumes:
       - ./grill-gauge-db-data:/var/lib/postgresql
+    restart: unless-stopped
+    networks:
+      - grill-gauge-network
+
+networks:
+  grill-gauge-network:
+    driver: bridge

@@ -32,16 +32,14 @@ export default function ProbeChart({ probe }: ProbeChartProps) {
     const probeIdsParam = [probe.id].join(",");
     const token = session?.apiToken as string | undefined;
 
-    getData(
+    getData<Record<number, Reading[]>>(
       `${BASE_URL}/probe/readings/between?probeIds=${probeIdsParam}&start=${startISO}&end=${endISO}`,
       token
     )
-      .then((data: Record<number, Reading[]>) => {
-        setReadings(data[probe.id] || []);
-      })
+      .then((data) => setReadings(data[probe.id] || []))
       .catch((err) => console.error(err))
       .finally(() => setLoading(false));
-  }, [probe.id, timeframe, session]);
+  }, [probe.id, timeframe, session?.apiToken]);
   const series: TemperatureSeries[] = [
     {
       id: `probe-${probe.id}`,

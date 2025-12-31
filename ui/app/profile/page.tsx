@@ -1,7 +1,6 @@
 "use client";
 
 import React, { useEffect, useState } from "react";
-import { useSession } from "next-auth/react";
 import { PageHeader } from "../components/pageHeader";
 import { useTheme } from "../providers/ThemeProvider";
 import { BASE_URL } from "../utils/envVars";

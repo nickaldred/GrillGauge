@@ -61,8 +61,9 @@ export function ProbeForm({
       }
     };
 
+    if (colour) return;
     fetchColours();
-  }, [session]);
+  }, [session, colour]);
 
   useEffect(() => {
     if (probe) {

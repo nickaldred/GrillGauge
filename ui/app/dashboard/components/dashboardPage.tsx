@@ -86,10 +86,8 @@ export function DashboardPage({ authStatus }: DashboardPageProps) {
       const email = user.email!;
       const url = `${BASE_URL}/ui/hubs?email=` + encodeURIComponent(email);
       const token = session?.apiToken as string | undefined;
-      getData(url, token)
-        .then((data) => {
-          setHubs(data);
-        })
+      getData<Hub[]>(url, token)
+        .then(setHubs)
         .catch((error) => {
           console.error("Error fetching user:", error);
         });
@@ -98,7 +96,7 @@ export function DashboardPage({ authStatus }: DashboardPageProps) {
     fetchData();
     const intervalId = setInterval(fetchData, 30000);
     return () => clearInterval(intervalId);
-  }, [user?.email, session]);
+  }, [user?.email, session?.apiToken]);
 
   // ** Handlers **
 
@@ -206,8 +204,8 @@ export function DashboardPage({ authStatus }: DashboardPageProps) {
                 isDarkMode ? "text-gray-300" : "text-gray-600"
               }`}
             >
-              Let's get you started — add a hub to begin monitoring your probes
-              and view live charts. You can always manage hubs later in
+              Let&apos;s get you started — add a hub to begin monitoring your
+              probes and view live charts. You can always manage hubs later in
               settings.
             </p>
 

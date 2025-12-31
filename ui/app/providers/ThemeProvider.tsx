@@ -6,6 +6,7 @@ import React, {
   useState,
   ReactNode,
   useMemo,
+  useCallback,
 } from "react";
 import { SessionProvider } from "next-auth/react";
 
@@ -36,8 +37,6 @@ const getInitialTheme = (): Theme => {
     const stored = localStorage.getItem("theme") as Theme | null;
     if (stored === "light" || stored === "dark") return stored;
   } catch (err) {
-    // ignore storage errors;
-    // eslint-disable-next-line no-console
     console.debug("read theme failed", err);
   }
 
@@ -60,7 +59,7 @@ export default function ThemeProvider({
     document.documentElement.classList.toggle("dark", resolved === "dark");
   }, []);
 
-  const toggle = () => {
+  const toggle = useCallback(() => {
     const next: Theme = theme === "dark" ? "light" : "dark";
     setTheme(next);
     try {
@@ -69,15 +68,13 @@ export default function ThemeProvider({
         60 * 60 * 24 * 365
       }; samesite=lax`;
     } catch (err) {
-      // ignore storage errors
-      // eslint-disable-next-line no-console
       console.debug("persist theme failed", err);
     }
     document.documentElement.dataset.theme = next;
     document.documentElement.classList.toggle("dark", next === "dark");
-  };
+  }, [theme]);
 
-  const value = useMemo(() => ({ theme, toggle }), [theme]);
+  const value = useMemo(() => ({ theme, toggle }), [theme, toggle]);
 
   return (
     <ThemeContext.Provider value={value}>

@@ -43,7 +43,7 @@ export function HubManagement() {
 
     const fetchData = () => {
       const token = session?.apiToken as string | undefined;
-      getData(`${BASE_URL}/ui/hubs?email=${user.email}`, token)
+      getData<Hub[]>(`${BASE_URL}/ui/hubs?email=${user.email}`, token)
         .then(setHubs)
         .catch(console.error);
     };
@@ -51,7 +51,7 @@ export function HubManagement() {
     fetchData();
     const interval = setInterval(fetchData, 30000);
     return () => clearInterval(interval);
-  }, [user?.email]);
+  }, [user?.email, session?.apiToken]);
 
   // Toggle expandable row
   const toggleHub = (hubId: number) =>
@@ -157,7 +157,7 @@ export function HubManagement() {
             isDarkMode ? "text-gray-400" : "text-gray-500"
           }`}
         >
-          No hubs registered yet. Click "Add New Hub" to get started.
+          No hubs registered yet. Click &quot;Add New Hub&quot; to get started.
         </div>
       ) : (
         <div className="overflow-x-auto">
@@ -380,7 +380,7 @@ export function HubManagement() {
         onRegistered={() => {
           // refresh hubs after a new hub is registered/confirmed
           if (!user?.email) return;
-          getData(`${BASE_URL}/ui/hubs?email=${user.email}`)
+          getData<Hub[]>(`${BASE_URL}/ui/hubs?email=${user.email}`)
             .then(setHubs)
             .catch(console.error);
         }}

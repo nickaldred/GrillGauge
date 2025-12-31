@@ -4,6 +4,7 @@ import { signOut, useSession } from "next-auth/react";
 import { useTheme } from "../providers/ThemeProvider";
 import { LogOutIcon } from "lucide-react";
 import { useRouter } from "next/navigation";
+import Image from "next/image";
 
 export const handleSignOut = async (e: React.MouseEvent<HTMLButtonElement>) => {
   e.preventDefault();
@@ -39,11 +40,19 @@ export default function GoogleSignInButton() {
         className="flex items-center cursor-pointer "
         onClick={handleProfileClick}
       >
-        <img
-          src={profileImage}
-          alt="Profile"
-          className="w-8 h-8 rounded-full mr-2"
-        />
+        {profileImage ? (
+          <Image
+            src={profileImage}
+            alt="Profile"
+            width={32}
+            height={32}
+            className="w-8 h-8 rounded-full mr-2 object-cover"
+          />
+        ) : (
+          <div className="w-8 h-8 rounded-full mr-2 bg-gradient-to-br from-orange-500 to-red-600 text-white flex items-center justify-center text-sm font-semibold">
+            {(user.name || "?").charAt(0).toUpperCase()}
+          </div>
+        )}
         <span
           className={`text-sm font-medium hidden md:inline ${
             isDarkMode ? "text-gray-300" : "text-gray-900"
