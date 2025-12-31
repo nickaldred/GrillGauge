@@ -7,19 +7,20 @@ services:
     environment:
       - INT_CA_KEY_PASSPHRASE=${INT_CA_KEY_PASSPHRASE}
       - JWT_SECRET=${JWT_SECRET}
+      - DB_PASSWORD=${DB_PASSWORD}
     volumes:
       - ~/intermediateCA:/app/CA:ro
-    # depends_on:
-    #   - grill-gauge-db
+    depends_on:
+      - grill-gauge-db
 
-  # grill-gauge-db:
-  #   image: postgres:15
-  #   container_name: grill-gauge-db
-  #   environment:
-  #     - POSTGRES_USER=grillgauge
-  #     - POSTGRES_PASSWORD=grillgaugepassword
-  #     - POSTGRES_DB=grillgauge
-  #   ports:
-  #     - "5432:5432"
-  #   volumes:
-  #     - grill-gauge-db-data:/var/lib/postgresql/data
+  grill-gauge-db:
+    image: postgres:18
+    container_name: grill-gauge-db
+    environment:
+      - POSTGRES_USER=grillgauge
+      - POSTGRES_PASSWORD=${DB_PASSWORD}
+      - POSTGRES_DB=grillgauge
+    ports:
+      - "5432:5432"
+    volumes:
+      - ./grill-gauge-db-data:/var/lib/postgresql
