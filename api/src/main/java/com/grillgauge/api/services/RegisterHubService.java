@@ -17,6 +17,7 @@ import java.util.Map;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.lang.NonNull;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 
@@ -176,7 +177,7 @@ public class RegisterHubService {
    * @param hubId The ID of the hub.
    * @param reason The reason code for revocation.
    */
-  public void revokeCertificate(final Long hubId, final int reason) {
+  public void revokeCertificate(@NonNull final Long hubId, final int reason) {
     LOG.info("Revoking certificates for hub ID: {}", hubId);
     Hub hub =
         hubRepository

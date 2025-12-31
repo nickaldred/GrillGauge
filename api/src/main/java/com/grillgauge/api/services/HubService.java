@@ -8,6 +8,7 @@ import java.util.Optional;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
+import org.springframework.lang.NonNull;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.server.ResponseStatusException;
@@ -30,7 +31,7 @@ public class HubService {
    * @return Hub entity.
    * @throws ResponseStatusException with status 404 if no hub is found for the given hubId.
    */
-  public Hub getHub(final Long hubId) {
+  public Hub getHub(@NonNull final Long hubId) {
     LOG.info("Retrieving hub for hub ID: {}", hubId);
     Optional<Hub> hub = hubRepository.findById(hubId);
     if (hub.isEmpty()) {
@@ -62,7 +63,7 @@ public class HubService {
    * @param hubId The ID of the hub to delete.
    */
   @Transactional
-  public void deleteHub(final Long hubId) {
+  public void deleteHub(@NonNull final Long hubId) {
     LOG.info("Attempting to delete hub ID: {}", hubId);
     hubRepository.deleteById(hubId);
     LOG.info("Successfully deleted hub ID: {}", hubId);
@@ -87,7 +88,7 @@ public class HubService {
    * @param hubToUpdate hub to update.
    * @return updated hub.
    */
-  public FrontEndHub updateHub(final FrontEndHub hubToUpdate) {
+  public FrontEndHub updateHub(@NonNull final FrontEndHub hubToUpdate) {
     LOG.info("Updating Hub with ID: {}", hubToUpdate.getId());
     Hub existingHub = this.getHub(hubToUpdate.getId());
     existingHub.setName(hubToUpdate.getName());

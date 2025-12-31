@@ -8,6 +8,7 @@ import com.grillgauge.api.domain.models.ProbeReading;
 import java.util.List;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.lang.NonNull;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -49,7 +50,7 @@ public class ExternalHubService {
    * @param hubId hubId to get the current state for
    * @return HubCurrentState containing the hubId, hub name, and list of probes
    */
-  public HubCurrentState getHubCurrentState(final Long hubId) {
+  public HubCurrentState getHubCurrentState(@NonNull final Long hubId) {
     LOG.info("Fetching current state for hubId: {}", hubId);
     Hub hub = hubService.getHub(hubId);
     List<Probe> probes = probeService.getProbesByHubId(hubId);

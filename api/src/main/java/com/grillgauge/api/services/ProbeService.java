@@ -13,6 +13,7 @@ import java.util.Optional;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
+import org.springframework.lang.NonNull;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.server.ResponseStatusException;
@@ -106,7 +107,7 @@ public class ProbeService {
    * @throws ResponseStatusException with status 404 if no probe is found for the given probeId
    */
   @Transactional
-  public void deleteProbe(final Long probeId) {
+  public void deleteProbe(@NonNull final Long probeId) {
     LOG.info("Deleting probe for probe ID: {}", probeId);
     probeRepository.deleteById(probeId);
   }
@@ -196,7 +197,7 @@ public class ProbeService {
    * @param name The name to update.
    * @return The updated name of the probe.
    */
-  public Map<String, Object> updateProbeName(final long probeId, final String name) {
+  public Map<String, Object> updateProbeName(final long probeId, @NonNull final String name) {
     LOG.info("Updating name for probe ID: {} to {}", probeId, name);
     Probe probe =
         probeRepository
