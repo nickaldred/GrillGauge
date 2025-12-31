@@ -1,5 +1,7 @@
 package com.grillgauge.api.startup;
 
+import static java.util.Objects.requireNonNull;
+
 import com.grillgauge.api.domain.entitys.Hub;
 import com.grillgauge.api.domain.entitys.Probe;
 import com.grillgauge.api.domain.entitys.Reading;
@@ -11,6 +13,7 @@ import com.grillgauge.api.domain.repositorys.UserRepository;
 import java.time.Instant;
 import java.util.List;
 import org.springframework.boot.CommandLineRunner;
+import org.springframework.context.annotation.Profile;
 import org.springframework.stereotype.Component;
 
 /**
@@ -19,6 +22,7 @@ import org.springframework.stereotype.Component;
  * users, hubs, probes, and readings to their respective repositories.
  */
 @Component
+@Profile("dev")
 public class DataLoader implements CommandLineRunner {
   private UserRepository userRepository;
   private HubRepository hubRepository;
@@ -54,13 +58,13 @@ public class DataLoader implements CommandLineRunner {
     User testUser2 = new User("nickaldred1994@gmail.com", "joe", "bloggs");
     User testUser3 = new User("swathi@gmail.com", "swathi", "guptha");
     User testUser4 = new User("tom@askjeeves.com", "tom", "jones");
-    userRepository.saveAll(List.of(testUser1, testUser2, testUser3, testUser4));
+    userRepository.saveAll(requireNonNull(List.of(testUser1, testUser2, testUser3, testUser4)));
 
     Hub testHub1 = new Hub(testUser1, "hub1");
     Hub testHub3 = new Hub(testUser3, "hub3");
     Hub testHub4 = new Hub(testUser4, "hub4");
     Hub testHub5 = new Hub(testUser1, "hub5");
-    hubRepository.saveAll(List.of(testHub1, testHub3, testHub4, testHub5));
+    hubRepository.saveAll(requireNonNull(List.of(testHub1, testHub3, testHub4, testHub5)));
 
     Probe testProbe1 = new Probe(1, testHub1, testUser1, (float) 180.00, "probe1");
     Probe testProbe2 = new Probe(2, testHub1, testUser1, (float) 200.00, "probe2");
@@ -69,7 +73,8 @@ public class DataLoader implements CommandLineRunner {
     Probe testProbe7 = new Probe(1, testHub4, testUser4, (float) 210.00, "probe7");
     Probe testProbe8 = new Probe(1, testHub5, testUser1, (float) 220.00, "probe8");
     probeRepository.saveAll(
-        List.of(testProbe1, testProbe2, testProbe3, testProbe6, testProbe7, testProbe8));
+        requireNonNull(
+            List.of(testProbe1, testProbe2, testProbe3, testProbe6, testProbe7, testProbe8)));
 
     Reading testReading1 = new Reading(testProbe1, (float) 135, Instant.now().minusSeconds(300));
     Reading testReading2 = new Reading(testProbe1, (float) 145, Instant.now().minusSeconds(200));
@@ -89,22 +94,23 @@ public class DataLoader implements CommandLineRunner {
     Reading testReading16 = new Reading(testProbe8, (float) 145, Instant.now());
 
     readingRepository.saveAll(
-        List.of(
-            testReading1,
-            testReading2,
-            testReading3,
-            testReading4,
-            testReading5,
-            testReading6,
-            testReading7,
-            testReading8,
-            testReading9,
-            testReading10,
-            testReading11,
-            testReading12,
-            testReading13,
-            testReading14,
-            testReading15,
-            testReading16));
+        requireNonNull(
+            List.of(
+                testReading1,
+                testReading2,
+                testReading3,
+                testReading4,
+                testReading5,
+                testReading6,
+                testReading7,
+                testReading8,
+                testReading9,
+                testReading10,
+                testReading11,
+                testReading12,
+                testReading13,
+                testReading14,
+                testReading15,
+                testReading16)));
   }
 }
