@@ -21,7 +21,7 @@ with the Root CA, without distrusting the Root itself.
 default_ca = CA_default
 
 [ CA_default ]
-dir            = ~/rootCA
+dir            = /home/nicka/rootCA
 certs          = $dir/certs
 crl_dir        = $dir/crl
 new_certs_dir  = $dir/newcerts
@@ -116,7 +116,7 @@ echo 1000 > ~/intermediateCA/crlnumber
 default_ca = CA_default
 
 [ CA_default ]
-dir            = ~/intermediateCA
+dir            = /home/nicka/intermediateCA
 certs          = $dir/certs
 crl_dir        = $dir/crl
 new_certs_dir  = $dir/newcerts
@@ -170,8 +170,7 @@ authorityKeyIdentifier = keyid,issuer
 ### Generate the intermediate CA private key
 
 ```bash
-openssl genrsa -aes256 \
-    -out ~/intermediateCA/private/GrillGauge-Intermediate.key.pem 4096
+openssl genrsa -aes256 -out ~/intermediateCA/private/GrillGauge-Intermediate.key.pem 4096
 chmod 600 ~/intermediateCA/private/GrillGauge-Intermediate.key.pem
 ```
 
@@ -189,11 +188,7 @@ openssl req -config ~/intermediateCA/openssl.cnf \
 On the offline Root CA machine:
 
 ```bash
-openssl ca -config ~/rootCA/openssl.cnf \
-    -extensions v3_ca \
-    -days 1825 -notext -md sha256 \
-    -in  ~/intermediateCA/csr/GrillGauge-Intermediate.csr.pem \
-    -out ~/intermediateCA/certs/GrillGauge-Intermediate.crt.pem
+openssl ca -config ~/rootCA/openssl.cnf -extensions v3_ca -days 1825 -notext -md sha256 -in  ~/intermediateCA/csr/GrillGauge-Intermediate.csr.pem -out ~/intermediateCA/certs/GrillGauge-Intermediate.crt.pem
 
 chmod 644 ~/intermediateCA/certs/GrillGauge-Intermediate.crt.pem
 ```
