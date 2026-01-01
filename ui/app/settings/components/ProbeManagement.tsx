@@ -1,4 +1,4 @@
-import { Hub, Probe } from "@/app/types/types";
+import { Hub, Probe, TemperatureUnit } from "@/app/types/types";
 import { EditIcon, TrashIcon, Eye, EyeOff } from "lucide-react";
 import { useTheme } from "@/app/providers/ThemeProvider";
 import Modal from "@/app/components/modal";
@@ -7,6 +7,10 @@ import { useSession } from "next-auth/react";
 import { deleteRequest, putRequest } from "@/app/utils/requestUtils";
 import { BASE_URL } from "@/app/utils/envVars";
 import { ProbeForm } from "./ProbeForm";
+import {
+  defaultTemperatureUnit,
+  temperatureUnitSymbol,
+} from "@/app/utils/temperature";
 
 // Props for the ProbeManagement component.
 interface ProbeManagementProps {
@@ -25,6 +29,10 @@ export function ProbeManagement({ hub }: ProbeManagementProps) {
 
   // ** Auth **
   const { data: session } = useSession();
+  const temperatureUnit: TemperatureUnit =
+    (session?.user?.temperatureUnit as TemperatureUnit | undefined) ??
+    defaultTemperatureUnit;
+  const unitSymbol = temperatureUnitSymbol(temperatureUnit);
 
   // ** States **
   const [isEditProbeModalOpen, setIsEditProbeModalOpen] = useState(false);
@@ -225,7 +233,7 @@ export function ProbeManagement({ hub }: ProbeManagementProps) {
                   <span
                     className={isDarkMode ? "text-gray-300" : "text-gray-800"}
                   >
-                    {probe.targetTemp}°F
+                    {probe.targetTemp}°{unitSymbol}
                   </span>
                 </td>
 

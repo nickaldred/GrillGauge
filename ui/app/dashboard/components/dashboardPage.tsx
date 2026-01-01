@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { ProbeCard } from "../../components/probeCard";
-import { Hub, Probe } from "../../types/types";
+import { Hub, Probe, TemperatureUnit } from "../../types/types";
 import Modal from "../../components/modal";
 import ProbeChart from "./probeChart";
 import HubChart from "./hubChart";
@@ -13,6 +13,10 @@ import { getData, putRequest } from "@/app/utils/requestUtils";
 import { BASE_URL } from "@/app/utils/envVars";
 import { LoadingState } from "../../components/LoadingState";
 import { DemoHubBanner } from "./DemoHubBanner";
+import {
+  defaultTemperatureUnit,
+  temperatureUnitSymbol,
+} from "@/app/utils/temperature";
 
 // ** Props **
 type DashboardPageProps = {
@@ -30,6 +34,10 @@ export function DashboardPage({ authStatus }: DashboardPageProps) {
   const { data: session } = useSession();
   const router = useRouter();
   const user = session?.user;
+  const temperatureUnit: TemperatureUnit =
+    (session?.user?.temperatureUnit as TemperatureUnit | undefined) ??
+    defaultTemperatureUnit;
+  const unitSymbol = temperatureUnitSymbol(temperatureUnit);
 
   // ** Theme **
   const { theme } = useTheme();
@@ -97,7 +105,7 @@ export function DashboardPage({ authStatus }: DashboardPageProps) {
     fetchData();
     const intervalId = setInterval(fetchData, 30000);
     return () => clearInterval(intervalId);
-  }, [user?.email, session?.apiToken]);
+  }, [user?.email, session?.apiToken, temperatureUnit]);
 
   // ** Handlers **
 
@@ -289,6 +297,7 @@ export function DashboardPage({ authStatus }: DashboardPageProps) {
                           onUpdateTargetTemp={handleUpdateTargetTemp}
                           onUpdateName={handleUpdateName}
                           onClick={openProbeModal}
+                          temperatureUnit={temperatureUnit}
                         />
                       </div>
                     ))}
@@ -355,14 +364,17 @@ export function DashboardPage({ authStatus }: DashboardPageProps) {
                       isDarkMode ? "text-gray-400" : "text-gray-500"
                     }`}
                   >
-                    °F
+                    °{unitSymbol}
                   </span>
                 </div>
               </div>
             </div>
 
             <div className="border rounded-lg p-4">
-              <ProbeChart probe={selectedProbe} />
+              <ProbeChart
+                probe={selectedProbe}
+                temperatureUnit={temperatureUnit}
+              />
             </div>
           </div>
         ) : (
@@ -431,7 +443,7 @@ export function DashboardPage({ authStatus }: DashboardPageProps) {
                             isDarkMode ? "text-gray-400" : "text-gray-500"
                           }`}
                         >
-                          °F
+                          °{unitSymbol}
                         </span>
                       </div>
                     </div>
@@ -439,7 +451,7 @@ export function DashboardPage({ authStatus }: DashboardPageProps) {
               </div>
             </div>
             <div className="border rounded-lg p-4">
-              <HubChart hub={selectedHub} />
+              <HubChart hub={selectedHub} temperatureUnit={temperatureUnit} />
             </div>
           </div>
         ) : (

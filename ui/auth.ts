@@ -3,7 +3,7 @@ import Google from "next-auth/providers/google";
 import jwt from "jsonwebtoken";
 import { Buffer } from "node:buffer";
 import { API_BASE_URL } from "./app/utils/envVars";
-import type { User as GrillUser } from "./app/types/types";
+import type { TemperatureUnit, User as GrillUser } from "./app/types/types";
 
 /**
  * Secret key for signing JWTs.
@@ -171,18 +171,21 @@ async function cacheUserFields(
   const tokenFirstName = token.firstName as string | undefined;
   const tokenLastName = token.lastName as string | undefined;
   const tokenRoles = token.roles as string[] | undefined;
+  const tokenTemperatureUnit = token.temperatureUnit as TemperatureUnit | undefined;
 
   const hasNames = Boolean(tokenFirstName) || Boolean(tokenLastName);
   const hasRoles = Array.isArray(tokenRoles) && tokenRoles.length > 0;
+  const hasTemperatureUnit = Boolean(tokenTemperatureUnit);
 
   if (!email) return;
-  if (!forceRefresh && hasNames && hasRoles) return;
+  if (!forceRefresh && hasNames && hasRoles && hasTemperatureUnit) return;
 
   const dbUser = await fetchUserByEmail(email);
   if (dbUser) {
     token.firstName = dbUser.firstName;
     token.lastName = dbUser.lastName;
     token.roles = dbUser.roles;
+    token.temperatureUnit = dbUser.temperatureUnit;
   }
 }
 
@@ -205,6 +208,7 @@ async function buildSessionUser(
   const tokenFirstName = token.firstName as string | undefined;
   const tokenLastName = token.lastName as string | undefined;
   const tokenRoles = token.roles as string[] | undefined;
+  const tokenTemperatureUnit = token.temperatureUnit as TemperatureUnit | undefined;
 
   let dbUser: GrillUser | null = null;
   if ((!tokenFirstName || !tokenLastName || !tokenRoles?.length) && email) {
@@ -219,11 +223,14 @@ async function buildSessionUser(
       : dbUser?.roles && dbUser.roles.length > 0
         ? dbUser.roles
         : ["USER"];
+  const temperatureUnit =
+    tokenTemperatureUnit ?? dbUser?.temperatureUnit ?? "CELSIUS";
 
   if (session.user) {
     if (firstName) session.user.firstName = firstName;
     if (lastName) session.user.lastName = lastName;
     session.user.roles = roles;
+    session.user.temperatureUnit = temperatureUnit;
 
     session.user.image = profileImageData ?? picture ?? session.user.image;
     if (profileImageData) {

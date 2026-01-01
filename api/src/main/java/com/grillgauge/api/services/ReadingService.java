@@ -2,6 +2,7 @@ package com.grillgauge.api.services;
 
 import com.grillgauge.api.domain.entitys.Probe;
 import com.grillgauge.api.domain.entitys.Reading;
+import com.grillgauge.api.domain.entitys.User;
 import com.grillgauge.api.domain.repositorys.ReadingRepository;
 import java.time.Instant;
 import java.util.List;
@@ -21,10 +22,15 @@ public class ReadingService {
 
   private final ReadingRepository readingRepository;
   private final DemoService demoService;
+  private final TemperatureConversionService temperatureConversionService;
 
-  public ReadingService(final ReadingRepository readingRepository, final DemoService demoService) {
+  public ReadingService(
+      final ReadingRepository readingRepository,
+      final DemoService demoService,
+      final TemperatureConversionService temperatureConversionService) {
     this.readingRepository = readingRepository;
     this.demoService = demoService;
+    this.temperatureConversionService = temperatureConversionService;
   }
 
   /**
@@ -111,6 +117,31 @@ public class ReadingService {
       throw new ResponseStatusException(HttpStatus.BAD_REQUEST, message);
     }
   }
+
+  /**
+   * Get readings for a probe between timestamps, converted to the user's preferred unit.
+   *
+   * @param probeId the probe ID
+   * @param start start timestamp ISO-8601
+   * @param end end timestamp ISO-8601
+   * @param unit preferred unit; defaults to Celsius when null
+   * @return list of lightweight views with converted temperatures
+   */
+  public List<ReadingView> getReadingsForProbeBetweenConverted(
+      Long probeId, String start, String end, User.UserTemperatureUnit unit) {
+    User.UserTemperatureUnit resolvedUnit = unit == null ? User.UserTemperatureUnit.CELSIUS : unit;
+
+    return getReadingsForProbeBetween(probeId, start, end).stream()
+        .map(
+            r ->
+                new ReadingView(
+                    r.getTimeStamp(),
+                    temperatureConversionService.toUserUnit(r.getCurrentTemp(), resolvedUnit)))
+        .toList();
+  }
+
+  /** Immutable view of a reading with converted temperature. */
+  public record ReadingView(Instant timestamp, Float temperature) {}
 
   private List<Reading> getDemoReadingsBetween(
       Long probeId, Instant startInstant, Instant endInstant) {

@@ -24,10 +24,7 @@ export default function Dashboard() {
       } w-full flex-1 flex flex-col p-6`}
     >
       <div className="container mx-auto px-4 py-4">
-        <PageHeader
-          leftTitle="Dashboard"
-          rightTitle="All temperatures shown in °F"
-        />
+        <PageHeader leftTitle="Dashboard" showTemperatureToggle />
         <DashboardPage authStatus={status} />
       </div>
     </div>

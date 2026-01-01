@@ -2,8 +2,9 @@
 
 import React, { useState } from "react";
 import { CheckIcon, EditIcon, ThermometerIcon } from "lucide-react";
-import { Probe } from "../types/types";
+import { Probe, TemperatureUnit } from "../types/types";
 import { useTheme } from "../providers/ThemeProvider";
+import { temperatureUnitSymbol } from "../utils/temperature";
 
 interface ProbeProps {
   readonly probe: Probe;
@@ -11,6 +12,7 @@ interface ProbeProps {
   onUpdateTargetTemp: (probeId: number, temp: number) => void;
   onUpdateName: (probeId: number, name: string) => void;
   onClick?: (probe: Probe) => void;
+  temperatureUnit: TemperatureUnit;
 }
 
 export function ProbeCard({
@@ -19,6 +21,7 @@ export function ProbeCard({
   onUpdateTargetTemp,
   onUpdateName,
   onClick,
+  temperatureUnit,
 }: Readonly<ProbeProps>) {
   // ** Theme **
   const { theme } = useTheme();
@@ -29,6 +32,7 @@ export function ProbeCard({
   const [tempName, setTempName] = useState(probe.name);
   const [isEditingTarget, setIsEditingTarget] = useState(false);
   const [tempTarget, setTempTarget] = useState(probe.targetTemp);
+  const unitSymbol = temperatureUnitSymbol(temperatureUnit);
 
   const progress = probe.connected
     ? Math.max(Math.round((probe.currentTemp / probe.targetTemp) * 100), 0)
@@ -188,7 +192,7 @@ export function ProbeCard({
               isDarkMode ? "text-gray-400" : "text-gray-500"
             }`}
           >
-            °F
+            °{unitSymbol}
           </span>
         </div>
         {probe.connected && (
@@ -199,7 +203,7 @@ export function ProbeCard({
           >
             {isOverTemp ? (
               <span className={isDarkMode ? "text-red-400" : "text-red-600"}>
-                Over temp at {probe.currentTemp}°F
+                Over temp at {probe.currentTemp}°{unitSymbol}
               </span>
             ) : isAtTemp ? (
               <span
@@ -214,7 +218,9 @@ export function ProbeCard({
                 ✓ Near target temperature
               </span>
             ) : (
-              <span>{deltaToTarget}°F to target</span>
+              <span>
+                {deltaToTarget}°{unitSymbol} to target
+              </span>
             )}
           </div>
         )}
@@ -286,7 +292,7 @@ export function ProbeCard({
                   isDarkMode ? "text-white" : "text-gray-900"
                 }`}
               >
-                {probe.targetTemp}°F
+                {probe.targetTemp}°{unitSymbol}
               </span>
               <button
                 onClick={(e) => {

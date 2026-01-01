@@ -35,6 +35,32 @@ public class UserService {
   }
 
   /**
+   * Update the temperature unit preference for the given user.
+   *
+   * @param email the email of the user to update
+   * @param temperatureUnit the desired temperature unit
+   * @return the updated User entity
+   * @throws ResponseStatusException with status 404 if no user is found for the given email
+   */
+  @Transactional
+  public User updateTemperatureUnit(
+      final String email, final User.UserTemperatureUnit temperatureUnit) {
+    User user =
+        userRepository
+            .findByEmail(email)
+            .orElseThrow(
+                () ->
+                    new ResponseStatusException(
+                        HttpStatus.NOT_FOUND, "No user found with for email: %s".formatted(email)));
+
+    User.UserTemperatureUnit resolvedUnit =
+        temperatureUnit == null ? User.UserTemperatureUnit.CELSIUS : temperatureUnit;
+    user.setTemperatureUnit(resolvedUnit);
+    userRepository.save(user);
+    return user;
+  }
+
+  /**
    * Delete the user with the given email.
    *
    * @param user the User entity containing the email to delete

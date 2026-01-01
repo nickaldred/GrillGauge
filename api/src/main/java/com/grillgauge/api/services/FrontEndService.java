@@ -2,6 +2,7 @@ package com.grillgauge.api.services;
 
 import com.grillgauge.api.domain.entitys.Hub;
 import com.grillgauge.api.domain.entitys.Probe;
+import com.grillgauge.api.domain.entitys.User;
 import com.grillgauge.api.domain.models.FrontEndHub;
 import com.grillgauge.api.domain.models.FrontEndProbe;
 import java.util.ArrayList;
@@ -19,12 +20,17 @@ public class FrontEndService {
   private final HubService hubService;
   private final ProbeService probeService;
   private final DemoService demoService;
+  private final TemperatureConversionService temperatureConversionService;
 
   public FrontEndService(
-      final HubService hubService, final ProbeService probeService, final DemoService demoService) {
+      final HubService hubService,
+      final ProbeService probeService,
+      final DemoService demoService,
+      final TemperatureConversionService temperatureConversionService) {
     this.hubService = hubService;
     this.probeService = probeService;
     this.demoService = demoService;
+    this.temperatureConversionService = temperatureConversionService;
   }
 
   /**
@@ -45,16 +51,27 @@ public class FrontEndService {
         hubs.stream()
             .map(
                 hub -> {
+                  User.UserTemperatureUnit temperatureUnit = User.resolveUnit(hub.getOwner());
+
                   List<FrontEndProbe> probes =
                       probeService.getProbesByHubId(hub.getId()).stream()
                           .map(
                               probe -> {
-                                Float currentTemp =
+                                Float currentTempCelsius =
                                     probeService.getCurrentTemperature(probe.getId());
+                                Float targetTempCelsius = probe.getTargetTemp();
+
+                                Float currentTemp =
+                                    temperatureConversionService.toUserUnit(
+                                        currentTempCelsius, temperatureUnit);
+                                Float targetTemp =
+                                    temperatureConversionService.toUserUnit(
+                                        targetTempCelsius, temperatureUnit);
+
                                 return new FrontEndProbe(
                                     probe.getId(),
                                     probe.getLocalId(),
-                                    probe.getTargetTemp(),
+                                    targetTemp,
                                     currentTemp,
                                     probe.getName(),
                                     probe.getColour(),
@@ -73,6 +90,25 @@ public class FrontEndService {
     if (hubs.getFirst().getOwner().getDemoHubEnabled().booleanValue()) {
       LOG.info("Adding demo hub for user ID: {}", email);
       FrontEndHub frontEndDemoHub = demoService.getDemoHub();
+      User.UserTemperatureUnit temperatureUnit = User.resolveUnit(hubs.getFirst().getOwner());
+
+      List<FrontEndProbe> convertedProbes =
+          frontEndDemoHub.getProbes().stream()
+              .map(
+                  probe -> {
+                    Float convertedCurrent =
+                        temperatureConversionService.toUserUnit(
+                            probe.getCurrentTemp(), temperatureUnit);
+                    Float convertedTarget =
+                        temperatureConversionService.toUserUnit(
+                            probe.getTargetTemp(), temperatureUnit);
+                    probe.setCurrentTemp(convertedCurrent);
+                    probe.setTargetTemp(convertedTarget);
+                    return probe;
+                  })
+              .toList();
+
+      frontEndDemoHub.setProbes(convertedProbes);
       dashboardHubs.add(0, frontEndDemoHub);
     }
 

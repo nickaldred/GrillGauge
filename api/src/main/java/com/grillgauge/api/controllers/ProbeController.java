@@ -1,11 +1,15 @@
 package com.grillgauge.api.controllers;
 
+import com.grillgauge.api.domain.entitys.User;
 import com.grillgauge.api.domain.models.FrontEndProbe;
 import com.grillgauge.api.services.ProbeService;
 import com.grillgauge.api.services.ReadingService;
+import com.grillgauge.api.services.UserService;
+import java.security.Principal;
 import java.time.Instant;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import org.springframework.lang.NonNull;
@@ -29,10 +33,15 @@ public class ProbeController {
 
   private final ReadingService readingService;
   private final ProbeService probeService;
+  private final UserService userService;
 
-  public ProbeController(final ReadingService readingService, final ProbeService probeService) {
+  public ProbeController(
+      final ReadingService readingService,
+      final ProbeService probeService,
+      final UserService userService) {
     this.readingService = readingService;
     this.probeService = probeService;
+    this.userService = userService;
   }
 
   /** Data Transfer Object for probe readings. */
@@ -50,15 +59,22 @@ public class ProbeController {
   @PreAuthorize(
       "@ownershipService.canAccessAllProbes(#probeIds, authentication.name) or hasRole('ADMIN')")
   public Map<Long, List<ReadingDto>> getReadingsForProbesBetween(
-      @RequestParam() Long[] probeIds, @RequestParam() String start, @RequestParam() String end) {
+      @RequestParam() Long[] probeIds,
+      @RequestParam() String start,
+      @RequestParam() String end,
+      final Principal principal) {
+
+    User.UserTemperatureUnit temperatureUnit = resolveUnit(principal);
 
     return Stream.of(probeIds)
         .collect(
             Collectors.toMap(
                 probeId -> probeId,
                 probeId ->
-                    readingService.getReadingsForProbeBetween(probeId, start, end).stream()
-                        .map(r -> new ReadingDto(r.getTimeStamp(), r.getCurrentTemp()))
+                    readingService
+                        .getReadingsForProbeBetweenConverted(probeId, start, end, temperatureUnit)
+                        .stream()
+                        .map(r -> new ReadingDto(r.timestamp(), r.temperature()))
                         .toList()));
   }
 
@@ -72,8 +88,7 @@ public class ProbeController {
   @PreAuthorize(
       "@ownershipService.canAccessProbe(#probe.id, authentication.name) or hasRole('ADMIN')")
   public FrontEndProbe updateProbe(@RequestBody FrontEndProbe probe) {
-    probeService.updateProbe(probe);
-    return probe;
+    return probeService.updateProbe(probe);
   }
 
   /**
@@ -115,5 +130,14 @@ public class ProbeController {
       "@ownershipService.canAccessProbe(#probeId, authentication.name) or hasRole('ADMIN')")
   public void deleteProbe(@NonNull @PathVariable Long probeId) {
     probeService.deleteProbe(probeId);
+  }
+
+  private User.UserTemperatureUnit resolveUnit(final Principal principal) {
+    if (principal == null) {
+      return User.UserTemperatureUnit.CELSIUS;
+    }
+
+    return Optional.ofNullable(userService.getUserByEmail(principal.getName()).getTemperatureUnit())
+        .orElse(User.UserTemperatureUnit.CELSIUS);
   }
 }

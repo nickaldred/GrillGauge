@@ -2,6 +2,8 @@ package com.grillgauge.api.domain.entitys;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
 import jakarta.persistence.Id;
 import jakarta.persistence.Table;
 import java.util.List;
@@ -38,6 +40,12 @@ public class User {
     ONE_MONTH
   }
 
+  /** User temperature unit preferences. */
+  public enum UserTemperatureUnit {
+    FAHRENHEIT,
+    CELSIUS
+  }
+
   @Id
   @Column(nullable = false, unique = true)
   @NonNull
@@ -52,11 +60,16 @@ public class User {
   @Column(nullable = false)
   private List<UserRole> roles;
 
+  @Enumerated(EnumType.STRING)
   @Column(nullable = false)
   private UserReadingExpiry readingExpiry = UserReadingExpiry.ONE_WEEK;
 
   @Column(nullable = false)
   private Boolean demoHubEnabled = false;
+
+  @Enumerated(EnumType.STRING)
+  @Column(nullable = false)
+  private UserTemperatureUnit temperatureUnit = UserTemperatureUnit.CELSIUS;
 
   /**
    * Constructor for User with default role USER.
@@ -70,5 +83,12 @@ public class User {
     this.firstName = firstName;
     this.lastName = lastName;
     this.roles = List.of(UserRole.USER);
+  }
+
+  public static UserTemperatureUnit resolveUnit(final User owner) {
+    if (owner == null || owner.getTemperatureUnit() == null) {
+      return User.UserTemperatureUnit.CELSIUS;
+    }
+    return owner.getTemperatureUnit();
   }
 }

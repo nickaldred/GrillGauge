@@ -2,16 +2,18 @@
 
 import { useEffect, useMemo, useState } from "react";
 import { useSession } from "next-auth/react";
-import { Hub, Reading } from "@/app/types/types";
+import { Hub, Reading, TemperatureUnit } from "@/app/types/types";
 import { BASE_URL } from "@/app/utils/envVars";
 import { getData } from "@/app/utils/requestUtils";
 import TemperatureTimeSeriesChart, {
   type TemperatureSeries,
 } from "./TemperatureTimeSeriesChart";
+import { temperatureUnitSymbol } from "@/app/utils/temperature";
 
 // Props for the HubChart component.
 interface HubChartProps {
   hub: Hub;
+  temperatureUnit: TemperatureUnit;
 }
 
 /**
@@ -21,12 +23,13 @@ interface HubChartProps {
  * @param hub The hub whose probes' readings are to be displayed.
  * @returns The HubChart component.
  */
-export default function HubChart({ hub }: HubChartProps) {
+export default function HubChart({ hub, temperatureUnit }: HubChartProps) {
   const { data: session } = useSession();
   // ** States **
   const [readings, setReadings] = useState<Record<string, Reading[]>>({});
   const [timeframe, setTimeframe] = useState<number>(60); // minutes, default = 1 hour
   const [loading, setLoading] = useState(false);
+  const unitSymbol = temperatureUnitSymbol(temperatureUnit);
 
   const probeIds = useMemo(
     () => hub.probes.map((probe) => probe.id),
@@ -63,7 +66,13 @@ export default function HubChart({ hub }: HubChartProps) {
       .then((data) => setReadings(data || {}))
       .catch((err) => console.error(err))
       .finally(() => setLoading(false));
-  }, [probeIdsKey, probeIds.length, timeframe, session?.apiToken]);
+  }, [
+    probeIdsKey,
+    probeIds.length,
+    timeframe,
+    session?.apiToken,
+    temperatureUnit,
+  ]);
 
   const series: TemperatureSeries[] = Object.entries(readings).map(
     ([probeId, probeReadings]) => {
@@ -71,7 +80,7 @@ export default function HubChart({ hub }: HubChartProps) {
       const displayName = probeIdToNameMap[numericId] || `Probe ${probeId}`;
       return {
         id: `probe-${probeId}`,
-        name: `${displayName} - Temperature (°F)`,
+        name: `${displayName} - Temperature (°${unitSymbol})`,
         colour: probeIdToColourMap[numericId],
         points: probeReadings.map((r) => ({
           time: new Date(r.timestamp).getTime(),
@@ -87,6 +96,7 @@ export default function HubChart({ hub }: HubChartProps) {
       timeframe={timeframe}
       onTimeframeChange={setTimeframe}
       loading={loading}
+      unitSymbol={unitSymbol}
     />
   );
 }

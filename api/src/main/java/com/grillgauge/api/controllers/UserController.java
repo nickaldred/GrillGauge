@@ -7,6 +7,7 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -59,5 +60,20 @@ public class UserController {
   @PreAuthorize("#email == authentication.name or hasRole('ADMIN')")
   public User getUserByEmail(@RequestParam final String email) {
     return userService.getUserByEmail(email);
+  }
+
+  /**
+   * Update a user's preferred temperature unit.
+   *
+   * @param email the user's email
+   * @param temperatureUnit the desired temperature unit
+   * @return the updated User entity
+   */
+  @PutMapping("/temperature-unit")
+  @PreAuthorize("#email == authentication.name or hasRole('ADMIN')")
+  public User updateTemperatureUnit(
+      @RequestParam final String email,
+      @RequestParam final User.UserTemperatureUnit temperatureUnit) {
+    return userService.updateTemperatureUnit(email, temperatureUnit);
   }
 }

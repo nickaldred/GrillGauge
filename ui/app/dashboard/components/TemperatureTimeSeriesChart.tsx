@@ -31,6 +31,7 @@ interface TemperatureTimeSeriesChartProps {
   timeframe: number; // minutes
   onTimeframeChange: (minutes: number) => void;
   loading: boolean;
+  unitSymbol: string;
 }
 
 const SLIDER_MIN = 5;
@@ -74,6 +75,7 @@ export default function TemperatureTimeSeriesChart({
   timeframe,
   onTimeframeChange,
   loading,
+  unitSymbol,
 }: TemperatureTimeSeriesChartProps) {
   // ** Theme **
   const { theme } = useTheme();
@@ -167,7 +169,7 @@ export default function TemperatureTimeSeriesChart({
                       : "text-blue-600 font-semibold ml-auto"
                   }
                 >
-                  {value.toFixed(1)}°F
+                  {value.toFixed(1)}°{unitSymbol}
                 </span>
               </div>
             );

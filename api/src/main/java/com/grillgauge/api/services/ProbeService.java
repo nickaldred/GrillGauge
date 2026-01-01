@@ -2,6 +2,7 @@ package com.grillgauge.api.services;
 
 import com.grillgauge.api.domain.entitys.Probe;
 import com.grillgauge.api.domain.entitys.Reading;
+import com.grillgauge.api.domain.entitys.User;
 import com.grillgauge.api.domain.models.FrontEndProbe;
 import com.grillgauge.api.domain.models.ProbeReading;
 import com.grillgauge.api.domain.repositorys.ProbeRepository;
@@ -25,10 +26,15 @@ public class ProbeService {
 
   private ReadingService readingService;
   private ProbeRepository probeRepository;
+  private final TemperatureConversionService temperatureConversionService;
 
-  public ProbeService(final ProbeRepository probeRepository, final ReadingService readingService) {
+  public ProbeService(
+      final ProbeRepository probeRepository,
+      final ReadingService readingService,
+      final TemperatureConversionService temperatureConversionService) {
     this.probeRepository = probeRepository;
     this.readingService = readingService;
+    this.temperatureConversionService = temperatureConversionService;
   }
 
   /**
@@ -146,7 +152,7 @@ public class ProbeService {
    *
    * @param frontEndProbe the FrontEndProbe containing updated probe data.
    */
-  public void updateProbe(final FrontEndProbe frontEndProbe) {
+  public FrontEndProbe updateProbe(final FrontEndProbe frontEndProbe) {
     LOG.info("Updating probe with ID: {}", frontEndProbe.getId());
     Probe probe =
         probeRepository
@@ -157,13 +163,21 @@ public class ProbeService {
                         HttpStatus.NOT_FOUND,
                         "No probe found for probe ID: %s".formatted(frontEndProbe.getId())));
 
+    User owner = probe.getOwner();
+    User.UserTemperatureUnit unit = User.resolveUnit(owner);
+
     probe.setName(frontEndProbe.getName());
-    probe.setTargetTemp(frontEndProbe.getTargetTemp());
+    Float targetTempCelsius =
+        temperatureConversionService.toCelsiusFromUser(frontEndProbe.getTargetTemp(), unit);
+    probe.setTargetTemp(targetTempCelsius);
     probe.setColour(frontEndProbe.getColour());
     probe.setVisible(frontEndProbe.getVisible());
 
     probeRepository.save(probe);
     LOG.info("Successfully updated probe with ID: {}", frontEndProbe.getId());
+    frontEndProbe.setTargetTemp(
+        temperatureConversionService.toUserUnit(probe.getTargetTemp(), unit));
+    return frontEndProbe;
   }
 
   /**
@@ -184,10 +198,13 @@ public class ProbeService {
                         HttpStatus.NOT_FOUND,
                         "No probe found for probe ID: %s".formatted(probeId)));
 
-    probe.setTargetTemp(targetTemp);
+    User owner = probe.getOwner();
+    User.UserTemperatureUnit unit = User.resolveUnit(owner);
+    Float targetTempCelsius = temperatureConversionService.toCelsiusFromUser(targetTemp, unit);
+    probe.setTargetTemp(targetTempCelsius);
     probeRepository.save(probe);
     LOG.info("Successfully updated target temperature for probe ID: {} to {}", probeId, targetTemp);
-    return targetTemp;
+    return temperatureConversionService.toUserUnit(probe.getTargetTemp(), unit);
   }
 
   /**

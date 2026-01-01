@@ -1,5 +1,7 @@
 // The types used throughout the application.
 
+export type TemperatureUnit = "CELSIUS" | "FAHRENHEIT";
+
 /**
  * Represents a temperature probe connected to a hub.
  */
@@ -26,6 +28,7 @@ export type User = {
   email: string;
   roles: ("USER" | "ADMIN")[];
   demoHubEnabled?: boolean;
+  temperatureUnit?: TemperatureUnit;
 };
 
 /**

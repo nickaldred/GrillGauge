@@ -107,10 +107,10 @@ public class DemoService {
 
   /** Initialises the demo probes with predefined settings. */
   private void initialiseProbes() {
-    registerProbe(-101L, 1, "Demo Probe 1", "#ef4444", 225f, 205f, 18d, 0.0d);
-    registerProbe(-102L, 2, "Demo Probe 2", "#f97316", 165f, 155f, 14d, Math.PI / 3);
-    registerProbe(-103L, 3, "Demo Probe 3", "#22c55e", 135f, 130f, 12d, 2 * Math.PI / 3);
-    registerProbe(-104L, 4, "Demo Probe 4", "#3b82f6", 200f, 190f, 16d, Math.PI);
+    registerProbe(-101L, 1, "Demo Probe 1", "#ef4444", 165f, 100f, 18d, 0.0d);
+    registerProbe(-102L, 2, "Demo Probe 2", "#f97316", 165f, 120f, 14d, Math.PI / 3);
+    registerProbe(-103L, 3, "Demo Probe 3", "#22c55e", 135f, 90f, 12d, 2 * Math.PI / 3);
+    registerProbe(-104L, 4, "Demo Probe 4", "#3b82f6", 180f, 100f, 16d, Math.PI);
   }
 
   /**

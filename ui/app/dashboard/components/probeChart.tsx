@@ -3,23 +3,29 @@
 import { useEffect, useState } from "react";
 import { useSession } from "next-auth/react";
 import { BASE_URL } from "@/app/utils/envVars";
-import { Probe, Reading } from "@/app/types/types";
+import { Probe, Reading, TemperatureUnit } from "@/app/types/types";
 import { getData } from "@/app/utils/requestUtils";
 import TemperatureTimeSeriesChart, {
   type TemperatureSeries,
 } from "./TemperatureTimeSeriesChart";
+import { temperatureUnitSymbol } from "@/app/utils/temperature";
 
 // Props for the ProbeChart component.
 interface ProbeChartProps {
   probe: Probe;
+  temperatureUnit: TemperatureUnit;
 }
 
-export default function ProbeChart({ probe }: ProbeChartProps) {
+export default function ProbeChart({
+  probe,
+  temperatureUnit,
+}: ProbeChartProps) {
   const { data: session } = useSession();
   // ** States **
   const [readings, setReadings] = useState<Reading[]>([]);
   const [timeframe, setTimeframe] = useState<number>(60); // minutes, default = 1 hour
   const [loading, setLoading] = useState(false);
+  const unitSymbol = temperatureUnitSymbol(temperatureUnit);
 
   // ** Fetch Readings **
   useEffect(() => {
@@ -39,11 +45,11 @@ export default function ProbeChart({ probe }: ProbeChartProps) {
       .then((data) => setReadings(data[probe.id] || []))
       .catch((err) => console.error(err))
       .finally(() => setLoading(false));
-  }, [probe.id, timeframe, session?.apiToken]);
+  }, [probe.id, timeframe, session?.apiToken, temperatureUnit]);
   const series: TemperatureSeries[] = [
     {
       id: `probe-${probe.id}`,
-      name: "Temperature (°F)",
+      name: `Temperature (°${unitSymbol})`,
       colour: probe.colour,
       points: readings.map((r) => ({
         time: new Date(r.timestamp).getTime(),
@@ -58,6 +64,7 @@ export default function ProbeChart({ probe }: ProbeChartProps) {
       timeframe={timeframe}
       onTimeframeChange={setTimeframe}
       loading={loading}
+      unitSymbol={unitSymbol}
     />
   );
 }
