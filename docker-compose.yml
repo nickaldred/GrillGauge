@@ -31,6 +31,7 @@ services:
       - JWT_SECRET=${JWT_SECRET}
       - AUTH_TRUE_HOST=true
       - AUTH_URL=http://localhost:3000
+      - DEV_WARNING_ENABLED=true
     depends_on:
       - grill-gauge-api
     networks:

@@ -4,6 +4,7 @@ import com.grillgauge.api.domain.entitys.Hub;
 import com.grillgauge.api.domain.models.FrontEndHub;
 import com.grillgauge.api.services.HubService;
 import org.springframework.http.HttpStatus;
+import org.springframework.lang.NonNull;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -74,7 +75,7 @@ public class HubController {
    */
   @PutMapping()
   @PreAuthorize("@ownershipService.canAccessHub(#hub.id, authentication.name) or hasRole('ADMIN')")
-  public FrontEndHub updateHub(@RequestBody FrontEndHub hub) {
+  public FrontEndHub updateHub(@NonNull @RequestBody FrontEndHub hub) {
     return this.hubService.updateHub(hub);
   }
 }

@@ -8,6 +8,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
+import org.springframework.lang.NonNull;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -112,7 +113,7 @@ public class ProbeController {
   @DeleteMapping("/{probeId}")
   @PreAuthorize(
       "@ownershipService.canAccessProbe(#probeId, authentication.name) or hasRole('ADMIN')")
-  public void deleteProbe(@PathVariable Long probeId) {
+  public void deleteProbe(@NonNull @PathVariable Long probeId) {
     probeService.deleteProbe(probeId);
   }
 }

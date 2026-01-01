@@ -1,5 +1,5 @@
 "use client";
-import React, { useEffect } from "react";
+import React, { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import {
   ThermometerIcon,
@@ -9,6 +9,7 @@ import {
 } from "lucide-react";
 import { useTheme } from "../providers/ThemeProvider";
 import { useSession } from "next-auth/react";
+import { DEV_WARNING_ENABLED } from "../utils/envVars";
 
 export default function LandingPage() {
   // ** Theme **
@@ -18,6 +19,31 @@ export default function LandingPage() {
   // ** Session & Router **
   const { status } = useSession();
   const router = useRouter();
+
+  // ** Dev Warning **
+  const [showDevWarning, setShowDevWarning] = useState(false);
+
+  useEffect(() => {
+    if (!DEV_WARNING_ENABLED) return;
+    const acknowledged = localStorage.getItem("devWarningAcknowledged");
+    setShowDevWarning(!acknowledged);
+  }, []);
+
+  useEffect(() => {
+    if (!DEV_WARNING_ENABLED) return;
+    const prevOverflow = document.body.style.overflow;
+    if (showDevWarning) {
+      document.body.style.overflow = "hidden";
+    }
+    return () => {
+      document.body.style.overflow = prevOverflow;
+    };
+  }, [showDevWarning]);
+
+  const handleAcknowledge = () => {
+    localStorage.setItem("devWarningAcknowledged", "true");
+    setShowDevWarning(false);
+  };
 
   // Redirect to dashboard if authenticated
   useEffect(() => {
@@ -57,6 +83,64 @@ export default function LandingPage() {
         isDarkMode ? "bg-gray-900" : "bg-gray-50"
       }`}
     >
+      {DEV_WARNING_ENABLED && showDevWarning && (
+        <div className="fixed inset-0 z-[70] flex items-center justify-center px-6 py-10 bg-black/70 backdrop-blur-md">
+          <div
+            className={`max-w-xl w-full rounded-2xl border shadow-2xl p-8 space-y-6 ${
+              isDarkMode
+                ? "bg-gray-900 border-gray-800 text-white"
+                : "bg-white border-gray-200 text-gray-900"
+            }`}
+          >
+            <div className="flex items-center gap-3">
+              <div
+                className={`w-12 h-12 rounded-xl flex items-center justify-center ${
+                  isDarkMode
+                    ? "bg-gradient-to-br from-orange-500 to-red-600"
+                    : "bg-gradient-to-br from-orange-400 to-red-500"
+                }`}
+              >
+                <FlameIcon size={26} className="text-white" />
+              </div>
+              <div>
+                <p className="text-sm font-semibold text-orange-500 uppercase tracking-[0.12em]">
+                  Development Notice
+                </p>
+                <h3 className="text-2xl font-bold">
+                  Heads up: work in progress
+                </h3>
+              </div>
+            </div>
+            <div
+              className={`leading-relaxed ${
+                isDarkMode ? "text-gray-300" : "text-gray-700"
+              }`}
+            >
+              <p>
+                Grill Gauge is currently in active development. The experience
+                and data you see today may change. Please avoid entering
+                personal or sensitive information while we finish hardening the
+                platform.
+              </p>
+              <p className="mt-3">
+                By selecting “Continue”, you understand this is a preview build.
+              </p>
+            </div>
+            <div className="flex flex-col sm:flex-row sm:items-center sm:justify-end gap-3">
+              <button
+                onClick={handleAcknowledge}
+                className={`w-full sm:w-auto px-5 py-3 rounded-lg font-semibold transition-all cursor-pointer shadow-lg ${
+                  isDarkMode
+                    ? "bg-gradient-to-r from-orange-500 to-red-600 text-white hover:from-orange-600 hover:to-red-700"
+                    : "bg-gradient-to-r from-orange-400 to-red-500 text-white hover:from-orange-500 hover:to-red-600"
+                }`}
+              >
+                Continue to site
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
       <nav
         className={`fixed top-0 left-0 right-0 z-50 backdrop-blur-md ${
           isDarkMode
