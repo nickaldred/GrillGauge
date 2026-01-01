@@ -12,6 +12,7 @@ import { useTheme } from "@/app/providers/ThemeProvider";
 import { getData, putRequest } from "@/app/utils/requestUtils";
 import { BASE_URL } from "@/app/utils/envVars";
 import { LoadingState } from "../../components/LoadingState";
+import { DemoHubBanner } from "./DemoHubBanner";
 
 // ** Props **
 type DashboardPageProps = {
@@ -176,14 +177,20 @@ export function DashboardPage({ authStatus }: DashboardPageProps) {
     setSelectedHub(null);
   };
 
+  const visibleHubs = hubs?.filter((hub) => hub.visible) ?? [];
+  const hasDemoHub =
+    hubs?.some((h) => h.name === "Demo Hub" || h.id < 0) ?? false;
+
   // Single loading state covers both auth resolving and hubs fetch.
   if (authStatus !== "authenticated" || !hubs)
     return <LoadingState message="Loading dashboard" />;
 
   return (
     <main className="p-6">
+      <DemoHubBanner enabled={hasDemoHub} isDarkMode={isDarkMode} />
+
       <div className="space-y-8">
-        {hubs.length === 0 ? (
+        {visibleHubs.length === 0 ? (
           <div
             className={`${
               isDarkMode
@@ -224,9 +231,9 @@ export function DashboardPage({ authStatus }: DashboardPageProps) {
             </div>
           </div>
         ) : (
-          hubs
-            .filter((hub) => hub.visible)
-            .map((hub) => (
+          visibleHubs.map((hub) => {
+            const isDemo = hub.id < 0 || hub.name === "Demo Hub";
+            return (
               <div key={hub.id} className="mb-10">
                 <div className="mb-4 flex flex-wrap items-center gap-3">
                   <h2
@@ -251,8 +258,10 @@ export function DashboardPage({ authStatus }: DashboardPageProps) {
                   </span>
                   <button
                     type="button"
-                    onClick={() => hub.connected && openHubModal(hub)}
-                    disabled={!hub.connected}
+                    onClick={() =>
+                      hub.connected && !isDemo && openHubModal(hub)
+                    }
+                    disabled={!hub.connected || isDemo}
                     className={`inline-flex items-center px-3 py-1.5 rounded-md text-sm font-medium focus:outline-none focus:ring-2 focus:ring-offset-2 transition-colors ${
                       hub.connected
                         ? isDarkMode
@@ -262,7 +271,7 @@ export function DashboardPage({ authStatus }: DashboardPageProps) {
                         ? "bg-gray-800 text-gray-500 border border-gray-700 opacity-60 cursor-not-allowed focus:ring-transparent"
                         : "bg-gray-200 text-gray-500 border border-gray-300 opacity-60 cursor-not-allowed focus:ring-transparent"
                     }`}
-                    aria-disabled={!hub.connected}
+                    aria-disabled={!hub.connected || isDemo}
                   >
                     View hub graph
                   </button>
@@ -285,7 +294,8 @@ export function DashboardPage({ authStatus }: DashboardPageProps) {
                     ))}
                 </div>
               </div>
-            ))
+            );
+          })
         )}
       </div>
 

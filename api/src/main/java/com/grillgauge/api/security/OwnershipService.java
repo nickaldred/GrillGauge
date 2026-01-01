@@ -56,6 +56,9 @@ public class OwnershipService {
   public boolean canAccessAllProbes(Long[] probeIds, String email) {
     if (probeIds == null || probeIds.length == 0 || email == null || email.isBlank()) {
       return false;
+    } else if (List.of(probeIds).stream().allMatch(i -> i < 0)) {
+      // Demo probes are accessible to all users
+      return true;
     }
     List<Long> ids = Arrays.asList(probeIds);
     long ownedCount = probeRepository.countByIdInAndOwnerEmail(ids, email);

@@ -34,6 +34,10 @@ export function ProbeCard({
     ? Math.max(Math.round((probe.currentTemp / probe.targetTemp) * 100), 0)
     : 0;
 
+  const deltaToTarget = Math.max(probe.targetTemp - probe.currentTemp, 0);
+  const isOverTemp = probe.currentTemp > probe.targetTemp;
+  const isAtTemp = !isOverTemp && progress >= 98;
+
   const handleSaveName = () => {
     onUpdateName(probe.id, tempName);
     setIsEditingName(false);
@@ -193,14 +197,24 @@ export function ProbeCard({
               isDarkMode ? "text-gray-400" : "text-gray-500"
             }`}
           >
-            {progress >= 90 ? (
+            {isOverTemp ? (
+              <span className={isDarkMode ? "text-red-400" : "text-red-600"}>
+                Over temp at {probe.currentTemp}°F
+              </span>
+            ) : isAtTemp ? (
               <span
                 className={isDarkMode ? "text-green-400" : "text-green-600"}
+              >
+                ✓ At target temperature
+              </span>
+            ) : progress >= 90 ? (
+              <span
+                className={isDarkMode ? "text-yellow-400" : "text-yellow-600"}
               >
                 ✓ Near target temperature
               </span>
             ) : (
-              <span>{probe.targetTemp - probe.currentTemp}°F to target</span>
+              <span>{deltaToTarget}°F to target</span>
             )}
           </div>
         )}

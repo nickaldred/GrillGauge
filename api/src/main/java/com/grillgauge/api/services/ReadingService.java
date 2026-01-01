@@ -19,10 +19,12 @@ public class ReadingService {
 
   private static final Logger LOG = LoggerFactory.getLogger(ReadingService.class);
 
-  private ReadingRepository readingRepository;
+  private final ReadingRepository readingRepository;
+  private final DemoService demoService;
 
-  public ReadingService(final ReadingRepository readingRepository) {
+  public ReadingService(final ReadingRepository readingRepository, final DemoService demoService) {
     this.readingRepository = readingRepository;
+    this.demoService = demoService;
   }
 
   /**
@@ -93,11 +95,14 @@ public class ReadingService {
   public List<Reading> getReadingsForProbeBetween(Long probeId, String start, String end) {
     LOG.info("Getting readings for probeID: {}, between: {} - {}", probeId, start, end);
     try {
-      List<Reading> probeReadings =
-          readingRepository.findByProbe_IdAndTimeStampBetweenOrderByTimeStampAsc(
-              probeId, Instant.parse(start), Instant.parse(end));
-      LOG.info("Successfully got {} readings for probeID: {}", probeReadings.size(), probeId);
-      return probeReadings;
+      Instant startInstant = Instant.parse(start);
+      Instant endInstant = Instant.parse(end);
+
+      if (probeId < 0) {
+        return getDemoReadingsBetween(probeId, startInstant, endInstant);
+      }
+
+      return getRealReadingsBetween(probeId, startInstant, endInstant);
     } catch (Exception e) {
       String message =
           "Invalid date format for start: %s or end: %s, please use ISO 8601 format."
@@ -105,5 +110,24 @@ public class ReadingService {
       LOG.error(message);
       throw new ResponseStatusException(HttpStatus.BAD_REQUEST, message);
     }
+  }
+
+  private List<Reading> getDemoReadingsBetween(
+      Long probeId, Instant startInstant, Instant endInstant) {
+    List<Reading> demoReadings =
+        demoService.getReadingsForProbeBetween(probeId, startInstant, endInstant).stream()
+            .map(r -> new Reading(null, null, r.timestamp(), r.timestamp(), r.temperature()))
+            .toList();
+    LOG.info("Successfully got {} demo readings for probeID: {}", demoReadings.size(), probeId);
+    return demoReadings;
+  }
+
+  private List<Reading> getRealReadingsBetween(
+      Long probeId, Instant startInstant, Instant endInstant) {
+    List<Reading> probeReadings =
+        readingRepository.findByProbe_IdAndTimeStampBetweenOrderByTimeStampAsc(
+            probeId, startInstant, endInstant);
+    LOG.info("Successfully got {} readings for probeID: {}", probeReadings.size(), probeId);
+    return probeReadings;
   }
 }

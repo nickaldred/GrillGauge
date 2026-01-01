@@ -3,8 +3,13 @@
 import React, { useState, useEffect } from "react";
 import { useSession } from "next-auth/react";
 import { motion, AnimatePresence } from "framer-motion";
-import { Hub } from "@/app/types/types";
-import { deleteRequest, getData, putRequest } from "@/app/utils/requestUtils";
+import { Hub, User } from "@/app/types/types";
+import {
+  deleteRequest,
+  getData,
+  postRequest,
+  putRequest,
+} from "@/app/utils/requestUtils";
 import { useTheme } from "@/app/providers/ThemeProvider";
 import {
   PlusIcon,
@@ -29,6 +34,7 @@ export function HubManagement() {
 
   const [hubs, setHubs] = useState<Hub[] | null>(null);
   const [expandedHubId, setExpandedHubId] = useState<number | null>(null);
+  const [userProfile, setUserProfile] = useState<User | null>(null);
 
   const [isDeleteHubModalOpen, setIsDeleteHubModalOpen] = useState(false);
   const [hubToDelete, setHubToDelete] = useState<Hub | null>(null);
@@ -36,6 +42,9 @@ export function HubManagement() {
   const [isEditHubModalOpen, setIsEditHubModalOpen] = useState(false);
   const [hubToEdit, setHubToEdit] = useState<Hub | null>(null);
   const [isRegisterModalOpen, setIsRegisterModalOpen] = useState(false);
+
+  const [isDemoHubEnabled, setIsDemoHubEnabled] = useState(false);
+  const [isDemoHubInfoOpen, setIsDemoHubInfoOpen] = useState(false);
 
   // Fetch hubs
   useEffect(() => {
@@ -51,6 +60,18 @@ export function HubManagement() {
     fetchData();
     const interval = setInterval(fetchData, 30000);
     return () => clearInterval(interval);
+  }, [user?.email, session?.apiToken]);
+
+  // Load demo hub flag from the backend user profile
+  useEffect(() => {
+    if (!user?.email) return;
+    const token = session?.apiToken as string | undefined;
+    getData<User>(`${BASE_URL}/user?email=${user.email}`, token)
+      .then((u) => {
+        setUserProfile(u);
+        setIsDemoHubEnabled(!!u.demoHubEnabled);
+      })
+      .catch(console.error);
   }, [user?.email, session?.apiToken]);
 
   // Toggle expandable row
@@ -127,6 +148,30 @@ export function HubManagement() {
     }
   };
 
+  /**
+   * Handles toggling the demo hub feature.
+   */
+  const handleToggleDemoHub = () => {
+    if (!userProfile) return;
+
+    const next = !isDemoHubEnabled;
+    const updatedUser: User = { ...userProfile, demoHubEnabled: next };
+    const token = session?.apiToken as string | undefined;
+
+    postRequest(`${BASE_URL}/user`, updatedUser, token)
+      .then(() => {
+        setUserProfile(updatedUser);
+        setIsDemoHubEnabled(next);
+        if (next) setIsDemoHubInfoOpen(true);
+        if (user?.email) {
+          getData<Hub[]>(`${BASE_URL}/ui/hubs?email=${user.email}`, token)
+            .then(setHubs)
+            .catch(console.error);
+        }
+      })
+      .catch(console.error);
+  };
+
   return (
     <div
       className={`rounded-xl shadow-lg p-5 mb-6 border ${
@@ -141,14 +186,47 @@ export function HubManagement() {
         >
           Hub Management
         </h1>
+        <div className="flex items-center gap-4">
+          <div className="flex items-center gap-2">
+            <span
+              className={`text-sm ${
+                isDarkMode ? "text-gray-300" : "text-gray-700"
+              }`}
+            >
+              Demo hub
+            </span>
+            <button
+              type="button"
+              onClick={handleToggleDemoHub}
+              disabled={!userProfile}
+              className={`relative inline-flex h-6 w-11 items-center rounded-full border transition-colors cursor-pointer focus:outline-none focus:ring-2 focus:ring-offset-2 ${
+                isDarkMode
+                  ? isDemoHubEnabled
+                    ? "bg-green-500 border-green-400 focus:ring-green-400"
+                    : "bg-gray-700 border-gray-500 focus:ring-gray-400"
+                  : isDemoHubEnabled
+                  ? "bg-green-500 border-green-500 focus:ring-green-400"
+                  : "bg-gray-200 border-gray-300 focus:ring-gray-400"
+              }`}
+              aria-pressed={isDemoHubEnabled}
+              aria-label="Toggle demo hub"
+            >
+              <span
+                className={`inline-block h-4 w-4 transform rounded-full bg-white shadow transition-transform ${
+                  isDemoHubEnabled ? "translate-x-5" : "translate-x-1"
+                }`}
+              />
+            </button>
+          </div>
 
-        <button
-          className="px-4 py-2 bg-red-600 text-white rounded-lg flex items-center cursor-pointer hover:bg-red-700"
-          onClick={() => setIsRegisterModalOpen(true)}
-        >
-          <PlusIcon size={18} className="mr-2" />
-          Add New Hub
-        </button>
+          <button
+            className="px-4 py-2 bg-red-600 text-white rounded-lg flex items-center cursor-pointer hover:bg-red-700"
+            onClick={() => setIsRegisterModalOpen(true)}
+          >
+            <PlusIcon size={18} className="mr-2" />
+            Add New Hub
+          </button>
+        </div>
       </div>
 
       {!hubs || hubs.length === 0 ? (
@@ -372,6 +450,29 @@ export function HubManagement() {
           onSubmit={handleSubmitEditHub}
           onCancel={() => setIsEditHubModalOpen(false)}
         />
+      </Modal>
+
+      {/* Demo Hub Info Modal */}
+      <Modal
+        open={isDemoHubInfoOpen}
+        onClose={() => setIsDemoHubInfoOpen(false)}
+        title="Demo Hub Enabled"
+      >
+        <div className="space-y-4">
+          <p className={isDarkMode ? "text-gray-300" : "text-gray-700"}>
+            The demo hub shows <span className="font-semibold">mock data</span>{" "}
+            on your dashboard and does not represent a real physical hub. Use it
+            to explore the app while you set up a real device.
+          </p>
+          <div className="flex justify-end">
+            <button
+              onClick={() => setIsDemoHubInfoOpen(false)}
+              className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 cursor-pointer"
+            >
+              Got it
+            </button>
+          </div>
+        </div>
       </Modal>
 
       <RegisterHubModal

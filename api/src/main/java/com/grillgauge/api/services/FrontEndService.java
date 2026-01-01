@@ -4,7 +4,9 @@ import com.grillgauge.api.domain.entitys.Hub;
 import com.grillgauge.api.domain.entitys.Probe;
 import com.grillgauge.api.domain.models.FrontEndHub;
 import com.grillgauge.api.domain.models.FrontEndProbe;
+import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
@@ -14,12 +16,15 @@ import org.springframework.stereotype.Service;
 public class FrontEndService {
   private static final Logger LOG = LoggerFactory.getLogger(FrontEndService.class);
 
-  private HubService hubService;
-  private ProbeService probeService;
+  private final HubService hubService;
+  private final ProbeService probeService;
+  private final DemoService demoService;
 
-  public FrontEndService(HubService hubService, ProbeService probeService) {
+  public FrontEndService(
+      final HubService hubService, final ProbeService probeService, final DemoService demoService) {
     this.hubService = hubService;
     this.probeService = probeService;
+    this.demoService = demoService;
   }
 
   /**
@@ -31,6 +36,10 @@ public class FrontEndService {
   public List<FrontEndHub> getHubs(final String email) {
     LOG.info("Getting hubs for user ID: {}", email);
     List<Hub> hubs = hubService.getHubsByEmail(email);
+    if (hubs.isEmpty()) {
+      LOG.info("No hubs found for user ID: {}", email);
+      return List.of();
+    }
 
     List<FrontEndHub> dashboardHubs =
         hubs.stream()
@@ -58,7 +67,14 @@ public class FrontEndService {
                   return new FrontEndHub(
                       hub.getId(), hub.getName(), probes, connected, hub.getVisible());
                 })
-            .toList();
+            .collect(Collectors.toCollection(ArrayList::new));
+
+    // Add demo hub if enabled for user
+    if (hubs.getFirst().getOwner().getDemoHubEnabled().booleanValue()) {
+      LOG.info("Adding demo hub for user ID: {}", email);
+      FrontEndHub frontEndDemoHub = demoService.getDemoHub();
+      dashboardHubs.add(0, frontEndDemoHub);
+    }
 
     LOG.info("Successfully got {} hubs for user ID: {}", dashboardHubs.size(), email);
     return dashboardHubs;

@@ -25,6 +25,7 @@ export type User = {
   lastName: string;
   email: string;
   roles: ("USER" | "ADMIN")[];
+  demoHubEnabled?: boolean;
 };
 
 /**

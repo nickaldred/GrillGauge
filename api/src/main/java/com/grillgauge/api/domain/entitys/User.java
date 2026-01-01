@@ -55,6 +55,9 @@ public class User {
   @Column(nullable = false)
   private UserReadingExpiry readingExpiry = UserReadingExpiry.ONE_WEEK;
 
+  @Column(nullable = false)
+  private Boolean demoHubEnabled = false;
+
   /**
    * Constructor for User with default role USER.
    *
