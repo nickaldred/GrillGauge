@@ -17,7 +17,7 @@ public class HubUserDetails implements UserDetails {
     this.hubName = hubName == null ? "hub-" + hubId : hubName;
   }
 
-  public Long getHubId() {
+  public long getHubId() {
     return hubId;
   }
 

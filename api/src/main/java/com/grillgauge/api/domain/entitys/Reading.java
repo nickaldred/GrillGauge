@@ -1,5 +1,6 @@
 package com.grillgauge.api.domain.entitys;
 
+import com.grillgauge.api.domain.entitys.User.UserReadingExpiry;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.FetchType;
@@ -36,11 +37,22 @@ public class Reading {
   private Instant timeStamp = Instant.now();
 
   @Column(nullable = false)
+  private Instant expiresAt;
+
+  @Column(nullable = false)
   private Float currentTemp;
 
-  public Reading(final Probe probe, final Float currentTemp) {
+  /**
+   * Constructor for Reading with current timestamp.
+   *
+   * @param probe The Probe associated with this Reading.
+   * @param currentTemp The current temperature recorded.
+   * @param expiresIn The user's reading expiry setting.
+   */
+  public Reading(final Probe probe, final Float currentTemp, final UserReadingExpiry expiresIn) {
     this.probe = probe;
     this.currentTemp = currentTemp;
+    this.expiresAt = calculateExpiry(this.timeStamp, expiresIn);
   }
 
   /**
@@ -49,10 +61,30 @@ public class Reading {
    * @param probe The Probe associated with this Reading.
    * @param currentTemp The current temperature recorded.
    * @param timeStamp The timestamp when the reading was taken.
+   * @param expiresIn The user's reading expiry setting.
    */
-  public Reading(final Probe probe, final Float currentTemp, final Instant timeStamp) {
+  public Reading(
+      final Probe probe,
+      final Float currentTemp,
+      final Instant timeStamp,
+      final UserReadingExpiry expiresIn) {
     this.probe = probe;
     this.currentTemp = currentTemp;
     this.timeStamp = timeStamp;
+    this.expiresAt = calculateExpiry(timeStamp, expiresIn);
+  }
+
+  /* Calculate the expiry time based on the reading timestamp and user's expiry setting. */
+  private Instant calculateExpiry(final Instant timeStamp, final UserReadingExpiry expiresIn) {
+    return switch (expiresIn) {
+      case ONE_HOUR -> timeStamp.plusSeconds(3600);
+      case SIX_HOURS -> timeStamp.plusSeconds(21600);
+      case TWELVE_HOURS -> timeStamp.plusSeconds(43200);
+      case ONE_DAY -> timeStamp.plusSeconds(86400);
+      case THREE_DAYS -> timeStamp.plusSeconds(259200);
+      case ONE_WEEK -> timeStamp.plusSeconds(604800);
+      case TWO_WEEKS -> timeStamp.plusSeconds(1209600);
+      case ONE_MONTH -> timeStamp.plusSeconds(2592000);
+    };
   }
 }

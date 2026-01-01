@@ -26,6 +26,18 @@ public class User {
     USER
   }
 
+  /** User reading expiry options. */
+  public enum UserReadingExpiry {
+    ONE_HOUR,
+    SIX_HOURS,
+    TWELVE_HOURS,
+    ONE_DAY,
+    THREE_DAYS,
+    ONE_WEEK,
+    TWO_WEEKS,
+    ONE_MONTH
+  }
+
   @Id
   @Column(nullable = false, unique = true)
   @NonNull
@@ -39,6 +51,9 @@ public class User {
 
   @Column(nullable = false)
   private List<UserRole> roles;
+
+  @Column(nullable = false)
+  private UserReadingExpiry readingExpiry = UserReadingExpiry.ONE_WEEK;
 
   /**
    * Constructor for User with default role USER.

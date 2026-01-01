@@ -76,22 +76,50 @@ public class DataLoader implements CommandLineRunner {
         requireNonNull(
             List.of(testProbe1, testProbe2, testProbe3, testProbe6, testProbe7, testProbe8)));
 
-    Reading testReading1 = new Reading(testProbe1, (float) 135, Instant.now().minusSeconds(300));
-    Reading testReading2 = new Reading(testProbe1, (float) 145, Instant.now().minusSeconds(200));
-    Reading testReading3 = new Reading(testProbe1, (float) 165, Instant.now().minusSeconds(100));
-    Reading testReading4 = new Reading(testProbe1, (float) 175, Instant.now());
-    Reading testReading5 = new Reading(testProbe2, (float) 135, Instant.now().minusSeconds(300));
-    Reading testReading6 = new Reading(testProbe2, (float) 135, Instant.now().minusSeconds(200));
-    Reading testReading7 = new Reading(testProbe2, (float) 140, Instant.now().minusSeconds(100));
-    Reading testReading8 = new Reading(testProbe2, (float) 150, Instant.now());
-    Reading testReading9 = new Reading(testProbe3, (float) 125, Instant.now().minusSeconds(300));
-    Reading testReading10 = new Reading(testProbe3, (float) 130, Instant.now().minusSeconds(200));
-    Reading testReading11 = new Reading(testProbe3, (float) 135, Instant.now().minusSeconds(100));
-    Reading testReading12 = new Reading(testProbe3, (float) 145, Instant.now());
-    Reading testReading13 = new Reading(testProbe8, (float) 125, Instant.now().minusSeconds(300));
-    Reading testReading14 = new Reading(testProbe8, (float) 135, Instant.now().minusSeconds(200));
-    Reading testReading15 = new Reading(testProbe8, (float) 140, Instant.now().minusSeconds(200));
-    Reading testReading16 = new Reading(testProbe8, (float) 145, Instant.now());
+    Reading testReading1 =
+        new Reading(
+            testProbe1, (float) 135, Instant.now().minusSeconds(300), testUser1.getReadingExpiry());
+    Reading testReading2 =
+        new Reading(
+            testProbe1, (float) 145, Instant.now().minusSeconds(200), testUser1.getReadingExpiry());
+    Reading testReading3 =
+        new Reading(
+            testProbe1, (float) 165, Instant.now().minusSeconds(100), testUser1.getReadingExpiry());
+    Reading testReading4 =
+        new Reading(testProbe1, (float) 175, Instant.now(), testUser1.getReadingExpiry());
+    Reading testReading5 =
+        new Reading(
+            testProbe2, (float) 135, Instant.now().minusSeconds(300), testUser1.getReadingExpiry());
+    Reading testReading6 =
+        new Reading(
+            testProbe2, (float) 135, Instant.now().minusSeconds(200), testUser1.getReadingExpiry());
+    Reading testReading7 =
+        new Reading(
+            testProbe2, (float) 140, Instant.now().minusSeconds(100), testUser1.getReadingExpiry());
+    Reading testReading8 =
+        new Reading(testProbe2, (float) 150, Instant.now(), testUser1.getReadingExpiry());
+    Reading testReading9 =
+        new Reading(
+            testProbe3, (float) 125, Instant.now().minusSeconds(300), testUser1.getReadingExpiry());
+    Reading testReading10 =
+        new Reading(
+            testProbe3, (float) 130, Instant.now().minusSeconds(200), testUser1.getReadingExpiry());
+    Reading testReading11 =
+        new Reading(
+            testProbe3, (float) 135, Instant.now().minusSeconds(100), testUser1.getReadingExpiry());
+    Reading testReading12 =
+        new Reading(testProbe3, (float) 145, Instant.now(), testUser1.getReadingExpiry());
+    Reading testReading13 =
+        new Reading(
+            testProbe8, (float) 125, Instant.now().minusSeconds(300), testUser1.getReadingExpiry());
+    Reading testReading14 =
+        new Reading(
+            testProbe8, (float) 135, Instant.now().minusSeconds(200), testUser1.getReadingExpiry());
+    Reading testReading15 =
+        new Reading(
+            testProbe8, (float) 140, Instant.now().minusSeconds(200), testUser1.getReadingExpiry());
+    Reading testReading16 =
+        new Reading(testProbe8, (float) 145, Instant.now(), testUser1.getReadingExpiry());
 
     readingRepository.saveAll(
         requireNonNull(

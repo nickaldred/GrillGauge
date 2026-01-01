@@ -1,16 +1,20 @@
 package com.grillgauge.api.services;
 
 import jakarta.annotation.PostConstruct;
+import java.io.File;
+import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.Reader;
 import java.io.StringReader;
 import java.io.StringWriter;
 import java.math.BigInteger;
+import java.nio.charset.StandardCharsets;
 import java.security.PrivateKey;
 import java.security.PublicKey;
 import java.security.SecureRandom;
 import java.security.cert.X509CRL;
 import java.security.cert.X509Certificate;
+import java.util.Base64;
 import java.util.Date;
 import org.bouncycastle.asn1.ASN1Integer;
 import org.bouncycastle.asn1.ASN1Set;
@@ -66,16 +70,70 @@ public class CertificateService {
   private long validityDays;
 
   @Value("${certificate.ca-cert}")
-  private String caCertPath;
+  private String caCert;
 
   @Value("${certificate.ca-key}")
-  private String caKeyPath;
+  private String caKey;
 
   @Value("${certificate.ca-key-passphrase:}")
   private String caKeyPassphrase;
 
   private X509Certificate caCertificate;
   private PrivateKey caPrivateKey;
+
+  /**
+   * Open a PEM source which can be a file path, a Base64-encoded string, or a raw PEM string.
+   *
+   * @param description Description of the PEM source (for error messages).
+   * @param source The PEM source string.
+   * @return A Reader for the PEM content.
+   * @throws CertificateServiceException if the source cannot be opened.
+   */
+  private Reader openPemSource(final String description, final String source)
+      throws CertificateServiceException {
+
+    if (source == null || source.isEmpty()) {
+      throw new CertificateServiceException(description + " source is not configured");
+    }
+
+    try {
+      File file = new File(source);
+      if (file.exists()) {
+        return new FileReader(file);
+      }
+
+      if (looksLikeBase64(source)) {
+        byte[] decoded = Base64.getMimeDecoder().decode(source);
+        return new StringReader(new String(decoded, StandardCharsets.UTF_8));
+      }
+
+      return new StringReader(source);
+
+    } catch (FileNotFoundException e) {
+      throw new CertificateServiceException(
+          "Failed to read " + description + " from provided source", e);
+    }
+  }
+
+  /**
+   * Heuristic check to see if a string looks like Base64-encoded data.
+   *
+   * @param value The string to check.
+   * @return true if the string looks like Base64, false otherwise.
+   */
+  private boolean looksLikeBase64(final String value) {
+    if (value == null || value.isEmpty()) {
+      return false;
+    }
+    if (value.contains("-----BEGIN")) {
+      return false;
+    }
+    String cleaned = value.replace("\n", "").replace("\r", "");
+    if (cleaned.length() % 4 != 0) {
+      return false;
+    }
+    return cleaned.matches("[A-Za-z0-9+/=]+");
+  }
 
   /**
    * Expose the loaded CA certificate for runtime checks (e.g. additional verification in
@@ -87,8 +145,8 @@ public class CertificateService {
 
   @PostConstruct
   private void init() throws CertificateServiceException {
-    this.caCertificate = loadCaCertificate(caCertPath);
-    this.caPrivateKey = loadCaPrivateKey(caKeyPath);
+    this.caCertificate = loadCaCertificate(caCert);
+    this.caPrivateKey = loadCaPrivateKey(caKey);
   }
 
   /** Custom runtime exception for CertificateService errors. */
@@ -120,7 +178,7 @@ public class CertificateService {
    * @return The loaded X509Certificate.
    */
   private X509Certificate loadCaCertificate(final String path) throws CertificateServiceException {
-    try (Reader reader = new FileReader(path);
+    try (Reader reader = openPemSource("CA certificate", path);
         PEMParser pemParser = new PEMParser(reader)) {
 
       Object obj = pemParser.readObject();
@@ -152,7 +210,7 @@ public class CertificateService {
    * @return The loaded PrivateKey.
    */
   private PrivateKey loadCaPrivateKey(final String path) throws CertificateServiceException {
-    try (Reader reader = new FileReader(path);
+    try (Reader reader = openPemSource("CA private key", path);
         PEMParser pemParser = new PEMParser(reader)) {
 
       Object obj = pemParser.readObject();

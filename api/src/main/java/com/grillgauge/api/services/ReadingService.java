@@ -56,7 +56,7 @@ public class ReadingService {
   @Transactional
   public Reading saveCurrentReading(final Probe probe, final float currentTemp) {
     LOG.debug("Saving current reading for probe ID: {}", probe.getId());
-    Reading reading = new Reading(probe, currentTemp);
+    Reading reading = new Reading(probe, currentTemp, probe.getOwner().getReadingExpiry());
     readingRepository.save(reading);
     LOG.debug("Successfully saved reading ID: {} for probe ID: {}", reading.getId(), probe.getId());
     return reading;

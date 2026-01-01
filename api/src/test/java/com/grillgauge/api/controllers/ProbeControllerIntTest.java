@@ -56,10 +56,30 @@ class ProbeControllerIntTest {
     testProbe = new Probe(1, testHub, testUser, (float) 200, "probe 1");
     probeRepository.save(testProbe);
 
-    Reading reading1 = new Reading(testProbe, (float) 180, Instant.parse("2024-01-01T10:00:00Z"));
-    Reading reading2 = new Reading(testProbe, (float) 180, Instant.parse("2024-01-01T11:00:00Z"));
-    Reading reading3 = new Reading(testProbe, (float) 180, Instant.parse("2024-01-01T12:00:00Z"));
-    Reading reading4 = new Reading(testProbe, (float) 180, Instant.parse("2024-01-01T12:30:00Z"));
+    Reading reading1 =
+        new Reading(
+            testProbe,
+            (float) 180,
+            Instant.parse("2024-01-01T10:00:00Z"),
+            testUser.getReadingExpiry());
+    Reading reading2 =
+        new Reading(
+            testProbe,
+            (float) 180,
+            Instant.parse("2024-01-01T11:00:00Z"),
+            testUser.getReadingExpiry());
+    Reading reading3 =
+        new Reading(
+            testProbe,
+            (float) 180,
+            Instant.parse("2024-01-01T12:00:00Z"),
+            testUser.getReadingExpiry());
+    Reading reading4 =
+        new Reading(
+            testProbe,
+            (float) 180,
+            Instant.parse("2024-01-01T12:30:00Z"),
+            testUser.getReadingExpiry());
 
     readings = List.of(reading1, reading2, reading3, reading4);
     readingRepository.saveAll(readings);
