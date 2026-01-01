@@ -7,6 +7,7 @@ import com.grillgauge.api.domain.models.FrontEndHub;
 import com.grillgauge.api.domain.models.FrontEndProbe;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -21,16 +22,19 @@ public class FrontEndService {
   private final ProbeService probeService;
   private final DemoService demoService;
   private final TemperatureConversionService temperatureConversionService;
+  private final UserService userService;
 
   public FrontEndService(
       final HubService hubService,
       final ProbeService probeService,
       final DemoService demoService,
-      final TemperatureConversionService temperatureConversionService) {
+      final TemperatureConversionService temperatureConversionService,
+      final UserService userService) {
     this.hubService = hubService;
     this.probeService = probeService;
     this.demoService = demoService;
     this.temperatureConversionService = temperatureConversionService;
+    this.userService = userService;
   }
 
   /**
@@ -42,10 +46,6 @@ public class FrontEndService {
   public List<FrontEndHub> getHubs(final String email) {
     LOG.info("Getting hubs for user ID: {}", email);
     List<Hub> hubs = hubService.getHubsByEmail(email);
-    if (hubs.isEmpty()) {
-      LOG.info("No hubs found for user ID: {}", email);
-      return List.of();
-    }
 
     List<FrontEndHub> dashboardHubs =
         hubs.stream()
@@ -87,10 +87,11 @@ public class FrontEndService {
             .collect(Collectors.toCollection(ArrayList::new));
 
     // Add demo hub if enabled for user
-    if (hubs.getFirst().getOwner().getDemoHubEnabled().booleanValue()) {
+    User user = userService.getUserByEmail(email);
+    if (demoEnabled(user)) {
       LOG.info("Adding demo hub for user ID: {}", email);
       FrontEndHub frontEndDemoHub = demoService.getDemoHub();
-      User.UserTemperatureUnit temperatureUnit = User.resolveUnit(hubs.getFirst().getOwner());
+      User.UserTemperatureUnit temperatureUnit = resolveUnit(user);
 
       List<FrontEndProbe> convertedProbes =
           frontEndDemoHub.getProbes().stream()
@@ -117,14 +118,47 @@ public class FrontEndService {
   }
 
   /**
-   * Get the list of default probe colours defined on the Probe entity.
-   *
-   * <p>This allows the UI to stay in sync with backend defaults without duplicating the list of hex
-   * values on the front-end.
+   * Get the list of default probe colours defined on the Probe entity. This allows the UI to stay
+   * in sync with backend defaults without duplicating the list of hex values on the front-end.
    *
    * @return immutable list of hex colour strings.
    */
   public List<String> getDefaultProbeColours() {
     return Probe.getDefaultColours();
+  }
+
+  /**
+   * Check if demo hub is enabled for the given user email.
+   *
+   * @param email user email
+   * @return true if demo hub is enabled, false otherwise.
+   */
+  private boolean demoEnabled(final User user) {
+    final boolean demoEnabled;
+    if (user == null) {
+      demoEnabled = false;
+    } else {
+      demoEnabled = Optional.ofNullable(user).map(User::getDemoHubEnabled).orElse(false);
+    }
+    return demoEnabled;
+  }
+
+  /**
+   * Resolve the user's temperature unit preference based on their email.
+   *
+   * @param email user email
+   * @return UserTemperatureUnit preference, defaults to CELSIUS if not found.
+   */
+  private User.UserTemperatureUnit resolveUnit(final User user) {
+    final User.UserTemperatureUnit unit;
+    if (user == null) {
+      unit = User.UserTemperatureUnit.CELSIUS;
+    } else {
+      unit =
+          Optional.ofNullable(user)
+              .map(User::getTemperatureUnit)
+              .orElse(User.UserTemperatureUnit.CELSIUS);
+    }
+    return unit;
   }
 }

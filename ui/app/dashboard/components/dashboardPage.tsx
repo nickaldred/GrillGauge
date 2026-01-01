@@ -266,10 +266,8 @@ export function DashboardPage({ authStatus }: DashboardPageProps) {
                   </span>
                   <button
                     type="button"
-                    onClick={() =>
-                      hub.connected && !isDemo && openHubModal(hub)
-                    }
-                    disabled={!hub.connected || isDemo}
+                    onClick={() => hub.connected && openHubModal(hub)}
+                    disabled={!hub.connected}
                     className={`inline-flex items-center px-3 py-1.5 rounded-md text-sm font-medium focus:outline-none focus:ring-2 focus:ring-offset-2 transition-colors ${
                       hub.connected
                         ? isDarkMode
@@ -279,7 +277,7 @@ export function DashboardPage({ authStatus }: DashboardPageProps) {
                         ? "bg-gray-800 text-gray-500 border border-gray-700 opacity-60 cursor-not-allowed focus:ring-transparent"
                         : "bg-gray-200 text-gray-500 border border-gray-300 opacity-60 cursor-not-allowed focus:ring-transparent"
                     }`}
-                    aria-disabled={!hub.connected || isDemo}
+                    aria-disabled={!hub.connected}
                   >
                     View hub graph
                   </button>
