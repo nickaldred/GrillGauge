@@ -35,6 +35,13 @@ public class ProbeController {
   private final ProbeService probeService;
   private final UserService userService;
 
+  /**
+   * The constructor for ProbeController.
+   *
+   * @param readingService The ReadingService instance.
+   * @param probeService The ProbeService instance.
+   * @param userService The UserService instance.
+   */
   public ProbeController(
       final ReadingService readingService,
       final ProbeService probeService,

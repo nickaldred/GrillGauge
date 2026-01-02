@@ -28,6 +28,13 @@ public class ProbeService {
   private ProbeRepository probeRepository;
   private final TemperatureConversionService temperatureConversionService;
 
+  /**
+   * Constructor for ProbeService.
+   *
+   * @param probeRepository The ProbeRepository instance.
+   * @param readingService The ReadingService instance.
+   * @param temperatureConversionService The TemperatureConversionService instance.
+   */
   public ProbeService(
       final ProbeRepository probeRepository,
       final ReadingService readingService,

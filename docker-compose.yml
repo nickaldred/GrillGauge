@@ -1,7 +1,10 @@
 services:
-  grill-gauge-api:
-    image: grill-gauge-api:latest
-    container_name: grill-gauge-api
+  grillgauge-api:
+    image: grillgauge-api:latest
+    container_name: grillgauge-api
+    build:
+      context: ./api
+      dockerfile: Dockerfile
     ports:
       - "8080:8080"
     environment:
@@ -11,20 +14,23 @@ services:
     volumes:
       - ~/intermediateCA:/app/CA:ro
     depends_on:
-      - grill-gauge-db
+      - grillgauge-db
     networks:
-      - grill-gauge-network
+      - grillgauge-network
 
-  grill-gauge-ui:
-    image: grill-gauge-ui:latest
-    container_name: grill-gauge-ui
+  grillgauge-ui:
+    image: grillgauge-ui:latest
+    container_name: grillgauge-ui
+    build:
+      context: ./ui
+      dockerfile: Dockerfile
     ports:
       - "3000:3000"
     environment:
       # Public URL used by the browser
       - NEXT_PUBLIC_API_BASE_URL=http://localhost:8080/api/v1
       # Internal URL used by the Next.js server inside the container to reach the API
-      - API_BASE_URL=http://grill-gauge-api:8080/api/v1
+      - API_BASE_URL=http://grillgauge-api:8080/api/v1
       - AUTH_SECRET=${AUTH_SECRET}
       - AUTH_GOOGLE_ID=${AUTH_GOOGLE_ID}
       - AUTH_GOOGLE_SECRET=${AUTH_GOOGLE_SECRET}
@@ -33,13 +39,13 @@ services:
       - AUTH_URL=http://localhost:3000
       - DEV_WARNING_ENABLED=true
     depends_on:
-      - grill-gauge-api
+      - grillgauge-api
     networks:
-      - grill-gauge-network
+      - grillgauge-network
 
-  grill-gauge-db:
+  grillgauge-db:
     image: postgres:18
-    container_name: grill-gauge-db
+    container_name: grillgauge-db
     environment:
       - POSTGRES_USER=grillgauge
       - POSTGRES_PASSWORD=${DB_PASSWORD}
@@ -47,11 +53,11 @@ services:
     ports:
       - "5432:5432"
     volumes:
-      - ./grill-gauge-db-data:/var/lib/postgresql
+      - ./grillgauge-db-data:/var/lib/postgresql
     restart: unless-stopped
     networks:
-      - grill-gauge-network
+      - grillgauge-network
 
 networks:
-  grill-gauge-network:
+  grillgauge-network:
     driver: bridge

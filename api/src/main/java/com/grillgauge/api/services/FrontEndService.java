@@ -24,6 +24,15 @@ public class FrontEndService {
   private final TemperatureConversionService temperatureConversionService;
   private final UserService userService;
 
+  /**
+   * Constructor for FrontEndService.
+   *
+   * @param hubService The HubService instance.
+   * @param probeService The ProbeService instance.
+   * @param demoService The DemoService instance.
+   * @param temperatureConversionService The TemperatureConversionService instance.
+   * @param userService The UserService instance.
+   */
   public FrontEndService(
       final HubService hubService,
       final ProbeService probeService,

@@ -85,6 +85,12 @@ public class User {
     this.roles = List.of(UserRole.USER);
   }
 
+  /**
+   * Resolve the user's temperature unit preference.
+   *
+   * @param owner The User entity.
+   * @return The resolved UserTemperatureUnit, defaults to CELSIUS if not set.
+   */
   public static UserTemperatureUnit resolveUnit(final User owner) {
     if (owner == null || owner.getTemperatureUnit() == null) {
       return User.UserTemperatureUnit.CELSIUS;

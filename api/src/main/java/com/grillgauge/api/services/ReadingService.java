@@ -24,6 +24,13 @@ public class ReadingService {
   private final DemoService demoService;
   private final TemperatureConversionService temperatureConversionService;
 
+  /**
+   * Constructor for ReadingService.
+   *
+   * @param readingRepository The ReadingRepository instance.
+   * @param demoService The DemoService instance.
+   * @param temperatureConversionService The TemperatureConversionService instance.
+   */
   public ReadingService(
       final ReadingRepository readingRepository,
       final DemoService demoService,

@@ -271,8 +271,8 @@ export function DashboardPage({ authStatus }: DashboardPageProps) {
                     className={`inline-flex items-center px-3 py-1.5 rounded-md text-sm font-medium focus:outline-none focus:ring-2 focus:ring-offset-2 transition-colors ${
                       hub.connected
                         ? isDarkMode
-                          ? "bg-amber-500/10 text-amber-300 border border-amber-400/60 hover:bg-amber-500/20 hover:border-amber-300 focus:ring-amber-400 cursor-pointer"
-                          : "bg-amber-50 text-amber-800 border border-amber-200 hover:bg-amber-100 hover:border-amber-300 focus:ring-amber-400 cursor-pointer"
+                          ? "bg-sky-500/10 text-sky-300 border border-sky-400/60 hover:bg-sky-500/20 hover:border-sky-300 focus:ring-sky-400 cursor-pointer"
+                          : "bg-sky-50 text-sky-800 border border-sky-200 hover:bg-sky-100 hover:border-sky-300 focus:ring-sky-400 cursor-pointer"
                         : isDarkMode
                         ? "bg-gray-800 text-gray-500 border border-gray-700 opacity-60 cursor-not-allowed focus:ring-transparent"
                         : "bg-gray-200 text-gray-500 border border-gray-300 opacity-60 cursor-not-allowed focus:ring-transparent"

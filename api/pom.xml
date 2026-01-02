@@ -228,7 +228,7 @@
         <configuration>
           <images>
             <image>
-              <name>grill-gauge-api</name>
+              <name>nicholasaldred/grillgauge-api</name>
               <build>
                 <contextDir>${project.basedir}</contextDir>
                 <dockerFile>Dockerfile</dockerFile>
