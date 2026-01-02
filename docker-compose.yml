@@ -1,6 +1,6 @@
 services:
   grillgauge-api:
-    image: grillgauge-api:latest
+    image: nicholasaldred/grillgauge-api:latest
     container_name: grillgauge-api
     build:
       context: ./api
@@ -21,7 +21,7 @@ services:
       - grillgauge-network
 
   grillgauge-ui:
-    image: grillgauge-ui:latest
+    image: nicholasaldred/grillgauge-ui:latest
     container_name: grillgauge-ui
     build:
       context: ./ui
