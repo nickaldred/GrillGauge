@@ -6,16 +6,21 @@ import { API_BASE_URL } from "./app/utils/envVars";
 import type { TemperatureUnit, User as GrillUser } from "./app/types/types";
 
 /**
- * Secret key for signing JWTs.
+ * Retrieves the secret key for signing JWTs from the environment.
  * Must be set in the environment variable JWT_SECRET.
+ *
+ * This is a function (not a module-level constant) so that builds do not
+ * require JWT_SECRET at build time; instead, it's required at runtime when
+ * a JWT is actually signed.
  */
-const JWT_SECRET = (() => {
+function getJwtSecret(): string {
   const secret = process.env.JWT_SECRET;
   if (!secret) {
     throw new Error("JWT_SECRET environment variable is required");
   }
+  console.log("JWT secret is:", secret );
   return secret;
-})();
+}
 
 const MAX_PROFILE_IMAGE_BYTES = 1_000_000; // ~1 MB safety limit
 
@@ -71,7 +76,7 @@ async function fetchUserByEmail(email: string): Promise<GrillUser | null> {
   try {
     const token = jwt.sign(
       { sub: email, email, roles: ["USER"] },
-      JWT_SECRET,
+      getJwtSecret(),
       { algorithm: "HS256", expiresIn: "5m" }
     );
 
@@ -246,7 +251,7 @@ async function buildSessionUser(
       roles,
     };
 
-    const signed = jwt.sign(payload, JWT_SECRET, {
+    const signed = jwt.sign(payload, getJwtSecret(), {
       algorithm: "HS256",
       expiresIn: "1h",
     });
