@@ -6,3 +6,4 @@ api/log.json
 *.csr
 *.pem
 *.crt
+.env

@@ -56,6 +56,8 @@ import org.bouncycastle.pkcs.jcajce.JcaPKCS10CertificationRequest;
 import org.bouncycastle.util.io.pem.PemObject;
 import org.bouncycastle.util.io.pem.PemReader;
 import org.bouncycastle.util.io.pem.PemWriter;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
@@ -65,6 +67,8 @@ import org.springframework.stereotype.Service;
  */
 @Service
 public class CertificateService {
+
+  private static final Logger LOG = LoggerFactory.getLogger(CertificateService.class);
 
   @Value("${certificate.validity-days:365}")
   private long validityDays;
@@ -91,6 +95,7 @@ public class CertificateService {
    */
   private Reader openPemSource(final String description, final String source)
       throws CertificateServiceException {
+    LOG.info("Opening PEM source for '{}'", description);
 
     if (source == null || source.isEmpty()) {
       throw new CertificateServiceException(description + " source is not configured");
@@ -99,12 +104,16 @@ public class CertificateService {
     try {
       File file = new File(source);
       if (file.exists()) {
+        LOG.info("Loading '{}' from file path: {}", description, source);
         return new FileReader(file);
       }
 
       if (looksLikeBase64(source)) {
+        LOG.info("Decoding '{}'' from Base64-encoded string", description);
         byte[] decoded = Base64.getMimeDecoder().decode(source);
         return new StringReader(new String(decoded, StandardCharsets.UTF_8));
+      } else {
+        LOG.info("Using '{}' from raw PEM string", description);
       }
 
       return new StringReader(source);
