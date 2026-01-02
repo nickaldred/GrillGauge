@@ -8,9 +8,11 @@ services:
     ports:
       - "8080:8080"
     environment:
-      - INT_CA_KEY_PASSPHRASE=${INT_CA_KEY_PASSPHRASE}
       - JWT_SECRET=${JWT_SECRET}
       - DB_PASSWORD=${DB_PASSWORD}
+      - CA_CERT=${CA_CERT}
+      - CA_KEY=${CA_KEY}
+      - INT_CA_KEY_PASSPHRASE=${INT_CA_KEY_PASSPHRASE}
     volumes:
       - ~/intermediateCA:/app/CA:ro
     depends_on:
